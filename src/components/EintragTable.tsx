@@ -1,16 +1,18 @@
 import { Edit, Trash2 } from 'lucide-react';
-import type { Eintrag } from '@types';
+import type { Eintrag, UserData } from '@types';
 
 interface EintragTableProps {
   eintraege: Eintrag[];
   onEdit: (eintrag: Eintrag) => void;
   onDelete: (id: string) => void;
+  currentUser: UserData | null;
 }
 
 export const EintragTable: React.FC<EintragTableProps> = ({
   eintraege,
   onEdit,
-  onDelete
+  onDelete,
+  currentUser,
 }) => {
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -45,22 +47,24 @@ export const EintragTable: React.FC<EintragTableProps> = ({
                 <td className="px-4 py-3 text-sm">{eintrag.jaeger}</td>
                 <td className="px-4 py-3 text-sm">{eintrag.bemerkung}</td>
                 <td className="px-4 py-3 text-center">
-                  <div className="flex justify-center gap-2">
-                    <button
-                      onClick={() => onEdit(eintrag)}
-                      className="text-blue-600 hover:text-blue-800 transition-colors"
-                      title="Bearbeiten"
-                    >
-                      <Edit size={16} />
-                    </button>
-                    <button
-                      onClick={() => onDelete(eintrag.id)}
-                      className="text-red-600 hover:text-red-800 transition-colors"
-                      title="Löschen"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
+                  {(currentUser?.role === 'admin' || currentUser?.uid === eintrag.userId) && (
+                    <div className="flex justify-center gap-2">
+                      <button
+                        onClick={() => onEdit(eintrag)}
+                        className="text-blue-600 hover:text-blue-800 transition-colors"
+                        title="Bearbeiten"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        onClick={() => onDelete(eintrag.id)}
+                        className="text-red-600 hover:text-red-800 transition-colors"
+                        title="Löschen"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}

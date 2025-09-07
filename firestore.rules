@@ -2,17 +2,41 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can read their own user profile
+
+    // Helper function to get the current user's data from the /users collection
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    // Users can read/update their own profile
     match /users/{userId} {
       allow read, update: if request.auth.uid == userId;
     }
 
-    // Entries are stored per tenant (jagdbezirk)
+    // Jagdbezirk document itself (for metadata)
+    match /jagdbezirke/{jagdbezirkId} {
+      // Any user in the district can read its metadata
+      allow read: if request.auth != null && getUserData().jagdbezirkId == jagdbezirkId;
+      // Only admins can modify the district (e.g. add hunters later)
+      allow write: if request.auth != null && getUserData().role == 'admin';
+    }
+
+    // Entries within a Jagdbezirk
     match /jagdbezirke/{jagdbezirkId}/eintraege/{eintragId} {
-      // User must be authenticated
-      allow read, write: if request.auth != null &&
-                          // User must belong to the jagdbezirk
-                          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.jagdbezirkId == jagdbezirkId;
+      // Allow read if user is admin OR owns the entry
+      allow read: if request.auth != null &&
+                     getUserData().jagdbezirkId == jagdbezirkId &&
+                     (getUserData().role == 'admin' || resource.data.userId == request.auth.uid);
+
+      // Allow create if user belongs to the district and sets their own userId
+      allow create: if request.auth != null &&
+                       getUserData().jagdbezirkId == jagdbezirkId &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // Allow update/delete if user is admin OR owns the entry
+      allow update, delete: if request.auth != null &&
+                               getUserData().jagdbezirkId == jagdbezirkId &&
+                               (getUserData().role == 'admin' || resource.data.userId == request.auth.uid);
     }
   }
 }

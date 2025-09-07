@@ -145,6 +145,7 @@ const App = () => {
           eintraege={filteredEintraege}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          currentUser={currentUser}
         />
 
         <FachbegriffeLegende />

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
 import type { Eintrag } from '@types';
-import useAuth from '@auth/AuthContext'; // Import useAuth
+import useAuth from '@auth/AuthContext';
 
 export const useFirestore = () => {
   const { currentUser } = useAuth(); // Get current user
@@ -33,7 +33,15 @@ export const useFirestore = () => {
     setLoading(true);
     setError(null);
     try {
-      const q = query(streckenCollectionRef, orderBy("datum", "desc"));
+      let q;
+      // If user is not an admin, only fetch their own entries
+      if (currentUser && currentUser.role !== 'admin') {
+        q = query(streckenCollectionRef, where("userId", "==", currentUser.uid), orderBy("datum", "desc"));
+      } else {
+        // Admin gets all entries
+        q = query(streckenCollectionRef, orderBy("datum", "desc"));
+      }
+
       const data = await getDocs(q);
       const geladeneEintraege = data.docs.map(doc => ({ ...doc.data(), id: doc.id } as Eintrag));
       setEintraege(geladeneEintraege);
