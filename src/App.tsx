@@ -14,8 +14,10 @@ import { EintragTable } from './components/EintragTable';
 import { FachbegriffeLegende } from './components/FachbegriffeLegende';
 import { OfficialPrintView } from './components/OfficialPrintView';
 import { exportToCSV } from './utils/csvExport';
-import useAuth from '@auth/AuthContext';
+import useAuth from './auth/AuthContext';
 import Login from './auth/Login';
+import { auth } from './firebase';
+import { signOut } from 'firebase/auth';
 
 const App = () => {
   const { currentUser } = useAuth();
@@ -47,6 +49,14 @@ const App = () => {
   if (!currentUser) {
     return <Login />;
   }
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Fehler beim Abmelden:", error);
+    }
+  };
 
   const handleToggleMode = () => {
     setIsDemoMode(!isDemoMode);
@@ -111,6 +121,7 @@ const App = () => {
         <Header 
           isDemoMode={isDemoMode}
           onToggleMode={handleToggleMode}
+          onLogout={handleLogout}
         />
 
         <ActionButtons
