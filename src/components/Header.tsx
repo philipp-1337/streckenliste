@@ -1,5 +1,3 @@
-import { TestTube2 } from 'lucide-react';
-
 interface HeaderProps {
   isDemoMode: boolean;
   onToggleMode: () => void;
@@ -7,25 +5,18 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ isDemoMode, onToggleMode }) => {
   return (
-    <header className="bg-green-800 text-white p-6 rounded-lg mb-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold">🦌 Jagd-Streckenliste</h1>
-          <p className="mt-2">Digitale Erfassung der Jagdstrecke mit korrekten Fachbegriffen</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className={`text-sm font-medium ${isDemoMode ? 'text-yellow-300' : 'text-green-300'}`}>
-            {isDemoMode ? 'Demo Modus' : 'Live Modus'}
-          </span>
-          <button 
-            onClick={onToggleMode}
-            className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg text-sm transition-colors"
-            title="Modus wechseln"
-          >
-            <TestTube2 size={16} />
-            Modus wechseln
-          </button>
-        </div>
+    <header className="flex justify-between items-center mb-6 print:hidden">
+      <h1 className="text-4xl font-bold text-green-800">Jagd-Streckenliste</h1>
+      <div className="flex items-center gap-4">
+        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${isDemoMode ? 'bg-yellow-200 text-yellow-800' : 'bg-red-200 text-red-800'}`}>
+          {isDemoMode ? 'Demo-Modus' : 'Live-Modus'}
+        </span>
+        <button 
+          onClick={onToggleMode}
+          className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg transition-colors"
+        >
+          {isDemoMode ? 'Live-Modus aktivieren' : 'Demo-Modus nutzen'}
+        </button>
       </div>
     </header>
   );

@@ -15,6 +15,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<Omit<Eintrag, 'id'>>(() => {
     if (editingEntry) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id, ...data } = editingEntry;
       return data;
     }

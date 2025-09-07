@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import type { Eintrag } from '@types';
 import { useFirestore } from '@hooks/useFirestore';
@@ -11,6 +12,7 @@ import { StatistikPanel } from '@components/StatistikPanel';
 import { EintragForm } from '@components/EintragForm';
 import { EintragTable } from '@components/EintragTable';
 import { FachbegriffeLegende } from '@components/FachbegriffeLegende';
+import { OfficialPrintView } from '@components/OfficialPrintView';
 import { exportToCSV } from '@utils/csvExport';
 
 const JagdStreckenliste = () => {
@@ -18,6 +20,8 @@ const JagdStreckenliste = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Eintrag | null>(null);
   const [showStats, setShowStats] = useState(false);
+  const [showFilter, setShowFilter] = useState(true);
+  const [showOfficialPrintView, setShowOfficialPrintView] = useState(false);
 
   // Hooks für Demo und Live Daten
   const firestore = useFirestore();
@@ -35,7 +39,7 @@ const JagdStreckenliste = () => {
     if (!isDemoMode) {
       firestore.getEintraege();
     }
-  }, [isDemoMode]);
+  }, [isDemoMode, firestore]);
 
   const handleToggleMode = () => {
     setIsDemoMode(!isDemoMode);
@@ -86,6 +90,14 @@ const JagdStreckenliste = () => {
     exportToCSV(filteredEintraege);
   };
 
+  const handlePrint = () => {
+    setShowOfficialPrintView(true);
+  };
+
+  const handleClosePrintView = () => {
+    setShowOfficialPrintView(false);
+  };
+
   return (
     <div className="min-h-screen bg-green-50 p-4">
       <div className="max-w-7xl mx-auto">
@@ -98,12 +110,17 @@ const JagdStreckenliste = () => {
           onNewEntry={handleNewEntry}
           onToggleStats={() => setShowStats(!showStats)}
           onExportCSV={handleExportCSV}
+          onPrint={handlePrint}
+          onToggleFilter={() => setShowFilter(!showFilter)}
+          showFilter={showFilter}
         />
 
-        <FilterPanel
-          filter={filter}
-          onFilterChange={setFilter}
-        />
+        {showFilter && (
+          <FilterPanel
+            filter={filter}
+            onFilterChange={setFilter}
+          />
+        )}
 
         {showStats && (
           <StatistikPanel stats={statistiken} />
@@ -125,13 +142,19 @@ const JagdStreckenliste = () => {
 
         <FachbegriffeLegende />
 
-        {/* Error Display für Live Modus */}
         {!isDemoMode && firestore.error && (
           <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             {firestore.error}
           </div>
         )}
       </div>
+
+      {showOfficialPrintView && (
+        <OfficialPrintView 
+          eintraege={filteredEintraege} 
+          onClose={handleClosePrintView} 
+        />
+      )}
     </div>
   );
 };
