@@ -1,16 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import type { Eintrag } from '@types';
+import { useAuth } from '@auth/AuthContext'; // Import useAuth
 
 export const useFirestore = () => {
+  const { currentUser } = useAuth(); // Get current user
   const [eintraege, setEintraege] = useState<Eintrag[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const streckenCollectionRef = collection(db, "strecken");
+  // streckenCollectionRef will now depend on currentUser
+  const getStreckenCollectionRef = () => {
+    if (!currentUser || !currentUser.jagdbezirkId) {
+      return null; // Or handle error/loading state
+    }
+    return collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/eintraege`);
+  };
+
+  useEffect(() => {
+    if (currentUser && currentUser.jagdbezirkId) {
+      getEintraege();
+    }
+  }, [currentUser]); // Re-run when currentUser changes
 
   const getEintraege = async () => {
+    const streckenCollectionRef = getStreckenCollectionRef();
+    if (!streckenCollectionRef) {
+      return; // Not ready to fetch
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -26,9 +45,20 @@ export const useFirestore = () => {
     }
   };
 
-  const addEintrag = async (eintrag: Omit<Eintrag, 'id'>) => {
+  const addEintrag = async (eintrag: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>) => {
+    const streckenCollectionRef = getStreckenCollectionRef();
+    if (!streckenCollectionRef || !currentUser) {
+      setError("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
+      return;
+    }
+
     try {
-      await addDoc(streckenCollectionRef, eintrag);
+      const newEintrag = {
+        ...eintrag,
+        userId: currentUser.uid,
+        jagdbezirkId: currentUser.jagdbezirkId,
+      };
+      await addDoc(streckenCollectionRef, newEintrag);
       await getEintraege();
     } catch (err) {
       setError("Fehler beim Speichern");
@@ -36,10 +66,20 @@ export const useFirestore = () => {
     }
   };
 
-  const updateEintrag = async (id: string, eintrag: Omit<Eintrag, 'id'>) => {
+  const updateEintrag = async (id: string, eintrag: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>) => {
+    const streckenCollectionRef = getStreckenCollectionRef();
+    if (!streckenCollectionRef || !currentUser) {
+      setError("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
+      return;
+    }
     try {
-      const eintragDoc = doc(db, "strecken", id);
-      await updateDoc(eintragDoc, eintrag);
+      const eintragDoc = doc(streckenCollectionRef, id); // Use streckenCollectionRef for doc path
+      const updatedEintrag = {
+        ...eintrag,
+        userId: currentUser.uid, // Ensure userId and jagdbezirkId are maintained
+        jagdbezirkId: currentUser.jagdbezirkId,
+      };
+      await updateDoc(eintragDoc, updatedEintrag);
       await getEintraege();
     } catch (err) {
       setError("Fehler beim Aktualisieren");
@@ -48,8 +88,13 @@ export const useFirestore = () => {
   };
 
   const deleteEintrag = async (id: string) => {
+    const streckenCollectionRef = getStreckenCollectionRef();
+    if (!streckenCollectionRef || !currentUser) {
+      setError("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
+      return;
+    }
     try {
-      const eintragDoc = doc(db, "strecken", id);
+      const eintragDoc = doc(streckenCollectionRef, id); // Use streckenCollectionRef for doc path
       await deleteDoc(eintragDoc);
       await getEintraege();
     } catch (err) {

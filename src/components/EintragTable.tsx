@@ -7,10 +7,10 @@ interface EintragTableProps {
   onDelete: (id: string) => void;
 }
 
-export const EintragTable: React.FC<EintragTableProps> = ({ 
-  eintraege, 
-  onEdit, 
-  onDelete 
+export const EintragTable: React.FC<EintragTableProps> = ({
+  eintraege,
+  onEdit,
+  onDelete
 }) => {
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -67,7 +67,7 @@ export const EintragTable: React.FC<EintragTableProps> = ({
           </tbody>
         </table>
       </div>
-      
+
       {eintraege.length === 0 && (
         <div className="text-center py-8 text-gray-500">
           Keine Einträge gefunden. Erstellen Sie den ersten Eintrag!

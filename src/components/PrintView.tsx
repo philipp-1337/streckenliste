@@ -1,4 +1,3 @@
-
 import type { Eintrag } from '@types';
 
 interface PrintViewProps {

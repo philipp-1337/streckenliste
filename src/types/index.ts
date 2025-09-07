@@ -12,6 +12,8 @@ export interface Eintrag {
   ort: string;
   einnahmen: string;
   notizen: string;
+  jagdbezirkId: string;
+  userId: string;
 }
 
 export interface WildartStats {
@@ -41,4 +43,19 @@ export interface FilterState {
   jaeger: string;
   jahr: string;
   kategorie: string;
+}
+
+export interface SortConfig {
+  key: keyof Eintrag;
+  direction: 'ascending' | 'descending';
+}
+
+export type Role = 'admin' | 'user';
+
+export interface UserData {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  jagdbezirkId: string;
+  role: Role;
 }

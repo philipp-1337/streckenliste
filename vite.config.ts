@@ -17,6 +17,7 @@ export default defineConfig({
       "@hooks": path.resolve(__dirname, "src/hooks"),
       "@data": path.resolve(__dirname, "src/data"),
       "@types": path.resolve(__dirname, "src/types"),
+      "@auth": path.resolve(__dirname, "src/auth"),
     },
   },
   build: {

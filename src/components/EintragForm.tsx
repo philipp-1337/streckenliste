@@ -8,15 +8,15 @@ interface EintragFormProps {
   onCancel: () => void;
 }
 
-export const EintragForm: React.FC<EintragFormProps> = ({ 
-  editingEntry, 
-  onSubmit, 
-  onCancel 
+export const EintragForm: React.FC<EintragFormProps> = ({
+  editingEntry,
+  onSubmit,
+  onCancel
 }) => {
-  const [formData, setFormData] = useState<Omit<Eintrag, 'id'>>(() => {
+  const [formData, setFormData] = useState<Omit<Eintrag, 'id'> & Partial<Pick<Eintrag, 'userId' | 'jagdbezirkId'>>>(() => {
     if (editingEntry) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, ...data } = editingEntry;
+      const { id, userId, jagdbezirkId, ...data } = editingEntry; // Destructure userId and jagdbezirkId
       return data;
     }
     return {
@@ -53,7 +53,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
   const handleKategorieChange = (kategorie: string) => {
     const wildartData = getKategorienFuerWildart(formData.wildart);
     const selectedKategorie = wildartData.find(k => k.kategorie === kategorie);
-    
+
     setFormData({
       ...formData,
       kategorie,
@@ -65,7 +65,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit(formData as Omit<Eintrag, 'id'>); // Cast to Omit<Eintrag, 'id'>
   };
 
   return (

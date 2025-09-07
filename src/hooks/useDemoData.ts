@@ -15,7 +15,9 @@ const beispielDaten: Eintrag[] = [
     jaeger: 'Hans Müller',
     ort: 'Revier Ost',
     einnahmen: '80',
-    notizen: 'Guter 6er Bock'
+    notizen: 'Guter 6er Bock',
+    userId: 'demo-user',
+    jagdbezirkId: 'dummy-jagdbezirk',
   },
   {
     id: 'demo-2',
@@ -30,7 +32,9 @@ const beispielDaten: Eintrag[] = [
     jaeger: 'Maria Schmidt',
     ort: 'Revier West',
     einnahmen: '120',
-    notizen: 'Führende Bache'
+    notizen: 'Führende Bache',
+    userId: 'demo-user',
+    jagdbezirkId: 'dummy-jagdbezirk',
   },
   {
     id: 'demo-3',
@@ -45,24 +49,28 @@ const beispielDaten: Eintrag[] = [
     jaeger: 'Klaus Weber',
     ort: 'Revier Süd',
     einnahmen: '30',
-    notizen: 'Spätes Kitz'
+    notizen: 'Spätes Kitz',
+    userId: 'demo-user',
+    jagdbezirkId: 'dummy-jagdbezirk',
   }
 ];
 
 export const useDemoData = () => {
   const [eintraege, setEintraege] = useState<Eintrag[]>(beispielDaten);
 
-  const addEintrag = (eintrag: Omit<Eintrag, 'id'>) => {
+  const addEintrag = (eintrag: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>) => {
     const neuerEintrag: Eintrag = {
       ...eintrag,
-      id: `demo-${Date.now()}`
+      id: `demo-${Date.now()}`,
+      userId: 'demo-user',
+      jagdbezirkId: 'dummy-jagdbezirk',
     };
     setEintraege(prev => [...prev, neuerEintrag]);
   };
 
-  const updateEintrag = (id: string, eintrag: Omit<Eintrag, 'id'>) => {
+  const updateEintrag = (id: string, eintrag: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>) => {
     setEintraege(prev => prev.map(e => 
-      e.id === id ? { ...e, ...eintrag, id } : e
+      e.id === id ? { ...e, ...eintrag, id, userId: 'demo-user', jagdbezirkId: 'dummy-jagdbezirk' } : e
     ));
   };
 

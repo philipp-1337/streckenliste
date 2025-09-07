@@ -1,21 +1,24 @@
 
 import { useState, useEffect } from 'react';
-import type { Eintrag } from '@types';
-import { useFirestore } from '@hooks/useFirestore';
-import { useDemoData } from '@hooks/useDemoData';
-import { useStatistiken } from '@hooks/useStatistiken';
-import { useFilter } from '@hooks/useFilter';
-import { Header } from '@components/Header';
-import { ActionButtons } from '@components/ActionButtons';
-import { FilterPanel } from '@components/FilterPanel';
-import { StatistikPanel } from '@components/StatistikPanel';
-import { EintragForm } from '@components/EintragForm';
-import { EintragTable } from '@components/EintragTable';
-import { FachbegriffeLegende } from '@components/FachbegriffeLegende';
-import { OfficialPrintView } from '@components/OfficialPrintView';
-import { exportToCSV } from '@utils/csvExport';
+import type { Eintrag } from './types';
+import { useFirestore } from './hooks/useFirestore';
+import { useDemoData } from './hooks/useDemoData';
+import { useStatistiken } from './hooks/useStatistiken';
+import { useFilter } from './hooks/useFilter';
+import { Header } from './components/Header';
+import { ActionButtons } from './components/ActionButtons';
+import { FilterPanel } from './components/FilterPanel';
+import { StatistikPanel } from './components/StatistikPanel';
+import { EintragForm } from './components/EintragForm';
+import { EintragTable } from './components/EintragTable';
+import { FachbegriffeLegende } from './components/FachbegriffeLegende';
+import { OfficialPrintView } from './components/OfficialPrintView';
+import { exportToCSV } from './utils/csvExport';
+import { useAuth } from './auth/AuthContext';
+import Login from './auth/Login';
 
-const JagdStreckenliste = () => {
+const App = () => {
+  const { currentUser } = useAuth();
   const [isDemoMode, setIsDemoMode] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Eintrag | null>(null);
@@ -40,6 +43,10 @@ const JagdStreckenliste = () => {
       firestore.getEintraege();
     }
   }, [isDemoMode, firestore]);
+
+  if (!currentUser) {
+    return <Login />;
+  }
 
   const handleToggleMode = () => {
     setIsDemoMode(!isDemoMode);
@@ -159,4 +166,4 @@ const JagdStreckenliste = () => {
   );
 };
 
-export default JagdStreckenliste;
+export default App;

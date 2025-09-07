@@ -32,8 +32,9 @@
       "@hooks/*": ["hooks/*"],
       "@data/*": ["data/*"],
       "@types": ["types/index.ts"],
-      "@types/*": ["types/*"]
+      "@types/*": ["types/*"],
+      "@auth/*": ["auth/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "src/types/index.ts"]
 }
