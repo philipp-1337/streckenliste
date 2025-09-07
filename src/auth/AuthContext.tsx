@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { User as FirebaseUser } from 'firebase/auth';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import type { UserData } from '@types';
 
 interface AuthContextType {
@@ -34,6 +35,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           role: 'user',
         };
         setCurrentUser(dummyUser);
+        // Fetch the user profile from Firestore
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          setCurrentUser(userDocSnap.data() as UserData);
+        } else {
+          // Handle case where user exists in Auth but not in Firestore
+          console.error("No user profile found in Firestore for UID:", user.uid);
+          setCurrentUser(null);
+        }
       } else {
         setCurrentUser(null);
       } 
@@ -52,6 +63,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 };
 
-export function useAuth() {
+export default function useAuth() {
   return useContext(AuthContext);
 }

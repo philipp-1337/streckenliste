@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import type { Eintrag } from '@types';
-import { useAuth } from '@auth/AuthContext'; // Import useAuth
+import useAuth from '@auth/AuthContext'; // Import useAuth
 
 export const useFirestore = () => {
   const { currentUser } = useAuth(); // Get current user

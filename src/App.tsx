@@ -14,7 +14,7 @@ import { EintragTable } from './components/EintragTable';
 import { FachbegriffeLegende } from './components/FachbegriffeLegende';
 import { OfficialPrintView } from './components/OfficialPrintView';
 import { exportToCSV } from './utils/csvExport';
-import { useAuth } from './auth/AuthContext';
+import useAuth from '@auth/AuthContext';
 import Login from './auth/Login';
 
 const App = () => {

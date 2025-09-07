@@ -13,10 +13,10 @@ export const EintragForm: React.FC<EintragFormProps> = ({
   onSubmit,
   onCancel
 }) => {
-  const [formData, setFormData] = useState<Omit<Eintrag, 'id'> & Partial<Pick<Eintrag, 'userId' | 'jagdbezirkId'>>>(() => {
+  const [formData, setFormData] = useState<Omit<Eintrag, 'id'>>(() => {
     if (editingEntry) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, userId, jagdbezirkId, ...data } = editingEntry; // Destructure userId and jagdbezirkId
+      const { id, ...data } = editingEntry;
       return data;
     }
     return {
@@ -31,7 +31,9 @@ export const EintragForm: React.FC<EintragFormProps> = ({
       jaeger: '',
       ort: '',
       einnahmen: '',
-      notizen: ''
+      notizen: '',
+      jagdbezirkId: '', // Initialize with empty string
+      userId: '' // Initialize with empty string
     };
   });
 
