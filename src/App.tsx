@@ -1,8 +1,10 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { Plus, Edit, Trash2, Download, Filter, BarChart3 } from 'lucide-react';
+import { Plus, Edit, Trash2, Download, Filter, BarChart3, TestTube2 } from 'lucide-react';
+import { db } from './firebase';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 
 interface Eintrag {
-  id: number;
+  id: string; // Firestore ID or temporary string ID
   datum: string;
   wildart: string;
   kategorie: string;
@@ -39,23 +41,70 @@ interface Wildarten {
   [key: string]: WildartInfo[];
 }
 
+const beispielDaten: Eintrag[] = [
+  {
+    id: 'demo-1',
+    datum: '2024-10-15',
+    wildart: 'Rehwild',
+    kategorie: 'Rehbock (ab 2 Jahre)',
+    altersklasse: 'AK 2',
+    geschlecht: 'm',
+    fachbegriff: 'Rehbock',
+    gewicht: '22',
+    bemerkung: 'Morgenjagd',
+    jaeger: 'Hans Müller',
+    ort: 'Revier Ost',
+    einnahmen: '80',
+    notizen: 'Guter 6er Bock'
+  },
+  {
+    id: 'demo-2',
+    datum: '2024-11-02',
+    wildart: 'Schwarzwild',
+    kategorie: 'Bache',
+    altersklasse: 'AK 2',
+    geschlecht: 'w',
+    fachbegriff: 'Bache',
+    gewicht: '85',
+    bemerkung: 'Drückjagd',
+    jaeger: 'Maria Schmidt',
+    ort: 'Revier West',
+    einnahmen: '120',
+    notizen: 'Führende Bache'
+  },
+  {
+    id: 'demo-3',
+    datum: '2024-09-20',
+    wildart: 'Rehwild',
+    kategorie: 'Kitz weiblich',
+    altersklasse: 'AK 0',
+    geschlecht: 'w',
+    fachbegriff: 'Rickenkitz',
+    gewicht: '12',
+    bemerkung: 'Einzelkitz',
+    jaeger: 'Klaus Weber',
+    ort: 'Revier Süd',
+    einnahmen: '30',
+    notizen: 'Spätes Kitz'
+  }
+];
+
 const JagdStreckenliste = () => {
   const [eintraege, setEintraege] = useState<Eintrag[]>([]);
+  const [isDemoMode, setIsDemoMode] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [showStats, setShowStats] = useState(false);
   const [filter, setFilter] = useState({ wildart: '', jaeger: '', jahr: '', kategorie: '' });
 
-  // Wildarten mit ihren spezifischen Kategorien und Fachbegriffen
+  const streckenCollectionRef = collection(db, "strecken");
+
   const wildarten: Wildarten = {
     'Rotwild': [
-      // AK 0 (unter 1 Jahr)
       { kategorie: 'Kalb männlich', altersklasse: 'AK 0', geschlecht: 'm', fachbegriff: 'Hirschkalb' },
       { kategorie: 'Kalb weiblich', altersklasse: 'AK 0', geschlecht: 'w', fachbegriff: 'Hirschkalb' },
-      // AK 1 (1 Jahr)
       { kategorie: 'Schmaltier', altersklasse: 'AK 1', geschlecht: 'w', fachbegriff: 'Schmaltier' },
       { kategorie: 'Schmalspießer', altersklasse: 'AK 1', geschlecht: 'm', fachbegriff: 'Schmalspießer' },
-      // AK 2+ (ab 2 Jahre)
       { kategorie: 'Alttier', altersklasse: 'AK 2', geschlecht: 'w', fachbegriff: 'Alttier' },
       { kategorie: 'Junger Hirsch (2-4 Jahre)', altersklasse: 'AK 2', geschlecht: 'm', fachbegriff: 'Junger Hirsch' },
       { kategorie: 'Mittelalter Hirsch (5-9 Jahre)', altersklasse: 'AK 3', geschlecht: 'm', fachbegriff: 'Mittelalter Hirsch' },
@@ -89,7 +138,7 @@ const JagdStreckenliste = () => {
     ]
   };
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Omit<Eintrag, 'id'>>({
     datum: '',
     wildart: '',
     kategorie: '',
@@ -104,57 +153,25 @@ const JagdStreckenliste = () => {
     notizen: ''
   });
 
-  // Initialisierung mit Beispieldaten
+  const getEintraegeFromFirestore = async () => {
+    try {
+      const q = query(streckenCollectionRef, orderBy("datum", "desc"));
+      const data = await getDocs(q);
+      const geladeneEintraege = data.docs.map(doc => ({ ...doc.data(), id: doc.id } as Eintrag));
+      setEintraege(geladeneEintraege);
+    } catch (error) {
+      console.error("Error fetching data from Firestore: ", error);
+      // Optionally: show an error message to the user
+    }
+  };
+
   useEffect(() => {
-    const beispielDaten: Eintrag[] = [
-      {
-        id: 1,
-        datum: '2024-10-15',
-        wildart: 'Rehwild',
-        kategorie: 'Rehbock (ab 2 Jahre)',
-        altersklasse: 'AK 2',
-        geschlecht: 'm',
-        fachbegriff: 'Rehbock',
-        gewicht: '22',
-        bemerkung: 'Morgenjagd',
-        jaeger: 'Hans Müller',
-        ort: 'Revier Ost',
-        einnahmen: '80',
-        notizen: 'Guter 6er Bock'
-      },
-      {
-        id: 2,
-        datum: '2024-11-02',
-        wildart: 'Schwarzwild',
-        kategorie: 'Bache',
-        altersklasse: 'AK 2',
-        geschlecht: 'w',
-        fachbegriff: 'Bache',
-        gewicht: '85',
-        bemerkung: 'Drückjagd',
-        jaeger: 'Maria Schmidt',
-        ort: 'Revier West',
-        einnahmen: '120',
-        notizen: 'Führende Bache'
-      },
-      {
-        id: 3,
-        datum: '2024-09-20',
-        wildart: 'Rehwild',
-        kategorie: 'Kitz weiblich',
-        altersklasse: 'AK 0',
-        geschlecht: 'w',
-        fachbegriff: 'Rickenkitz',
-        gewicht: '12',
-        bemerkung: 'Einzelkitz',
-        jaeger: 'Klaus Weber',
-        ort: 'Revier Süd',
-        einnahmen: '30',
-        notizen: 'Spätes Kitz'
-      }
-    ];
-    setEintraege(beispielDaten);
-  }, []);
+    if (isDemoMode) {
+      setEintraege(beispielDaten);
+    } else {
+      getEintraegeFromFirestore();
+    }
+  }, [isDemoMode]);
 
   const getKategorienFuerWildart = (wildart: string) => {
     return wildarten[wildart] || [];
@@ -167,7 +184,7 @@ const JagdStreckenliste = () => {
       altersklasse: '',
       geschlecht: '',
       fachbegriff: '',
-      kategorie: '' // Reset kategorie when wildart changes
+      kategorie: ''
     });
   };
 
@@ -184,20 +201,33 @@ const JagdStreckenliste = () => {
     });
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
-    if (editingId) {
-      setEintraege(eintraege.map(eintrag => 
-        eintrag.id === editingId ? { ...eintrag, ...formData, id: editingId } : eintrag
-      ));
-      setEditingId(null);
+
+    if (isDemoMode) {
+      if (editingId) {
+        setEintraege(eintraege.map(e => 
+          e.id === editingId ? { ...e, ...formData, id: editingId } : e
+        ));
+      } else {
+        const neuerEintrag: Eintrag = {
+          ...formData,
+          id: `demo-${Date.now()}`
+        };
+        setEintraege([...eintraege, neuerEintrag]);
+      }
     } else {
-      const neuerEintrag: Eintrag = {
-        ...formData,
-        id: Date.now()
-      };
-      setEintraege([...eintraege, neuerEintrag]);
+      try {
+        if (editingId) {
+          const eintragDoc = doc(db, "strecken", editingId);
+          await updateDoc(eintragDoc, formData);
+        } else {
+          await addDoc(streckenCollectionRef, formData);
+        }
+        await getEintraegeFromFirestore();
+      } catch (error) {
+        console.error("Error writing to Firestore: ", error);
+      }
     }
     
     resetForm();
@@ -219,17 +249,29 @@ const JagdStreckenliste = () => {
       notizen: ''
     });
     setShowForm(false);
+    setEditingId(null);
   };
 
   const handleEdit = (eintrag: Eintrag) => {
-    setFormData(eintrag);
-    setEditingId(eintrag.id);
+    const { id, ...dataForForm } = eintrag;
+    setFormData(dataForForm);
+    setEditingId(id);
     setShowForm(true);
   };
 
-  const handleDelete = (id: number) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Eintrag wirklich löschen?')) {
-      setEintraege(eintraege.filter(e => e.id !== id));
+      if (isDemoMode) {
+        setEintraege(eintraege.filter(e => e.id !== id));
+      } else {
+        try {
+          const eintragDoc = doc(db, "strecken", id);
+          await deleteDoc(eintragDoc);
+          await getEintraegeFromFirestore();
+        } catch (error) {
+          console.error("Error deleting document: ", error);
+        }
+      }
     }
   };
 
@@ -255,7 +297,6 @@ const JagdStreckenliste = () => {
       stats[eintrag.wildart].gewicht += parseFloat(eintrag.gewicht || '0');
       stats[eintrag.wildart].einnahmen += parseFloat(eintrag.einnahmen || '0');
       
-      // Altersklassen-Statistik
       const ak = eintrag.altersklasse;
       if (!stats[eintrag.wildart].altersklassen[ak]) {
         stats[eintrag.wildart].altersklassen[ak] = 0;
@@ -301,8 +342,25 @@ const JagdStreckenliste = () => {
     <div className="min-h-screen bg-green-50 p-4">
       <div className="max-w-7xl mx-auto">
         <header className="bg-green-800 text-white p-6 rounded-lg mb-6">
-          <h1 className="text-3xl font-bold">🦌 Jagd-Streckenliste</h1>
-          <p className="mt-2">Digitale Erfassung der Jagdstrecke mit korrekten Fachbegriffen</p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold">🦌 Jagd-Streckenliste</h1>
+              <p className="mt-2">Digitale Erfassung der Jagdstrecke mit korrekten Fachbegriffen</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className={`text-sm font-medium ${isDemoMode ? 'text-yellow-300' : 'text-green-300'}`}>
+                {isDemoMode ? 'Demo Modus' : 'Live Modus'}
+              </span>
+              <button 
+                onClick={() => setIsDemoMode(!isDemoMode)}
+                className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-3 py-2 rounded-lg text-sm transition-colors"
+                title="Modus wechseln"
+              >
+                <TestTube2 size={16} />
+                Modus wechseln
+              </button>
+            </div>
+          </div>
         </header>
 
         {/* Action Buttons */}
