@@ -8,12 +8,14 @@ interface AuthContextType {
   currentUser: UserData | null;
   loading: boolean;
   firebaseUser: FirebaseUser | null;
+  loginDemo: () => void;
 }
 
-const AuthContext = createContext<AuthContextType>({
+export const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   loading: true,
   firebaseUser: null,
+  loginDemo: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -25,8 +27,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setFirebaseUser(user);
       if (user) {
-        // Here we would fetch the user profile from Firestore
-        // For now, we'll create a dummy user
+        // ...existing code...
         const dummyUser: UserData = {
           uid: user.uid,
           email: user.email,
@@ -35,29 +36,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           role: 'user',
         };
         setCurrentUser(dummyUser);
-        // Fetch the user profile from Firestore
         const userDocRef = doc(db, 'users', user.uid);
         const userDocSnap = await getDoc(userDocRef);
         if (userDocSnap.exists()) {
           setCurrentUser(userDocSnap.data() as UserData);
         } else {
-          // Handle case where user exists in Auth but not in Firestore
           console.error("No user profile found in Firestore for UID:", user.uid);
           setCurrentUser(null);
         }
       } else {
         setCurrentUser(null);
-      } 
+      }
       setLoading(false);
     });
-
     return unsubscribe;
   }, []);
+
+  // Demo-Login Funktion
+  const loginDemo = () => {
+    const demoUser: UserData = {
+      uid: 'demo-user',
+      email: 'demo@streckenliste.de',
+      displayName: 'Demo User',
+      jagdbezirkId: 'dummy-jagdbezirk',
+      role: 'user',
+    };
+    setCurrentUser(demoUser);
+    setFirebaseUser(null);
+    setLoading(false);
+  };
 
   const value = {
     currentUser,
     loading,
     firebaseUser,
+    loginDemo,
   };
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
