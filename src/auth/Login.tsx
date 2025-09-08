@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Toaster, toast } from 'sonner';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
+import { FirebaseError } from 'firebase/app';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -10,17 +11,17 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-  // setError entfernt, da Toast genutzt wird
+    // setError entfernt, da Toast genutzt wird
     try {
       await signInWithEmailAndPassword(auth, email, password);
-    } catch (err: any) { // Added any for error type
-  // setError entfernt, da Toast genutzt wird
-      if (err.code === 'auth/invalid-credential') {
+    } catch (err: unknown) {
+      const error = err as FirebaseError;
+      if (error.code === 'auth/invalid-credential') {
         toast.error('Ungültige Zugangsdaten. Bitte überprüfe Email und Passwort.');
       } else {
-        toast.error(err.message || 'Fehler beim Login');
+        toast.error(error.message || 'Fehler beim Login');
       }
-      console.error(err);
+      console.error(error);
     }
   };
 

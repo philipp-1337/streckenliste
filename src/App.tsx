@@ -12,7 +12,7 @@ import { EintragForm } from '@components/EintragForm';
 import { EintragTable } from '@components/EintragTable';
 import { FachbegriffeLegende } from '@components/FachbegriffeLegende';
 import { OfficialPrintView } from '@components/OfficialPrintView';
-import useAuth from '@auth/AuthContext';
+import useAuth from '@hooks/useAuth';
 import Login from '@auth/Login';
 import { auth } from './firebase';
 import { signOut } from 'firebase/auth';
