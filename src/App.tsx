@@ -68,6 +68,7 @@ const App = () => {
       handleFormClose();
     } catch (error) {
       console.error('Fehler beim Speichern:', error);
+      if (firestore.error === 'In der Demo sind Funktionen eingeschränkt.') return;
       toast.error('Fehler beim Speichern');
     }
   };
@@ -83,6 +84,7 @@ const App = () => {
         await currentData.deleteEintrag(id);
       } catch (error) {
         console.error('Fehler beim Löschen:', error);
+        if (firestore.error === 'In der Demo sind Funktionen eingeschränkt.') return;
         toast.error('Fehler beim Löschen');
       }
     }

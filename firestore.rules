@@ -10,33 +10,36 @@ service cloud.firestore {
 
     // Users can read/update their own profile
     match /users/{userId} {
-      allow read, update: if request.auth.uid == userId;
+    allow read: if request.auth.uid == userId;
+    allow update: if request.auth.uid == userId && request.auth.uid != 'PQz2hNrf3gYSfKJ2eYjRlg67vaf1';
     }
 
     // Jagdbezirk document itself (for metadata)
     match /jagdbezirke/{jagdbezirkId} {
       // Any user in the district can read its metadata
-      allow read: if request.auth != null && getUserData().jagdbezirkId == jagdbezirkId;
+    allow read: if request.auth != null && getUserData().jagdbezirkId == jagdbezirkId;
       // Only admins can modify the district (e.g. add hunters later)
-      allow write: if request.auth != null && getUserData().role == 'admin';
+    allow write: if request.auth != null && getUserData().role == 'admin' && request.auth.uid != 'PQz2hNrf3gYSfKJ2eYjRlg67vaf1';
     }
 
     // Entries within a Jagdbezirk
     match /jagdbezirke/{jagdbezirkId}/eintraege/{eintragId} {
       // Allow read if user is admin OR owns the entry
-      allow read: if request.auth != null &&
-                     getUserData().jagdbezirkId == jagdbezirkId &&
-                     (getUserData().role == 'admin' || resource.data.userId == request.auth.uid);
+    allow read: if request.auth != null &&
+           getUserData().jagdbezirkId == jagdbezirkId &&
+           (getUserData().role == 'admin' || resource.data.userId == request.auth.uid);
 
       // Allow create if user belongs to the district and sets their own userId
-      allow create: if request.auth != null &&
-                       getUserData().jagdbezirkId == jagdbezirkId &&
-                       request.resource.data.userId == request.auth.uid;
+    allow create: if request.auth != null &&
+             getUserData().jagdbezirkId == jagdbezirkId &&
+             request.resource.data.userId == request.auth.uid &&
+             request.auth.uid != 'PQz2hNrf3gYSfKJ2eYjRlg67vaf1';
 
       // Allow update/delete if user is admin OR owns the entry
-      allow update, delete: if request.auth != null &&
-                               getUserData().jagdbezirkId == jagdbezirkId &&
-                               (getUserData().role == 'admin' || resource.data.userId == request.auth.uid);
+    allow update, delete: if request.auth != null &&
+             getUserData().jagdbezirkId == jagdbezirkId &&
+             (getUserData().role == 'admin' || resource.data.userId == request.auth.uid) &&
+             request.auth.uid != 'PQz2hNrf3gYSfKJ2eYjRlg67vaf1';
     }
   }
 }

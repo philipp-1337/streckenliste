@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { db } from '../firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
 import type { Eintrag } from '@types';
@@ -6,6 +7,7 @@ import useAuth from '@auth/AuthContext';
 
 export const useFirestore = () => {
   const { currentUser } = useAuth(); // Get current user
+  const DEMO_UID = 'PQz2hNrf3gYSfKJ2eYjRlg67vaf1';
   const [eintraege, setEintraege] = useState<Eintrag[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,6 +62,7 @@ export const useFirestore = () => {
       setEintraege(geladeneEintraege);
     } catch (err) {
       setError("Fehler beim Laden der Daten");
+      toast.error("Fehler beim Laden der Daten");
       console.error("Error fetching data from Firestore: ", err, '\ncurrentUser:', currentUser);
     } finally {
       setLoading(false);
@@ -70,9 +73,14 @@ export const useFirestore = () => {
     const streckenCollectionRef = getStreckenCollectionRef();
     if (!streckenCollectionRef || !currentUser) {
       setError("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
+      toast.error("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
       return;
     }
-
+    if (currentUser.uid === DEMO_UID) {
+      setError("In der Demo sind Funktionen eingeschränkt.");
+      toast.error("In der Demo sind Funktionen eingeschränkt.");
+      return;
+    }
     try {
       const newEintrag = {
         ...eintrag,
@@ -83,6 +91,7 @@ export const useFirestore = () => {
       await getEintraege();
     } catch (err) {
       setError("Fehler beim Speichern");
+      toast.error("Fehler beim Speichern");
       throw err;
     }
   };
@@ -91,6 +100,12 @@ export const useFirestore = () => {
     const streckenCollectionRef = getStreckenCollectionRef();
     if (!streckenCollectionRef || !currentUser) {
       setError("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
+      toast.error("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
+      return;
+    }
+    if (currentUser.uid === DEMO_UID) {
+      setError("In der Demo sind Funktionen eingeschränkt.");
+      toast.error("In der Demo sind Funktionen eingeschränkt.");
       return;
     }
     try {
@@ -104,6 +119,7 @@ export const useFirestore = () => {
       await getEintraege();
     } catch (err) {
       setError("Fehler beim Aktualisieren");
+      toast.error("Fehler beim Aktualisieren");
       throw err;
     }
   };
@@ -112,6 +128,12 @@ export const useFirestore = () => {
     const streckenCollectionRef = getStreckenCollectionRef();
     if (!streckenCollectionRef || !currentUser) {
       setError("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
+      toast.error("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
+      return;
+    }
+    if (currentUser.uid === DEMO_UID) {
+      setError("In der Demo sind Funktionen eingeschränkt.");
+      toast.error("In der Demo sind Funktionen eingeschränkt.");
       return;
     }
     try {
@@ -120,6 +142,7 @@ export const useFirestore = () => {
       await getEintraege();
     } catch (err) {
       setError("Fehler beim Löschen");
+      toast.error("Fehler beim Löschen");
       throw err;
     }
   };
