@@ -1,4 +1,5 @@
-import { Plus, BarChart3, Download, Filter, Printer } from 'lucide-react';
+import { Plus, BarChart3, Download, Filter, Printer, MoreVertical } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 
 interface ActionButtonsProps {
   onNewEntry: () => void;
@@ -9,6 +10,7 @@ interface ActionButtonsProps {
   showFilter: boolean;
 }
 
+
 export const ActionButtons: React.FC<ActionButtonsProps> = ({
   onNewEntry,
   onToggleStats,
@@ -17,43 +19,68 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   onToggleFilter,
   showFilter,
 }) => {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [open]);
+
   return (
-    <div className="flex flex-wrap gap-4 mb-6 print:hidden">
+    <div className="relative mb-6 print:hidden" ref={menuRef}>
       <button
-        onClick={onNewEntry}
-        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+        onClick={() => setOpen((v) => !v)}
+        className="bg-neutral-800 hover:bg-neutral-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors shadow"
+        aria-haspopup="true"
+        aria-expanded={open}
       >
-        <Plus size={20} />
-        Neuer Eintrag
+        <MoreVertical size={20} />
+        Aktionen
       </button>
-      <button
-        onClick={onToggleStats}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-      >
-        <BarChart3 size={20} />
-        Statistiken
-      </button>
-      <button
-        onClick={onExportCSV}
-        className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-      >
-        <Download size={20} />
-        CSV Export
-      </button>
-      <button
-        onClick={onToggleFilter}
-        className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-      >
-        <Filter size={20} />
-        {showFilter ? 'Filter ausblenden' : 'Filter einblenden'}
-      </button>
-      <button
-        onClick={onPrint}
-        className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-      >
-        <Printer size={20} />
-        Drucken
-      </button>
+      {open && (
+        <div className="absolute left-0 mt-2 w-56 bg-white border border-neutral-200 rounded-lg shadow-lg z-10">
+          <button
+            onClick={() => { setOpen(false); onNewEntry(); }}
+            className="w-full flex items-center gap-2 px-4 py-3 text-neutral-800 hover:bg-neutral-100 transition-colors text-left"
+          >
+            <Plus size={18} /> Neuer Eintrag
+          </button>
+          <button
+            onClick={() => { setOpen(false); onToggleStats(); }}
+            className="w-full flex items-center gap-2 px-4 py-3 text-neutral-800 hover:bg-neutral-100 transition-colors text-left"
+          >
+            <BarChart3 size={18} /> Statistiken
+          </button>
+          <button
+            onClick={() => { setOpen(false); onExportCSV(); }}
+            className="w-full flex items-center gap-2 px-4 py-3 text-neutral-800 hover:bg-neutral-100 transition-colors text-left"
+          >
+            <Download size={18} /> CSV Export
+          </button>
+          <button
+            onClick={() => { setOpen(false); onToggleFilter(); }}
+            className="w-full flex items-center gap-2 px-4 py-3 text-neutral-800 hover:bg-neutral-100 transition-colors text-left"
+          >
+            <Filter size={18} /> {showFilter ? 'Filter ausblenden' : 'Filter einblenden'}
+          </button>
+          <button
+            onClick={() => { setOpen(false); onPrint(); }}
+            className="w-full flex items-center gap-2 px-4 py-3 text-neutral-800 hover:bg-neutral-100 transition-colors text-left"
+          >
+            <Printer size={18} /> Drucken
+          </button>
+        </div>
+      )}
     </div>
   );
 };
