@@ -1,3 +1,5 @@
+
+import { useNavigate } from 'react-router-dom';
 import type { Eintrag } from '@types';
 
 interface OfficialPrintViewProps {
@@ -6,7 +8,7 @@ interface OfficialPrintViewProps {
 }
 
 export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, onClose }) => {
-
+  const navigate = useNavigate();
   return (
     <>
       {/* Print Styles */}
@@ -167,7 +169,7 @@ export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege,
                 Drucken
               </button>
               <button
-                onClick={onClose}
+                onClick={() => navigate(-1)}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
               >
                 Schließen

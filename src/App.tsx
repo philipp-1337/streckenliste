@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Toaster, toast } from 'sonner';
 import type { Eintrag } from '@types';
 import { useFirestore } from '@hooks/useFirestore';
@@ -17,14 +17,13 @@ import useAuth from '@auth/AuthContext';
 import Login from '@auth/Login';
 import { auth } from './firebase';
 import { signOut } from 'firebase/auth';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-const App = () => {
+const App = () => {  
   const { currentUser, loading: userLoading } = useAuth();
-  const [showForm, setShowForm] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Eintrag | null>(null);
-  const [showStats, setShowStats] = useState(false);
-  const [showFilter, setShowFilter] = useState(true);
-  const [showOfficialPrintView, setShowOfficialPrintView] = useState(false);
+  const [showFilterPanel, setShowFilterPanel] = useState(true);
+  const [showNewEntryForm, setShowNewEntryForm] = useState(false);
 
   // Hook für Live Daten
   const firestore = useFirestore();
@@ -38,6 +37,10 @@ const App = () => {
   );
   const statistiken = useStatistiken(filteredEintraege);
 
+  // Toggle function for FilterPanel
+  const handleToggleFilterPanel = () => setShowFilterPanel((v) => !v);
+  const handleShowNewEntryForm = () => setShowNewEntryForm(true);
+  const handleCloseNewEntryForm = () => setShowNewEntryForm(false);
   if (userLoading) {
     return (
       <div className="flex items-center justify-center h-screen text-xl">
@@ -49,6 +52,14 @@ const App = () => {
     return <Login />;
   }
 
+  // LoginRedirect-Komponente für die Hauptseite
+  const LoginRedirect = () => {
+    if (!currentUser) {
+      return <Navigate to="/login" replace />;
+    }
+    return null;
+  };
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -58,10 +69,6 @@ const App = () => {
     }
   };
 
-  const handleNewEntry = () => {
-    setEditingEntry(null);
-    setShowForm(!showForm);
-  };
 
   const handleSubmit = async (data: Omit<Eintrag, "id">) => {
     try {
@@ -81,7 +88,6 @@ const App = () => {
 
   const handleEdit = (eintrag: Eintrag) => {
     setEditingEntry(eintrag);
-    setShowForm(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -125,24 +131,13 @@ const App = () => {
   };
 
   const handleFormClose = () => {
-    setShowForm(false);
     setEditingEntry(null);
   };
 
-  const handleExportCSV = () => {
-    exportToCSV(filteredEintraege);
-  };
 
-  const handlePrint = () => {
-    setShowOfficialPrintView(true);
-  };
-
-  const handleClosePrintView = () => {
-    setShowOfficialPrintView(false);
-  };
 
   return (
-    <>
+    <Router>
       <Toaster
         richColors={true}
         position="bottom-right"
@@ -156,54 +151,84 @@ const App = () => {
       <div className="min-h-screen bg-green-50 p-4">
         <div className="max-w-7xl mx-auto">
           <Header onLogout={handleLogout} />
-
-          <ActionButtons
-            onNewEntry={handleNewEntry}
-            onToggleStats={() => setShowStats(!showStats)}
-            onExportCSV={handleExportCSV}
-            onPrint={handlePrint}
-            onToggleFilter={() => setShowFilter(!showFilter)}
-            showFilter={showFilter}
-          />
-
-          {showFilter && (
-            <FilterPanel filter={filter} onFilterChange={setFilter} />
-          )}
-
-          {showStats && <StatistikPanel stats={statistiken} />}
-
-          {showForm && (
-            <EintragForm
-              editingEntry={editingEntry}
-              onSubmit={handleSubmit}
-              onCancel={handleFormClose}
-            />
-          )}
-
-          <EintragTable
-            eintraege={filteredEintraege}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            currentUser={currentUser}
-          />
-
-          <FachbegriffeLegende />
-
           {firestore.error && (
             <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
               {firestore.error}
             </div>
           )}
+          <Routes>
+            <Route path="/" element={
+              <>
+                <ActionButtons
+                  showFilter={showFilterPanel}
+                  onToggleFilterPanel={handleToggleFilterPanel}
+                  onShowNewEntryForm={handleShowNewEntryForm}
+                />
+                {showFilterPanel && (
+                  <FilterPanel filter={filter} onFilterChange={setFilter} />
+                )}
+                <EintragTable
+                  eintraege={filteredEintraege}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  currentUser={currentUser}
+                />
+                {editingEntry && (
+                  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full relative">
+                      <EintragForm
+                        editingEntry={editingEntry}
+                        onSubmit={handleSubmit}
+                        onCancel={handleFormClose}
+                      />
+                      <button
+                        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+                        onClick={handleFormClose}
+                        title="Schließen"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {showNewEntryForm && (
+                  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full relative">
+                      <EintragForm
+                        editingEntry={null}
+                        onSubmit={async (data) => { await handleSubmit(data); handleCloseNewEntryForm(); }}
+                        onCancel={handleCloseNewEntryForm}
+                      />
+                      <button
+                        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+                        onClick={handleCloseNewEntryForm}
+                        title="Schließen"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            } />
+            <Route path="/form" element={
+              <EintragForm
+                editingEntry={editingEntry}
+                onSubmit={handleSubmit}
+                onCancel={handleFormClose}
+              />
+            } />
+            <Route path="/stats" element={
+              <StatistikPanel stats={statistiken} />
+            } />
+            <Route path="/legende" element={<FachbegriffeLegende />} />
+            <Route path="/print" element={
+              <OfficialPrintView eintraege={filteredEintraege} onClose={() => {}} />
+            } />
+          </Routes>
         </div>
-
-        {showOfficialPrintView && (
-          <OfficialPrintView
-            eintraege={filteredEintraege}
-            onClose={handleClosePrintView}
-          />
-        )}
       </div>
-    </>
+    </Router>
   );
 };
 
