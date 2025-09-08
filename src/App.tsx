@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from 'react';
-import type { Eintrag } from './types';
-import { useFirestore } from './hooks/useFirestore';
-import { useDemoData } from './hooks/useDemoData';
-import { useStatistiken } from './hooks/useStatistiken';
-import { useFilter } from './hooks/useFilter';
+import type { Eintrag } from '@types';
+import { useFirestore } from '@hooks/useFirestore';
+import { useDemoData } from '@hooks/useDemoData';
+import { useStatistiken } from '@hooks/useStatistiken';
+import { useFilter } from '@hooks/useFilter';
 import { Header } from '@components/Header';
 import { ActionButtons } from '@components/ActionButtons';
 import { FilterPanel } from '@components/FilterPanel';
@@ -14,8 +14,8 @@ import { EintragTable } from '@components/EintragTable';
 import { FachbegriffeLegende } from '@components/FachbegriffeLegende';
 import { OfficialPrintView } from '@components/OfficialPrintView';
 import { exportToCSV } from './utils/csvExport';
-import useAuth from './auth/AuthContext';
-import Login from './auth/Login';
+import useAuth from '@auth/AuthContext';
+import Login from '@auth/Login';
 import { auth } from './firebase';
 import { signOut } from 'firebase/auth';
 
