@@ -1,5 +1,5 @@
 
-import { Plus, BarChart3, Filter, Printer, MoreVertical } from 'lucide-react';
+import { Plus, Filter, Printer, MoreVertical } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 

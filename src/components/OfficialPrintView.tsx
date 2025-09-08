@@ -7,7 +7,7 @@ interface OfficialPrintViewProps {
   onClose: () => void;
 }
 
-export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, onClose }) => {
+export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
   const navigate = useNavigate();
   return (
     <>

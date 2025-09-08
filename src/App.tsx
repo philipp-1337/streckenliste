@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Toaster, toast } from 'sonner';
 import type { Eintrag } from '@types';
 import { useFirestore } from '@hooks/useFirestore';
@@ -12,12 +12,11 @@ import { EintragForm } from '@components/EintragForm';
 import { EintragTable } from '@components/EintragTable';
 import { FachbegriffeLegende } from '@components/FachbegriffeLegende';
 import { OfficialPrintView } from '@components/OfficialPrintView';
-import { exportToCSV } from './utils/csvExport';
 import useAuth from '@auth/AuthContext';
 import Login from '@auth/Login';
 import { auth } from './firebase';
 import { signOut } from 'firebase/auth';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 const App = () => {  
   const { currentUser, loading: userLoading } = useAuth();
@@ -51,14 +50,6 @@ const App = () => {
   if (!currentUser) {
     return <Login />;
   }
-
-  // LoginRedirect-Komponente für die Hauptseite
-  const LoginRedirect = () => {
-    if (!currentUser) {
-      return <Navigate to="/login" replace />;
-    }
-    return null;
-  };
 
   const handleLogout = async () => {
     try {
