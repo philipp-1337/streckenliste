@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { Toaster, toast } from 'sonner';
 import type { Eintrag } from '@types';
 import { useFirestore } from '@hooks/useFirestore';
 import { useStatistiken } from '@hooks/useStatistiken';
@@ -48,6 +49,7 @@ const App = () => {
       await signOut(auth);
     } catch (error) {
       console.error("Fehler beim Abmelden:", error);
+      toast.error('Fehler beim Abmelden');
     }
   };
 
@@ -66,7 +68,7 @@ const App = () => {
       handleFormClose();
     } catch (error) {
       console.error('Fehler beim Speichern:', error);
-      // Hier könnte eine Fehlermeldung angezeigt werden
+      toast.error('Fehler beim Speichern');
     }
   };
 
@@ -81,6 +83,7 @@ const App = () => {
         await currentData.deleteEintrag(id);
       } catch (error) {
         console.error('Fehler beim Löschen:', error);
+        toast.error('Fehler beim Löschen');
       }
     }
   };
@@ -103,7 +106,9 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-green-50 p-4">
+    <>
+      <Toaster richColors position="bottom-center" />
+      <div className="min-h-screen bg-green-50 p-4">
       <div className="max-w-7xl mx-auto">
         <Header 
           onLogout={handleLogout}
@@ -159,7 +164,8 @@ const App = () => {
           onClose={handleClosePrintView} 
         />
       )}
-    </div>
+      </div>
+    </>
   );
 };
 
