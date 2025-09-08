@@ -22,6 +22,7 @@ export default defineConfig({
   },
   build: {
     outDir: "build",
+    sourcemap: true, // <--- hinzufügen
     rollupOptions: {
       output: {
         manualChunks(id) {
