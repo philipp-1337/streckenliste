@@ -26,7 +26,7 @@ const Login = () => {
 
   return (
     <>
-      <Toaster richColors position="bottom-center" />
+      <Toaster richColors={true} position="bottom-right" mobileOffset={32} offset={32} closeButton={false} expand={true} invert={false} gap={16} />
       <div className="min-h-screen flex items-center justify-center bg-green-50 p-4">
         <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
           <h2 className="text-3xl font-bold text-center text-green-800 mb-6">Login</h2>

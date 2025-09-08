@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Toaster, toast } from 'sonner';
 import type { Eintrag } from '@types';
@@ -32,13 +31,19 @@ const App = () => {
 
   // Aktuelle Datenquelle basierend auf Modus
   const currentData = firestore;
-  
+
   // Filter und Statistiken
-  const { filter, setFilter, filteredEintraege } = useFilter(currentData.eintraege);
+  const { filter, setFilter, filteredEintraege } = useFilter(
+    currentData.eintraege
+  );
   const statistiken = useStatistiken(filteredEintraege);
 
   if (userLoading) {
-    return <div className="flex items-center justify-center h-screen text-xl">Benutzerdaten werden geladen...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen text-xl">
+        Benutzerdaten werden geladen...
+      </div>
+    );
   }
   if (!currentUser) {
     return <Login />;
@@ -49,7 +54,7 @@ const App = () => {
       await signOut(auth);
     } catch (error) {
       console.error("Fehler beim Abmelden:", error);
-      toast.error('Fehler beim Abmelden');
+      toast.error("Fehler beim Abmelden");
     }
   };
 
@@ -58,7 +63,7 @@ const App = () => {
     setShowForm(!showForm);
   };
 
-  const handleSubmit = async (data: Omit<Eintrag, 'id'>) => {
+  const handleSubmit = async (data: Omit<Eintrag, "id">) => {
     try {
       if (editingEntry) {
         await currentData.updateEintrag(editingEntry.id, data);
@@ -67,9 +72,10 @@ const App = () => {
       }
       handleFormClose();
     } catch (error) {
-      console.error('Fehler beim Speichern:', error);
-      if (firestore.error === 'In der Demo sind Funktionen eingeschränkt.') return;
-      toast.error('Fehler beim Speichern');
+      console.error("Fehler beim Speichern:", error);
+      if (firestore.error === "In der Demo sind Funktionen eingeschränkt.")
+        return;
+      toast.error("Fehler beim Speichern");
     }
   };
 
@@ -79,15 +85,43 @@ const App = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('Eintrag wirklich löschen?')) {
-      try {
-        await currentData.deleteEintrag(id);
-      } catch (error) {
-        console.error('Fehler beim Löschen:', error);
-        if (firestore.error === 'In der Demo sind Funktionen eingeschränkt.') return;
-        toast.error('Fehler beim Löschen');
-      }
-    }
+    toast.custom(
+      (t: string | number) => (
+        <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-lg p-4 dark:bg-neutral-900 dark:border-neutral-700">
+          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            Eintrag wirklich löschen?
+          </div>
+          <div className="mt-3 flex justify-end gap-2">
+            <button
+              onClick={() => toast.dismiss(t)}
+              className="rounded-xl px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-neutral-800 transition"
+            >
+              Abbrechen
+            </button>
+            <button
+              onClick={async () => {
+                try {
+                  await currentData.deleteEintrag(id);
+                  toast.dismiss(t);
+                } catch (error) {
+                  console.error("Fehler beim Löschen:", error);
+                  if (
+                    firestore.error ===
+                    "In der Demo sind Funktionen eingeschränkt."
+                  )
+                    return;
+                  toast.error("Fehler beim Löschen");
+                }
+              }}
+              className="rounded-xl px-3 py-1.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition"
+            >
+              Löschen
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: 10000 }
+    );
   };
 
   const handleFormClose = () => {
@@ -109,63 +143,65 @@ const App = () => {
 
   return (
     <>
-      <Toaster richColors position="bottom-center" />
+      <Toaster
+        richColors={true}
+        position="bottom-right"
+        mobileOffset={32}
+        offset={32}
+        closeButton={false}
+        expand={true}
+        invert={false}
+        gap={16}
+      />
       <div className="min-h-screen bg-green-50 p-4">
-      <div className="max-w-7xl mx-auto">
-        <Header 
-          onLogout={handleLogout}
-        />
+        <div className="max-w-7xl mx-auto">
+          <Header onLogout={handleLogout} />
 
-        <ActionButtons
-          onNewEntry={handleNewEntry}
-          onToggleStats={() => setShowStats(!showStats)}
-          onExportCSV={handleExportCSV}
-          onPrint={handlePrint}
-          onToggleFilter={() => setShowFilter(!showFilter)}
-          showFilter={showFilter}
-        />
+          <ActionButtons
+            onNewEntry={handleNewEntry}
+            onToggleStats={() => setShowStats(!showStats)}
+            onExportCSV={handleExportCSV}
+            onPrint={handlePrint}
+            onToggleFilter={() => setShowFilter(!showFilter)}
+            showFilter={showFilter}
+          />
 
-        {showFilter && (
-          <FilterPanel
-            filter={filter}
-            onFilterChange={setFilter}
+          {showFilter && (
+            <FilterPanel filter={filter} onFilterChange={setFilter} />
+          )}
+
+          {showStats && <StatistikPanel stats={statistiken} />}
+
+          {showForm && (
+            <EintragForm
+              editingEntry={editingEntry}
+              onSubmit={handleSubmit}
+              onCancel={handleFormClose}
+            />
+          )}
+
+          <EintragTable
+            eintraege={filteredEintraege}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            currentUser={currentUser}
+          />
+
+          <FachbegriffeLegende />
+
+          {firestore.error && (
+            <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              {firestore.error}
+            </div>
+          )}
+        </div>
+
+        {showOfficialPrintView && (
+          <OfficialPrintView
+            eintraege={filteredEintraege}
+            onClose={handleClosePrintView}
           />
         )}
-
-        {showStats && (
-          <StatistikPanel stats={statistiken} />
-        )}
-
-        {showForm && (
-          <EintragForm
-            editingEntry={editingEntry}
-            onSubmit={handleSubmit}
-            onCancel={handleFormClose}
-          />
-        )}
-
-        <EintragTable
-          eintraege={filteredEintraege}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          currentUser={currentUser}
-        />
-
-        <FachbegriffeLegende />
-
-        {firestore.error && (
-          <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {firestore.error}
-          </div>
-        )}
-      </div>
-
-      {showOfficialPrintView && (
-        <OfficialPrintView 
-          eintraege={filteredEintraege} 
-          onClose={handleClosePrintView} 
-        />
-      )}
       </div>
     </>
   );
