@@ -25,21 +25,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setFirebaseUser(user);
       if (user) {
-        // Here we would fetch the user profile from Firestore
-        // For now, we'll create a dummy user
-        const dummyUser: UserData = {
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          jagdbezirkId: 'dummy-jagdbezirk',
-          role: 'user',
-        };
-        setCurrentUser(dummyUser);
+        // Debug: Log Auth user
+        console.log('[AuthContext] Firebase Auth user:', user);
         // Fetch the user profile from Firestore
         const userDocRef = doc(db, 'users', user.uid);
         const userDocSnap = await getDoc(userDocRef);
         if (userDocSnap.exists()) {
-          setCurrentUser(userDocSnap.data() as UserData);
+          const userData = userDocSnap.data() as UserData;
+          console.log('[AuthContext] Firestore UserData:', userData);
+          setCurrentUser(userData);
         } else {
           // Handle case where user exists in Auth but not in Firestore
           console.error("No user profile found in Firestore for UID:", user.uid);
@@ -47,7 +41,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } else {
         setCurrentUser(null);
-      } 
+      }
       setLoading(false);
     });
 

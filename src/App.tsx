@@ -19,7 +19,7 @@ import { auth } from './firebase';
 import { signOut } from 'firebase/auth';
 
 const App = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, loading: userLoading } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Eintrag | null>(null);
   const [showStats, setShowStats] = useState(false);
@@ -36,6 +36,9 @@ const App = () => {
   const { filter, setFilter, filteredEintraege } = useFilter(currentData.eintraege);
   const statistiken = useStatistiken(filteredEintraege);
 
+  if (userLoading) {
+    return <div className="flex items-center justify-center h-screen text-xl">Benutzerdaten werden geladen...</div>;
+  }
   if (!currentUser) {
     return <Login />;
   }

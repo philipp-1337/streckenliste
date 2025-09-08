@@ -19,21 +19,34 @@ export const useFirestore = () => {
   };
 
   useEffect(() => {
-    if (currentUser && currentUser.jagdbezirkId) {
-      getEintraege();
+    if (!currentUser) {
+      console.warn('[useFirestore] Kein currentUser vorhanden, Abfrage wird nicht ausgeführt.');
+      return;
     }
+    if (!currentUser.jagdbezirkId) {
+      console.warn('[useFirestore] currentUser ohne jagdbezirkId:', currentUser);
+      return;
+    }
+    getEintraege();
   }, [currentUser]); // Re-run when currentUser changes
 
   const getEintraege = async () => {
     const streckenCollectionRef = getStreckenCollectionRef();
     if (!streckenCollectionRef) {
+      console.warn('[useFirestore] Kein streckenCollectionRef, currentUser:', currentUser);
       return; // Not ready to fetch
+    }
+    if (!currentUser || !currentUser.uid || !currentUser.jagdbezirkId) {
+      console.warn('[useFirestore] Abfrage gestoppt, fehlende Userdaten:', currentUser);
+      return;
     }
 
     setLoading(true);
     setError(null);
     try {
       let q;
+      // Debug: Log currentUser vor Abfrage
+      console.log('[useFirestore] getEintraege mit currentUser:', currentUser);
       // If user is not an admin, only fetch their own entries
       if (currentUser && currentUser.role !== 'admin') {
         q = query(streckenCollectionRef, where("userId", "==", currentUser.uid), orderBy("datum", "desc"));
@@ -47,7 +60,7 @@ export const useFirestore = () => {
       setEintraege(geladeneEintraege);
     } catch (err) {
       setError("Fehler beim Laden der Daten");
-      console.error("Error fetching data from Firestore: ", err);
+      console.error("Error fetching data from Firestore: ", err, '\ncurrentUser:', currentUser);
     } finally {
       setLoading(false);
     }
