@@ -56,6 +56,7 @@ const Login = () => {
           {error && (
             <p className="text-red-500 text-sm text-center mt-4">{error}</p>
           )}
+          <p className='text-sm text-center mt-4'>Demo: demo@example.com / demo-login</p>
         </form>
       </div>
     </div>

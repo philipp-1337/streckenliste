@@ -1,8 +1,7 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Eintrag } from '@types';
 import { useFirestore } from '@hooks/useFirestore';
-import { useDemoData } from '@hooks/useDemoData';
 import { useStatistiken } from '@hooks/useStatistiken';
 import { useFilter } from '@hooks/useFilter';
 import { Header } from '@components/Header';
@@ -21,30 +20,21 @@ import { signOut } from 'firebase/auth';
 
 const App = () => {
   const { currentUser } = useAuth();
-  const [isDemoMode, setIsDemoMode] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Eintrag | null>(null);
   const [showStats, setShowStats] = useState(false);
   const [showFilter, setShowFilter] = useState(true);
   const [showOfficialPrintView, setShowOfficialPrintView] = useState(false);
 
-  // Hooks für Demo und Live Daten
+  // Hook für Live Daten
   const firestore = useFirestore();
-  const demoData = useDemoData();
 
   // Aktuelle Datenquelle basierend auf Modus
-  const currentData = isDemoMode ? demoData : firestore;
+  const currentData = firestore;
   
   // Filter und Statistiken
   const { filter, setFilter, filteredEintraege } = useFilter(currentData.eintraege);
   const statistiken = useStatistiken(filteredEintraege);
-
-  // Daten laden beim Wechsel des Modus
-  useEffect(() => {
-    if (!isDemoMode) {
-      firestore.getEintraege();
-    }
-  }, [isDemoMode, firestore]);
 
   if (!currentUser) {
     return <Login />;
@@ -56,12 +46,6 @@ const App = () => {
     } catch (error) {
       console.error("Fehler beim Abmelden:", error);
     }
-  };
-
-  const handleToggleMode = () => {
-    setIsDemoMode(!isDemoMode);
-    setShowForm(false);
-    setEditingEntry(null);
   };
 
   const handleNewEntry = () => {
@@ -119,8 +103,6 @@ const App = () => {
     <div className="min-h-screen bg-green-50 p-4">
       <div className="max-w-7xl mx-auto">
         <Header 
-          isDemoMode={isDemoMode}
-          onToggleMode={handleToggleMode}
           onLogout={handleLogout}
         />
 
@@ -161,7 +143,7 @@ const App = () => {
 
         <FachbegriffeLegende />
 
-        {!isDemoMode && firestore.error && (
+        {firestore.error && (
           <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             {firestore.error}
           </div>
