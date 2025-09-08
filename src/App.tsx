@@ -1,18 +1,17 @@
-
 import { useState, useEffect } from 'react';
 import type { Eintrag } from './types';
 import { useFirestore } from './hooks/useFirestore';
 import { useDemoData } from './hooks/useDemoData';
 import { useStatistiken } from './hooks/useStatistiken';
 import { useFilter } from './hooks/useFilter';
-import { Header } from './components/Header';
-import { ActionButtons } from './components/ActionButtons';
-import { FilterPanel } from './components/FilterPanel';
-import { StatistikPanel } from './components/StatistikPanel';
-import { EintragForm } from './components/EintragForm';
-import { EintragTable } from './components/EintragTable';
-import { FachbegriffeLegende } from './components/FachbegriffeLegende';
-import { OfficialPrintView } from './components/OfficialPrintView';
+import { Header } from '@components/Header';
+import { ActionButtons } from '@components/ActionButtons';
+import { FilterPanel } from '@components/FilterPanel';
+import { StatistikPanel } from '@components/StatistikPanel';
+import { EintragForm } from '@components/EintragForm';
+import { EintragTable } from '@components/EintragTable';
+import { FachbegriffeLegende } from '@components/FachbegriffeLegende';
+import { OfficialPrintView } from '@components/OfficialPrintView';
 import { exportToCSV } from './utils/csvExport';
 import useAuth from './auth/AuthContext';
 import Login from './auth/Login';
@@ -21,7 +20,7 @@ import { signOut } from 'firebase/auth';
 
 const App = () => {
   const { currentUser } = useAuth();
-  const [isDemoMode, setIsDemoMode] = useState(true);
+  const [isDemoMode] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingEntry, setEditingEntry] = useState<Eintrag | null>(null);
   const [showStats, setShowStats] = useState(false);
@@ -56,12 +55,6 @@ const App = () => {
     } catch (error) {
       console.error("Fehler beim Abmelden:", error);
     }
-  };
-
-  const handleToggleMode = () => {
-    setIsDemoMode(!isDemoMode);
-    setShowForm(false);
-    setEditingEntry(null);
   };
 
   const handleNewEntry = () => {
@@ -118,9 +111,7 @@ const App = () => {
   return (
     <div className="min-h-screen bg-green-50 p-4">
       <div className="max-w-7xl mx-auto">
-        <Header 
-          isDemoMode={isDemoMode}
-          onToggleMode={handleToggleMode}
+        <Header
           onLogout={handleLogout}
         />
 
