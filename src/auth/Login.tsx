@@ -1,5 +1,4 @@
-import { useState, useContext } from 'react';
-import { AuthContext } from './AuthContext';
+import { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -7,7 +6,6 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { loginDemo } = useContext(AuthContext);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,13 +52,6 @@ const Login = () => {
             className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
           >
             Login
-          </button>
-          <button
-            type="button"
-            onClick={loginDemo}
-            className="w-full bg-gray-200 hover:bg-gray-300 text-green-800 font-bold py-2 px-4 rounded-lg mt-2 transition-colors"
-          >
-            Demo-Login
           </button>
           {error && (
             <p className="text-red-500 text-sm text-center mt-4">{error}</p>
