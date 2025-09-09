@@ -1,5 +1,5 @@
 
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, BookIcon, HomeIcon, LogOutIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface NavProps {
@@ -16,7 +16,7 @@ export const Nav: React.FC<NavProps> = ({ onLogout }) => {
           onClick={() => navigate('/')}
           className="flex flex-col items-center gap-1 text-white hover:text-neutral-300 px-2 py-1 focus:outline-none"
         >
-          <span className="text-xl">🏠</span>
+          <HomeIcon size={20} />
           <span className="text-xs">Übersicht</span>
         </button>
         <button
@@ -30,7 +30,7 @@ export const Nav: React.FC<NavProps> = ({ onLogout }) => {
           onClick={() => navigate('/legende')}
           className="flex flex-col items-center gap-1 text-white hover:text-neutral-300 px-2 py-1 focus:outline-none"
         >
-          <span className="text-xl">📖</span>
+          <BookIcon size={20} />
           <span className="text-xs">Legende</span>
         </button>
         <button
@@ -38,7 +38,7 @@ export const Nav: React.FC<NavProps> = ({ onLogout }) => {
           className="flex flex-col items-center gap-1 text-gray-300 hover:text-red-400 px-2 py-1 focus:outline-none"
           title="Logout"
         >
-          <span className="text-xl">⎋</span>
+          <LogOutIcon size={20} />
           <span className="text-xs">Logout</span>
         </button>
       </div>

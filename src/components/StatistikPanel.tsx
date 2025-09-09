@@ -1,4 +1,5 @@
 import type { AllStats } from '@types';
+import { BarChart2Icon } from 'lucide-react';
 
 interface StatistikPanelProps {
   stats: AllStats;
@@ -7,7 +8,7 @@ interface StatistikPanelProps {
 export const StatistikPanel: React.FC<StatistikPanelProps> = ({ stats }) => {
   return (
     <div className="bg-white p-6 rounded-lg mb-6 shadow">
-      <h3 className="text-xl font-bold mb-4">📊 Statistiken</h3>
+    <h3 className="font-semibold mb-3 flex items-center gap-2"><BarChart2Icon className="inline-block align-middle" size={20} /> <span className="align-middle">Statistiken</span></h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Object.entries(stats).map(([wildart, stat]) => (
           <div key={wildart} className="bg-green-100 p-4 rounded-lg">
