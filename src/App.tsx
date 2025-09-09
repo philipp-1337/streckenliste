@@ -16,7 +16,7 @@ import useAuth from '@hooks/useAuth';
 import Login from '@auth/Login';
 import { auth } from './firebase';
 import { signOut } from 'firebase/auth';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Routes, Route } from 'react-router-dom';
 
 const App = () => {  
   const { currentUser, loading: userLoading } = useAuth();
@@ -129,7 +129,7 @@ const App = () => {
 
 
   return (
-    <Router>
+    <>
       <Toaster
         richColors={true}
         position="bottom-right"
@@ -143,11 +143,11 @@ const App = () => {
       <div className="min-h-screen bg-green-50 p-4">
         <div className="max-w-7xl mx-auto">
           <Header onLogout={handleLogout} />
-          {firestore.error && (
+          {/* {firestore.error && (
             <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
               {firestore.error}
             </div>
-          )}
+          )} */}
           <Routes>
             <Route path="/" element={
               <>
@@ -198,7 +198,7 @@ const App = () => {
           </Routes>
         </div>
       </div>
-    </Router>
+    </>
   );
 };
 
