@@ -7,6 +7,7 @@ import { useFilter } from '@hooks/useFilter';
 import { Header } from '@components/Header';
 import { ActionButtons } from '@components/ActionButtons';
 import { FilterPanel } from '@components/FilterPanel';
+import { Nav } from '@components/Nav';
 import { StatistikPanel } from '@components/StatistikPanel';
 import { EintragForm } from '@components/EintragForm';
 import { EintragTable } from '@components/EintragTable';
@@ -141,13 +142,8 @@ const App = () => {
         gap={16}
       />
       <div className="min-h-screen bg-green-50 p-4">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto pb-16">
           <Header onLogout={handleLogout} />
-          {/* {firestore.error && (
-            <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {firestore.error}
-            </div>
-          )} */}
           <Routes>
             <Route path="/" element={
               <>
@@ -157,12 +153,9 @@ const App = () => {
                   onToggleFilterPanel={handleToggleFilterPanel}
                   onToggleNewEntryForm={() => setShowNewEntryForm((v) => !v)}
                 />
-                {showFilterPanel && (
-                  <FilterPanel filter={filter} onFilterChange={setFilter} />
-                )}
                 {/* Inline Formular über der Tabelle */}
                 {(showNewEntryForm || editingEntry) && (
-                  <div className="max-w-2xl mx-auto mb-6">
+                  <div className="mx-auto mb-6">
                     <EintragForm
                       editingEntry={editingEntry}
                       onSubmit={async (data) => {
@@ -170,15 +163,20 @@ const App = () => {
                         handleFormClose();
                       }}
                       onCancel={handleFormClose}
-                    />
+                      />
                   </div>
                 )}
+                {showFilterPanel && (
+                  <FilterPanel filter={filter} onFilterChange={setFilter} />
+                )}
+                {!(showNewEntryForm || editingEntry) && (
                 <EintragTable
                   eintraege={filteredEintraege}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                   currentUser={currentUser}
                 />
+                )}
               </>
             } />
             <Route path="/form" element={
@@ -198,6 +196,7 @@ const App = () => {
           </Routes>
         </div>
       </div>
+      <Nav onLogout={handleLogout} />
     </>
   );
 };

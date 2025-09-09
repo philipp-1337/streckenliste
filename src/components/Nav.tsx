@@ -42,8 +42,6 @@ export const Nav: React.FC<NavProps> = ({ onLogout }) => {
           <span className="text-xs">Logout</span>
         </button>
       </div>
-      {/* Platzhalter für BottomTabMenu, damit Content nicht verdeckt wird */}
-      <div style={{ height: '56px' }} />
     </nav>
   );
 }
