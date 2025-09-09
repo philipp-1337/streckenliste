@@ -14,10 +14,9 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
   const navigate = useNavigate();
   return (
     <>
-      {/* Offizielle Formblatt-Druckansicht */}
-      <div className="print-area fixed inset-0 bg-white z-50 p-4 overflow-auto">
-        <div className="max-w-full">
-          <div className="text-xs">
+    <div className="print-area bg-white p-4 overflow-auto">
+      <div className="max-w-full text-xs">
+        <div className="text-xs">
             {/* Header */}
             <div className="text-center mb-4">
               <h1 className="text-lg font-bold">Anlage zur Streckenliste für das Jagdjahr: 2024/2025</h1>
@@ -143,7 +142,10 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
             {/* Action Buttons (nicht druckbar) */}
             <div className="fixed top-4 right-4 print:hidden flex gap-2">
                <button
-                onClick={() => setTimeout(() => window.print(), 100)}
+                onClick={() => {
+                  document.body.offsetHeight; // Force reflow
+                  setTimeout(() => window.print(), 400);
+                }}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
               >
                 Drucken
