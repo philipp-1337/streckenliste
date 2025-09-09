@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
@@ -8,12 +9,14 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   // Fehlermeldung wird nur als Toast angezeigt
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     // setError entfernt, da Toast genutzt wird
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      navigate('/');
     } catch (err: unknown) {
       const error = err as FirebaseError;
       if (error.code === 'auth/invalid-credential') {
