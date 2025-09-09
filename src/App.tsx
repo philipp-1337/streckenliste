@@ -79,6 +79,7 @@ const App = () => {
 
   const handleEdit = (eintrag: Eintrag) => {
     setEditingEntry(eintrag);
+    setShowNewEntryForm(false);
   };
 
   const handleDelete = async (id: string) => {
@@ -123,6 +124,7 @@ const App = () => {
 
   const handleFormClose = () => {
     setEditingEntry(null);
+    setShowNewEntryForm(false);
   };
 
 
@@ -158,48 +160,25 @@ const App = () => {
                 {showFilterPanel && (
                   <FilterPanel filter={filter} onFilterChange={setFilter} />
                 )}
+                {/* Inline Formular über der Tabelle */}
+                {(showNewEntryForm || editingEntry) && (
+                  <div className="max-w-2xl mx-auto mb-6">
+                    <EintragForm
+                      editingEntry={editingEntry}
+                      onSubmit={async (data) => {
+                        await handleSubmit(data);
+                        handleFormClose();
+                      }}
+                      onCancel={handleFormClose}
+                    />
+                  </div>
+                )}
                 <EintragTable
                   eintraege={filteredEintraege}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                   currentUser={currentUser}
                 />
-                {editingEntry && (
-                  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full relative">
-                      <EintragForm
-                        editingEntry={editingEntry}
-                        onSubmit={handleSubmit}
-                        onCancel={handleFormClose}
-                      />
-                      <button
-                        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
-                        onClick={handleFormClose}
-                        title="Schließen"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  </div>
-                )}
-                {showNewEntryForm && (
-                  <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full relative">
-                      <EintragForm
-                        editingEntry={null}
-                        onSubmit={async (data) => { await handleSubmit(data); handleCloseNewEntryForm(); }}
-                        onCancel={handleCloseNewEntryForm}
-                      />
-                      <button
-                        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
-                        onClick={handleCloseNewEntryForm}
-                        title="Schließen"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  </div>
-                )}
               </>
             } />
             <Route path="/form" element={
