@@ -16,7 +16,7 @@ import useAuth from '@hooks/useAuth';
 import Login from '@auth/Login';
 import { auth } from './firebase';
 import { signOut } from 'firebase/auth';
-import { BrowserRouter as Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
 const App = () => {  
   const { currentUser, loading: userLoading } = useAuth();
