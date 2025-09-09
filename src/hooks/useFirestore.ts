@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { db } from '../firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
@@ -13,26 +13,14 @@ export const useFirestore = () => {
   const [error, setError] = useState<string | null>(null);
 
   // streckenCollectionRef will now depend on currentUser
-  const getStreckenCollectionRef = () => {
+  const getStreckenCollectionRef = useCallback(() => {
     if (!currentUser || !currentUser.jagdbezirkId) {
       return null; // Or handle error/loading state
     }
     return collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/eintraege`);
-  };
+  }, [currentUser]);
 
-  useEffect(() => {
-    if (!currentUser) {
-      console.warn('[useFirestore] Kein currentUser vorhanden, Abfrage wird nicht ausgeführt.');
-      return;
-    }
-    if (!currentUser.jagdbezirkId) {
-      console.warn('[useFirestore] currentUser ohne jagdbezirkId:', currentUser);
-      return;
-    }
-    getEintraege();
-  }, [currentUser]); // Re-run when currentUser changes
-
-  const getEintraege = async () => {
+  const getEintraege = useCallback(async () => {
     const streckenCollectionRef = getStreckenCollectionRef();
     if (!streckenCollectionRef) {
       console.warn('[useFirestore] Kein streckenCollectionRef, currentUser:', currentUser);
@@ -67,7 +55,20 @@ export const useFirestore = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser, getStreckenCollectionRef]);
+
+  useEffect(() => {
+    if (!currentUser) {
+      console.warn('[useFirestore] Kein currentUser vorhanden, Abfrage wird nicht ausgeführt.');
+      return;
+    }
+    if (!currentUser.jagdbezirkId) {
+      console.warn('[useFirestore] currentUser ohne jagdbezirkId:', currentUser);
+      return;
+    }
+    getEintraege();
+  }, [currentUser, getEintraege]); // Re-run when currentUser changes
+
 
   const addEintrag = async (eintrag: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>) => {
     const streckenCollectionRef = getStreckenCollectionRef();

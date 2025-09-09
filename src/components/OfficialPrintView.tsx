@@ -143,7 +143,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
             <div className="fixed top-4 right-4 print:hidden flex gap-2">
                <button
                 onClick={() => {
-                  document.body.offsetHeight; // Force reflow
+                  void document.body.offsetHeight; // Force reflow
                   setTimeout(() => window.print(), 400);
                 }}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
