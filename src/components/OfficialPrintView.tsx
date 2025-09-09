@@ -14,28 +14,6 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
   const navigate = useNavigate();
   return (
     <>
-      {/* Print Styles */}
-      <style>{`
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          .print-area, .print-area * {
-            visibility: visible;
-          }
-          .print-area {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-          @page {
-            margin: 1cm;
-            size: A4 landscape;
-          }
-        }
-      `}</style>
-
       {/* Offizielle Formblatt-Druckansicht */}
       <div className="print-area fixed inset-0 bg-white z-50 p-4 overflow-auto">
         <div className="max-w-full">
@@ -165,7 +143,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
             {/* Action Buttons (nicht druckbar) */}
             <div className="fixed top-4 right-4 print:hidden flex gap-2">
                <button
-                onClick={() => window.print()}
+                onClick={() => setTimeout(() => window.print(), 100)}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
               >
                 Drucken
