@@ -22,8 +22,8 @@ export const wildarten: Wildarten = {
     { kategorie: 'Alter Hirsch (ab 8 Jahre) ♂', altersklasse: 'AK 4', geschlecht: 'm', fachbegriff: 'Alter Damhirsch ♂' }
   ],
   'Rehwild': [
-    { kategorie: 'Kitz männlich ♂', altersklasse: 'AK 0', geschlecht: 'm', fachbegriff: 'Bockkitz ♂' },
-    { kategorie: 'Kitz weiblich ♀', altersklasse: 'AK 0', geschlecht: 'w', fachbegriff: 'Rickenkitz ♀' },
+    { kategorie: 'Bockkitz ♂', altersklasse: 'AK 0', geschlecht: 'm', fachbegriff: 'Bockkitz ♂' },
+    { kategorie: 'Rickenkitz ♀', altersklasse: 'AK 0', geschlecht: 'w', fachbegriff: 'Rickenkitz ♀' },
     { kategorie: 'Schmalreh ♀', altersklasse: 'AK 1', geschlecht: 'w', fachbegriff: 'Schmalreh ♀' },
     { kategorie: 'Jährling ♂', altersklasse: 'AK 1', geschlecht: 'm', fachbegriff: 'Jährling ♂' },
     { kategorie: 'Ricke ♀', altersklasse: 'AK 2', geschlecht: 'w', fachbegriff: 'Ricke ♀' },
