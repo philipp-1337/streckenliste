@@ -39,7 +39,6 @@ const App = () => {
   // Toggle function for FilterPanel
   const handleToggleFilterPanel = () => setShowFilterPanel((v) => !v);
   const handleShowNewEntryForm = () => setShowNewEntryForm(true);
-  const handleCloseNewEntryForm = () => setShowNewEntryForm(false);
   if (userLoading) {
     return (
       <div className="flex items-center justify-center h-screen text-xl">
