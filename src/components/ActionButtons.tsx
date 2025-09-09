@@ -1,7 +1,5 @@
-
 import { Plus, Filter, Printer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
 
 interface ActionButtonsProps {
   showFilter: boolean;
@@ -10,36 +8,97 @@ interface ActionButtonsProps {
   onToggleNewEntryForm?: () => void;
 }
 
-
-
-export const ActionButtons: React.FC<ActionButtonsProps> = ({ showFilter, showNewEntryForm, onToggleFilterPanel, onToggleNewEntryForm }) => {
+export const ActionButtons: React.FC<ActionButtonsProps> = ({
+  showFilter,
+  showNewEntryForm,
+  onToggleFilterPanel,
+  onToggleNewEntryForm
+}) => {
   const navigate = useNavigate();
+
+  const buttons = [
+    {
+      id: 'new-entry',
+      icon: Plus,
+      title: showNewEntryForm ? 'Neuen Eintrag schließen' : 'Neuer Eintrag',
+      onClick: onToggleNewEntryForm,
+      isActive: showNewEntryForm,
+      activeColors: 'text-red-700 shadow-red-500/20',
+      iconClass: showNewEntryForm ? 'rotate-45' : '',
+    },
+    {
+      id: 'filter',
+      icon: Filter,
+      title: 'Filter anzeigen/verstecken',
+      onClick: onToggleFilterPanel,
+      isActive: showFilter,
+      activeColors: 'text-green-700 shadow-green-500/20',
+      iconClass: '',
+    },
+    {
+      id: 'print',
+      icon: Printer,
+      title: 'Drucken',
+      onClick: () => navigate('/print'),
+      isActive: false,
+      activeColors: '',
+      iconClass: '',
+    },
+  ];
+
   return (
-    <div className="flex gap-2 mb-6 print:hidden">
-      <button
-        onClick={onToggleNewEntryForm}
-        className={`p-2 rounded-lg flex items-center justify-center transition-colors shadow border ${showNewEntryForm ? 'bg-red-100 border-red-400 text-red-700' : 'bg-neutral-800 hover:bg-neutral-700 text-white border-neutral-800'}`}
-        title={showNewEntryForm ? 'Neuen Eintrag schließen' : 'Neuer Eintrag'}
-      >
-        <Plus
-          size={20}
-          className={showNewEntryForm ? 'transition-transform duration-200 rotate-228' : 'transition-transform duration-200'}
-        />
-      </button>
-      <button
-        onClick={onToggleFilterPanel}
-        className={`p-2 rounded-lg flex items-center justify-center transition-colors shadow border ${showFilter ? 'bg-green-100 border-green-400 text-green-700' : 'bg-white border-neutral-200 text-neutral-800'}`}
-        title="Filter anzeigen/verstecken"
-      >
-        <Filter size={20} />
-      </button>
-      <button
-        onClick={() => navigate('/print')}
-        className="bg-white border border-neutral-200 text-neutral-800 p-2 rounded-lg flex items-center justify-center transition-colors shadow"
-        title="Drucken"
-      >
-        <Printer size={20} />
-      </button>
+    <div className="flex gap-3 mb-6 print:hidden">
+      {buttons.map((button) => {
+        const Icon = button.icon;
+
+        return (
+          <button
+            key={button.id}
+            onClick={button.onClick}
+            className={`
+              group relative
+              w-12 h-12 rounded-2xl
+              flex items-center justify-center
+              glass-bg backdrop-blur-xl backdrop-saturate-[180%]
+              transition-all duration-300 ease-bounce
+              hover:scale-105 active:scale-95
+              focus:outline-none focus:ring-2 focus:ring-white/20
+              ${button.isActive
+                ? `glass-shadow-active ${button.activeColors}`
+                : 'text-black/70 hover:text-black/90 glass-shadow'
+              }
+            `}
+            title={button.title}
+          >
+            {/* Active state background overlay */}
+            <div className={`
+              absolute inset-0 rounded-2xl
+              bg-gradient-active opacity-0
+              transition-opacity duration-300
+              ${button.isActive ? 'opacity-100' : 'group-hover:opacity-50'}
+            `} />
+
+            {/* Icon */}
+            <Icon
+              size={20}
+              className={`
+                relative z-10 
+                transition-all duration-300 ease-bounce
+                group-hover:scale-110
+                ${button.iconClass}
+              `}
+            />
+
+            {/* Ripple effect on click */}
+            <div className="
+              absolute inset-0 rounded-2xl
+              bg-white/20 opacity-0 scale-0
+              group-active:opacity-100 group-active:scale-100
+              transition-all duration-150
+            " />
+          </button>
+        );
+      })}
     </div>
   );
 };

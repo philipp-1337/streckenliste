@@ -23,11 +23,11 @@ export const theme = {
     keyframes: {
       slideUp: {
         from: {
-          transform: 'translateX(-50%) translateY(100px)',
+          transform: 'translateY(100px)',
           opacity: '0',
         },
         to: {
-          transform: 'translateX(-50%) translateY(0)',
+          transform: 'translateY(0)',
           opacity: '1',
         },
       },
@@ -66,6 +66,16 @@ export const plugins = [
             0 8px 32px rgba(0, 0, 0, 0.1),
             0 2px 8px rgba(0, 0, 0, 0.05),
             inset 0 1px 0 rgba(255, 255, 255, 0.2)
+          `,
+      },
+
+      // Active state shadow mit mehr Glow
+      '.glass-shadow-active': {
+        'box-shadow': `
+            0 12px 40px rgba(0, 0, 0, 0.15),
+            0 4px 12px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 0 20px currentColor
           `,
       },
 

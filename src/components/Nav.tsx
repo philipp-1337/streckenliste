@@ -41,7 +41,7 @@ export const Nav: React.FC<NavProps> = ({ onLogout }) => {
     <nav>
       <div className="
         fixed left-1/2 -translate-x-1/2 bottom-safe-floating
-        w-tab-menu h-16 sm:w-tab-menu-sm sm:h-12
+        w-tab-menu h-16 sm:w-tab-menu-sm
         glass-bg glass-shadow rounded-pill
         backdrop-blur-xl backdrop-saturate-[180%]
         flex justify-around items-center
