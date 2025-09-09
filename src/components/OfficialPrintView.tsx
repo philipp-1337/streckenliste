@@ -1,13 +1,16 @@
 
 import { useNavigate } from 'react-router-dom';
 import type { Eintrag } from '@types';
+import useAuth from '@hooks/useAuth';
 
 interface OfficialPrintViewProps {
   eintraege: Eintrag[];
-  onClose: () => void;
 }
 
-export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
+
+const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
+  const { currentUser } = useAuth();
+  const jagdbezirk = currentUser?.jagdbezirkId ? currentUser.jagdbezirkId : 'Unbekannt';
   const navigate = useNavigate();
   return (
     <>
@@ -40,9 +43,8 @@ export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege 
             {/* Header */}
             <div className="text-center mb-4">
               <h1 className="text-lg font-bold">Anlage zur Streckenliste für das Jagdjahr: 2024/2025</h1>
-              <p className="mt-1">Jagdbezirk: Randau</p>
+              <p className="mt-1">Jagdbezirk: {jagdbezirk}</p>
             </div>
-
             {/* Haupttabelle */}
             <table className="w-full border-collapse border-2 border-black text-xs">
               <thead>
@@ -181,3 +183,5 @@ export const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege 
     </>
   );
 };
+
+export { OfficialPrintView };
