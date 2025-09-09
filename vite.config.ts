@@ -25,7 +25,23 @@ export default defineConfig({
     sourcemap: true, // <--- hinzufügen
     rollupOptions: {
       output: {
-        manualChunks: undefined,
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("sonner")) {
+              return "sonner";
+            }
+            if (id.includes("firebase")) {
+              return "firebase";
+            }
+            if (id.includes("lucide-react")) {
+              return "lucide";
+            }
+            if (id.includes("react")) {
+              return "react";
+            }
+            return "vendor";
+          }
+        },
       },
     },
   },
