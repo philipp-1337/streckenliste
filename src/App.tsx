@@ -38,7 +38,7 @@ const App = () => {
 
   // Toggle function for FilterPanel
   const handleToggleFilterPanel = () => setShowFilterPanel((v) => !v);
-  const handleShowNewEntryForm = () => setShowNewEntryForm(true);
+  // entfernt: handleShowNewEntryForm
   if (userLoading) {
     return (
       <div className="flex items-center justify-center h-screen text-xl">
@@ -153,8 +153,9 @@ const App = () => {
               <>
                 <ActionButtons
                   showFilter={showFilterPanel}
+                  showNewEntryForm={showNewEntryForm}
                   onToggleFilterPanel={handleToggleFilterPanel}
-                  onShowNewEntryForm={handleShowNewEntryForm}
+                  onToggleNewEntryForm={() => setShowNewEntryForm((v) => !v)}
                 />
                 {showFilterPanel && (
                   <FilterPanel filter={filter} onFilterChange={setFilter} />
@@ -192,7 +193,7 @@ const App = () => {
             } />
             <Route path="/legende" element={<FachbegriffeLegende />} />
             <Route path="/print" element={
-              <OfficialPrintView eintraege={filteredEintraege} onClose={() => {}} />
+              <OfficialPrintView eintraege={filteredEintraege} />
             } />
           </Routes>
         </div>
