@@ -21,7 +21,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 const App = () => {  
   const { currentUser, loading: userLoading } = useAuth();
   const [editingEntry, setEditingEntry] = useState<Eintrag | null>(null);
-  const [showFilterPanel, setShowFilterPanel] = useState(true);
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showNewEntryForm, setShowNewEntryForm] = useState(false);
 
   // Hook für Live Daten
