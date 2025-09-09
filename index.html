@@ -1,33 +1,46 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Streckenliste</title>
-    <style>
+
+<head>
+  <meta charset="UTF-8" />
+  <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Streckenliste</title>
+  <style>
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+
+      .print-area,
+      .print-area * {
+        visibility: visible;
+      }
+
+      .print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+
+      @page {
+        margin: 1cm;
+        size: A4 landscape;
+      }
+
       @media print {
-        body * {
-          visibility: hidden;
-        }
-        .print-area, .print-area * {
-          visibility: visible;
-        }
-        .print-area {
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 100%;
-        }
         @page {
-          margin: 1cm;
-          size: A4 landscape;
+          size: landscape;
         }
       }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

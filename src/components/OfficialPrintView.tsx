@@ -104,7 +104,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
                 ))}
 
                 {/* Leere Zeilen für weitere Einträge */}
-                {Array.from({length: Math.max(5, 25 - eintraege.length)}, (_, i) => (
+                {Array.from({length: Math.min(9, eintraege.length)}, (_, i) => (
                   <tr key={`empty-${i}`}>
                     <td className="border border-black p-1 text-center h-6"></td>
                     <td className="border border-black p-1"></td>
