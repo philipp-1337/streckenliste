@@ -72,9 +72,10 @@ export const useFirestore = () => {
 
   const addEintrag = async (eintrag: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>) => {
     const streckenCollectionRef = getStreckenCollectionRef();
-    if (!streckenCollectionRef || !currentUser) {
+    if (!streckenCollectionRef || !currentUser || !currentUser.uid || !currentUser.jagdbezirkId) {
       setError("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
       toast.error("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
+      console.error('[useFirestore] addEintrag failed - missing user data:', { currentUser });
       return;
     }
     if (currentUser.uid === DEMO_UID) {
@@ -93,15 +94,17 @@ export const useFirestore = () => {
     } catch (err) {
       setError("Fehler beim Speichern");
       toast.error("Fehler beim Speichern");
+      console.error('[useFirestore] addEintrag error:', err);
       throw err;
     }
   };
 
   const updateEintrag = async (id: string, eintrag: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>) => {
     const streckenCollectionRef = getStreckenCollectionRef();
-    if (!streckenCollectionRef || !currentUser) {
+    if (!streckenCollectionRef || !currentUser || !currentUser.uid || !currentUser.jagdbezirkId) {
       setError("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
       toast.error("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
+      console.error('[useFirestore] updateEintrag failed - missing user data:', { currentUser });
       return;
     }
     if (currentUser.uid === DEMO_UID) {
@@ -121,15 +124,17 @@ export const useFirestore = () => {
     } catch (err) {
       setError("Fehler beim Aktualisieren");
       toast.error("Fehler beim Aktualisieren");
+      console.error('[useFirestore] updateEintrag error:', err);
       throw err;
     }
   };
 
   const deleteEintrag = async (id: string) => {
     const streckenCollectionRef = getStreckenCollectionRef();
-    if (!streckenCollectionRef || !currentUser) {
+    if (!streckenCollectionRef || !currentUser || !currentUser.uid || !currentUser.jagdbezirkId) {
       setError("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
       toast.error("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
+      console.error('[useFirestore] deleteEintrag failed - missing user data:', { currentUser });
       return;
     }
     if (currentUser.uid === DEMO_UID) {
@@ -144,7 +149,46 @@ export const useFirestore = () => {
     } catch (err) {
       setError("Fehler beim Löschen");
       toast.error("Fehler beim Löschen");
+      console.error('[useFirestore] deleteEintrag error:', err);
       throw err;
+    }
+  };
+
+  const importEintraege = async (eintraege: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>[]) => {
+    const streckenCollectionRef = getStreckenCollectionRef();
+    if (!streckenCollectionRef || !currentUser || !currentUser.uid || !currentUser.jagdbezirkId) {
+      setError("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
+      toast.error("Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.");
+      console.error('[useFirestore] importEintraege failed - missing user data:', { currentUser });
+      throw new Error("Benutzer nicht authentifiziert");
+    }
+    if (currentUser.uid === DEMO_UID) {
+      setError("In der Demo sind Funktionen eingeschränkt.");
+      toast.error("In der Demo sind Funktionen eingeschränkt.");
+      throw new Error("Demo-Modus");
+    }
+    
+    setLoading(true);
+    try {
+      // Importiere alle Einträge sequenziell
+      for (const eintrag of eintraege) {
+        const newEintrag = {
+          ...eintrag,
+          userId: currentUser.uid,
+          jagdbezirkId: currentUser.jagdbezirkId,
+        };
+        await addDoc(streckenCollectionRef, newEintrag);
+      }
+      
+      toast.success(`${eintraege.length} Einträge erfolgreich importiert`);
+      await getEintraege();
+    } catch (err) {
+      setError("Fehler beim Importieren");
+      toast.error("Fehler beim Importieren");
+      console.error('[useFirestore] importEintraege error:', err);
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -155,6 +199,7 @@ export const useFirestore = () => {
     getEintraege,
     addEintrag,
     updateEintrag,
-    deleteEintrag
+    deleteEintrag,
+    importEintraege
   };
 };

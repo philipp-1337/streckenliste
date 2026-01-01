@@ -13,6 +13,7 @@ import { EintragForm } from '@components/EintragForm';
 import { EintragTable } from '@components/EintragTable';
 import { FachbegriffeLegende } from '@components/FachbegriffeLegende';
 import { OfficialPrintView } from '@components/OfficialPrintView';
+import { ImportDialog } from '@components/ImportDialog';
 import useAuth from '@hooks/useAuth';
 import Login from '@auth/Login';
 import { auth } from './firebase';
@@ -24,6 +25,7 @@ const App = () => {
   const [editingEntry, setEditingEntry] = useState<Eintrag | null>(null);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showNewEntryForm, setShowNewEntryForm] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
 
   // Hook für Live Daten
   const firestore = useFirestore();
@@ -127,6 +129,10 @@ const App = () => {
     setShowNewEntryForm(false);
   };
 
+  const handleImport = async (eintraege: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>[]) => {
+    await currentData.importEintraege(eintraege);
+  };
+
 
 
   return (
@@ -152,6 +158,7 @@ const App = () => {
                   showNewEntryForm={showNewEntryForm}
                   onToggleFilterPanel={handleToggleFilterPanel}
                   onToggleNewEntryForm={() => setShowNewEntryForm((v) => !v)}
+                  onToggleImportDialog={() => setShowImportDialog((v) => !v)}
                 />
                 {/* Inline Formular über der Tabelle */}
                 {(showNewEntryForm || editingEntry) && (
@@ -197,6 +204,11 @@ const App = () => {
         </div>
       </div>
       <Nav onLogout={handleLogout} />
+      <ImportDialog
+        isOpen={showImportDialog}
+        onClose={() => setShowImportDialog(false)}
+        onImport={handleImport}
+      />
     </>
   );
 };

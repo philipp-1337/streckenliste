@@ -57,5 +57,6 @@ export interface UserData {
   email: string | null;
   displayName: string | null;
   jagdbezirkId: string;
+  jagdbezirkName: string;
   role: Role;
 }

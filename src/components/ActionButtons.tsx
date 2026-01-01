@@ -1,4 +1,4 @@
-import { Plus, Filter, Printer, FunnelXIcon } from 'lucide-react';
+import { Plus, Filter, Printer, FunnelXIcon, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface ActionButtonsProps {
@@ -6,13 +6,15 @@ interface ActionButtonsProps {
   showNewEntryForm: boolean;
   onToggleFilterPanel?: () => void;
   onToggleNewEntryForm?: () => void;
+  onToggleImportDialog?: () => void;
 }
 
 export const ActionButtons: React.FC<ActionButtonsProps> = ({
   showFilter,
   showNewEntryForm,
   onToggleFilterPanel,
-  onToggleNewEntryForm
+  onToggleNewEntryForm,
+  onToggleImportDialog
 }) => {
   const navigate = useNavigate();
 
@@ -26,6 +28,16 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       activeColors: 'text-red-700 shadow-red-500/20',
       iconClass: showNewEntryForm ? 'rotate-45' : '',
       disabled: false,
+    },
+    {
+      id: 'import',
+      icon: Upload,
+      title: 'CSV importieren',
+      onClick: onToggleImportDialog,
+      isActive: false,
+      activeColors: '',
+      iconClass: '',
+      disabled: showNewEntryForm,
     },
     {
       id: 'filter',
