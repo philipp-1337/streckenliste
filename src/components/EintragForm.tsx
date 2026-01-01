@@ -56,12 +56,16 @@ export const EintragForm: React.FC<EintragFormProps> = ({
     const wildartData = getKategorienFuerWildart(formData.wildart);
     const selectedKategorie = wildartData.find(k => k.kategorie === kategorie);
 
+    // Bei Sonstige: Tier in Bemerkung schreiben
+    const isRaubwild = formData.wildart === 'Sonstige';
+    
     setFormData({
       ...formData,
-      kategorie,
+      kategorie: isRaubwild ? 'Raubwild' : kategorie,
       altersklasse: selectedKategorie?.altersklasse || '',
       geschlecht: selectedKategorie?.geschlecht || '',
-      fachbegriff: selectedKategorie?.fachbegriff || ''
+      fachbegriff: selectedKategorie?.fachbegriff || '',
+      bemerkung: isRaubwild ? kategorie : formData.bemerkung
     });
   };
 
@@ -102,9 +106,11 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Kategorie/Typ *</label>
+            <label className="block text-sm font-medium mb-1">
+              Kategorie/Typ {formData.wildart !== 'Sonstige' && '*'}
+            </label>
             <select
-              required
+              required={formData.wildart !== 'Sonstige'}
               value={formData.kategorie}
               onChange={(e) => handleKategorieChange(e.target.value)}
               disabled={!formData.wildart}
@@ -121,7 +127,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
         </div>
 
         {/* Automatisch ausgefüllte Felder */}
-        {formData.kategorie && (
+        {formData.kategorie && formData.wildart !== 'Sonstige' && (
           <div className="bg-blue-50 p-4 rounded-lg">
             <h4 className="font-semibold mb-2">📋 Automatisch ermittelt:</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">

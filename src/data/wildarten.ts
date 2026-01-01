@@ -36,5 +36,14 @@ export const wildarten: Wildarten = {
     { kategorie: 'Überläuferkeiler ♂', altersklasse: 'AK 1', geschlecht: 'm', fachbegriff: 'Überläuferkeiler ♂' },
     { kategorie: 'Bache ♀', altersklasse: 'AK 2', geschlecht: 'w', fachbegriff: 'Bache ♀' },
     { kategorie: 'Keiler (ab 2 Jahre) ♂', altersklasse: 'AK 2', geschlecht: 'm', fachbegriff: 'Keiler ♂' }
+  ],
+  'Sonstige': [
+    { kategorie: 'Waschbär', altersklasse: '', geschlecht: '', fachbegriff: '' },
+    { kategorie: 'Fuchs', altersklasse: '', geschlecht: '', fachbegriff: '' },
+    { kategorie: 'Dachs', altersklasse: '', geschlecht: '', fachbegriff: '' },
+    { kategorie: 'Nutria', altersklasse: '', geschlecht: '', fachbegriff: '' },
+    { kategorie: 'Marderhund', altersklasse: '', geschlecht: '', fachbegriff: '' },
+    { kategorie: 'Marder', altersklasse: '', geschlecht: '', fachbegriff: '' },
+    { kategorie: 'Sonstige', altersklasse: '', geschlecht: '', fachbegriff: '' }
   ]
 };

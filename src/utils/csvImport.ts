@@ -144,51 +144,32 @@ export const csvRowToEintrag = (row: CSVRow): Omit<Eintrag, 'id' | 'userId' | 'j
   // Wenn kein Schalenwild, prüfe Bemerkung für Raubwild
   if (!wildart && row.Bemerkung) {
     const bemerkung = row.Bemerkung.toLowerCase();
-    if (bemerkung.includes('waschbär')) {
-      return {
-        datum: parseDatum(row.Datum),
-        wildart: 'Waschbär',
-        kategorie: 'Raubwild',
-        altersklasse: '',
-        geschlecht: '',
-        fachbegriff: '',
-        gewicht: '',
-        bemerkung: row.Bemerkung,
-        jaeger: row['Name Jäger'] || '',
-        ort: row.Ort || '',
-        einnahmen: parseEinnahmen(row.Einnahmen),
-        notizen: row.Notizen || '',
-      };
-    } else if (bemerkung.includes('dachs')) {
-      return {
-        datum: parseDatum(row.Datum),
-        wildart: 'Dachs',
-        kategorie: 'Raubwild',
-        altersklasse: '',
-        geschlecht: '',
-        fachbegriff: '',
-        gewicht: '',
-        bemerkung: row.Bemerkung,
-        jaeger: row['Name Jäger'] || '',
-        ort: row.Ort || '',
-        einnahmen: parseEinnahmen(row.Einnahmen),
-        notizen: row.Notizen || '',
-      };
-    } else if (bemerkung.includes('fuchs')) {
-      return {
-        datum: parseDatum(row.Datum),
-        wildart: 'Fuchs',
-        kategorie: 'Raubwild',
-        altersklasse: '',
-        geschlecht: '',
-        fachbegriff: '',
-        gewicht: '',
-        bemerkung: row.Bemerkung,
-        jaeger: row['Name Jäger'] || '',
-        ort: row.Ort || '',
-        einnahmen: parseEinnahmen(row.Einnahmen),
-        notizen: row.Notizen || '',
-      };
+    const raubwildMap: { [key: string]: string } = {
+      'waschbär': 'Waschbär',
+      'dachs': 'Dachs',
+      'fuchs': 'Fuchs',
+      'nutria': 'Nutria',
+      'marderhund': 'Marderhund',
+      'marder': 'Marder'
+    };
+    
+    for (const [keyword, tierName] of Object.entries(raubwildMap)) {
+      if (bemerkung.includes(keyword)) {
+        return {
+          datum: parseDatum(row.Datum),
+          wildart: 'Sonstige',
+          kategorie: 'Raubwild',
+          altersklasse: '',
+          geschlecht: '',
+          fachbegriff: '',
+          gewicht: '',
+          bemerkung: tierName,
+          jaeger: row['Name Jäger'] || '',
+          ort: row.Ort || '',
+          einnahmen: parseEinnahmen(row.Einnahmen),
+          notizen: row.Notizen || '',
+        };
+      }
     }
   }
   

@@ -12,6 +12,12 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
   const { currentUser } = useAuth();
   const jagdbezirk = currentUser?.jagdbezirkId ? currentUser.jagdbezirkId : 'Unbekannt';
   const navigate = useNavigate();
+  
+  // Sortiere Einträge nach Datum aufsteigend (älteste zuerst)
+  const sortedEintraege = [...eintraege].sort((a, b) => 
+    new Date(a.datum).getTime() - new Date(b.datum).getTime()
+  );
+  
   return (
     <>
     <div className="print-area bg-white p-4 overflow-auto">
@@ -69,7 +75,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
               </thead>
               <tbody>
                 {/* Datenzeilen */}
-                {eintraege.map((eintrag, index) => (
+                {sortedEintraege.map((eintrag, index) => (
                   <tr key={eintrag.id}>
                     <td className="border border-black p-1 text-center">{index + 1}</td>
                     <td className="border border-black p-1 text-center">{new Date(eintrag.datum).toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit'})}</td>
@@ -104,7 +110,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
                 ))}
 
                 {/* Leere Zeilen für weitere Einträge */}
-                {Array.from({length: Math.min(9, eintraege.length)}, (_, i) => (
+                {Array.from({length: Math.min(9, sortedEintraege.length)}, (_, i) => (
                   <tr key={`empty-${i}`}>
                     <td className="border border-black p-1 text-center h-6"></td>
                     <td className="border border-black p-1"></td>
