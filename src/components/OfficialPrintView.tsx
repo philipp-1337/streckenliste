@@ -25,7 +25,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
         <div className="text-xs">
             {/* Header */}
             <div className="text-center mb-4">
-              <h1 className="text-lg font-bold">Anlage zur Streckenliste für das Jagdjahr: 2024/2025</h1>
+              <h1 className="text-lg font-bold">Anlage zur Streckenliste für das Jagdjahr: 2025/2026</h1>
               <p className="mt-1">Jagdbezirk: {jagdbezirk}</p>
             </div>
             {/* Haupttabelle */}

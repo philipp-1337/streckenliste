@@ -141,18 +141,25 @@ export const csvRowToEintrag = (row: CSVRow): Omit<Eintrag, 'id' | 'userId' | 'j
     else if (altersklasse === 'AK 4' && geschlecht === 'm') fachbegriff = 'alte Hirsche (ab 8 Jahre)';
   }
   
-  // Wenn kein Schalenwild, prüfe Bemerkung für Raubwild
+  // Wenn kein Schalenwild, prüfe Bemerkung für Raubwild oder Invasive Arten
   if (!wildart && row.Bemerkung) {
     const bemerkung = row.Bemerkung.toLowerCase();
+    
+    // Raubwild (heimisch)
     const raubwildMap: { [key: string]: string } = {
-      'waschbär': 'Waschbär',
-      'dachs': 'Dachs',
       'fuchs': 'Fuchs',
-      'nutria': 'Nutria',
-      'marderhund': 'Marderhund',
+      'dachs': 'Dachs',
       'marder': 'Marder'
     };
     
+    // Invasive Arten
+    const invasivMap: { [key: string]: string } = {
+      'waschbär': 'Waschbär',
+      'nutria': 'Nutria',
+      'marderhund': 'Marderhund'
+    };
+    
+    // Prüfe Raubwild
     for (const [keyword, tierName] of Object.entries(raubwildMap)) {
       if (bemerkung.includes(keyword)) {
         return {
@@ -161,7 +168,27 @@ export const csvRowToEintrag = (row: CSVRow): Omit<Eintrag, 'id' | 'userId' | 'j
           kategorie: 'Raubwild',
           altersklasse: '',
           geschlecht: '',
-          fachbegriff: '',
+          fachbegriff: tierName,
+          gewicht: '',
+          bemerkung: tierName,
+          jaeger: row['Name Jäger'] || '',
+          ort: row.Ort || '',
+          einnahmen: parseEinnahmen(row.Einnahmen),
+          notizen: row.Notizen || '',
+        };
+      }
+    }
+    
+    // Prüfe Invasive Arten
+    for (const [keyword, tierName] of Object.entries(invasivMap)) {
+      if (bemerkung.includes(keyword)) {
+        return {
+          datum: parseDatum(row.Datum),
+          wildart: 'Sonstige',
+          kategorie: 'Invasive Arten',
+          altersklasse: '',
+          geschlecht: '',
+          fachbegriff: tierName,
           gewicht: '',
           bemerkung: tierName,
           jaeger: row['Name Jäger'] || '',

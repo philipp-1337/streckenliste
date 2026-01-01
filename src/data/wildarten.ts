@@ -38,12 +38,11 @@ export const wildarten: Wildarten = {
     { kategorie: 'Keiler (ab 2 Jahre) ♂', altersklasse: 'AK 2', geschlecht: 'm', fachbegriff: 'Keiler ♂' }
   ],
   'Sonstige': [
-    { kategorie: 'Waschbär', altersklasse: '', geschlecht: '', fachbegriff: '' },
-    { kategorie: 'Fuchs', altersklasse: '', geschlecht: '', fachbegriff: '' },
-    { kategorie: 'Dachs', altersklasse: '', geschlecht: '', fachbegriff: '' },
-    { kategorie: 'Nutria', altersklasse: '', geschlecht: '', fachbegriff: '' },
-    { kategorie: 'Marderhund', altersklasse: '', geschlecht: '', fachbegriff: '' },
-    { kategorie: 'Marder', altersklasse: '', geschlecht: '', fachbegriff: '' },
-    { kategorie: 'Sonstige', altersklasse: '', geschlecht: '', fachbegriff: '' }
+    { kategorie: 'Raubwild', altersklasse: '', geschlecht: '', fachbegriff: 'Fuchs' },
+    { kategorie: 'Raubwild', altersklasse: '', geschlecht: '', fachbegriff: 'Dachs' },
+    { kategorie: 'Raubwild', altersklasse: '', geschlecht: '', fachbegriff: 'Marder' },
+    { kategorie: 'Invasive Arten', altersklasse: '', geschlecht: '', fachbegriff: 'Waschbär' },
+    { kategorie: 'Invasive Arten', altersklasse: '', geschlecht: '', fachbegriff: 'Nutria' },
+    { kategorie: 'Invasive Arten', altersklasse: '', geschlecht: '', fachbegriff: 'Marderhund' }
   ]
 };

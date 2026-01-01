@@ -56,17 +56,30 @@ export const EintragForm: React.FC<EintragFormProps> = ({
     const wildartData = getKategorienFuerWildart(formData.wildart);
     const selectedKategorie = wildartData.find(k => k.kategorie === kategorie);
 
-    // Bei Sonstige: Tier in Bemerkung schreiben
-    const isRaubwild = formData.wildart === 'Sonstige';
+    // Bei "Sonstige": Kategorie bleibt (Raubwild/Invasive Arten), Tier kommt in Bemerkung
+    const isSonstige = formData.wildart === 'Sonstige';
     
-    setFormData({
-      ...formData,
-      kategorie: isRaubwild ? 'Raubwild' : kategorie,
-      altersklasse: selectedKategorie?.altersklasse || '',
-      geschlecht: selectedKategorie?.geschlecht || '',
-      fachbegriff: selectedKategorie?.fachbegriff || '',
-      bemerkung: isRaubwild ? kategorie : formData.bemerkung
-    });
+    if (isSonstige) {
+      // Bei Sonstige: kategorie ist bereits richtig (Raubwild/Invasive Arten)
+      // fachbegriff enthält das Tier, das in die Bemerkung kommt
+      setFormData({
+        ...formData,
+        kategorie,
+        altersklasse: '',
+        geschlecht: '',
+        fachbegriff: selectedKategorie?.fachbegriff || '',
+        bemerkung: selectedKategorie?.fachbegriff || ''
+      });
+    } else {
+      // Normales Schalenwild
+      setFormData({
+        ...formData,
+        kategorie,
+        altersklasse: selectedKategorie?.altersklasse || '',
+        geschlecht: selectedKategorie?.geschlecht || '',
+        fachbegriff: selectedKategorie?.fachbegriff || ''
+      });
+    }
   };
 
   const handleSubmit = (e: FormEvent) => {
@@ -117,11 +130,34 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               className="w-full border rounded-lg px-3 py-2 disabled:bg-gray-100"
             >
               <option value="">Bitte wählen...</option>
-              {getKategorienFuerWildart(formData.wildart).map(kategorie => (
-                <option key={kategorie.kategorie} value={kategorie.kategorie}>
-                  {kategorie.kategorie}
-                </option>
-              ))}
+              {formData.wildart === 'Sonstige' ? (
+                <>
+                  <optgroup label="Raubwild">
+                    {getKategorienFuerWildart('Sonstige')
+                      .filter(k => k.kategorie === 'Raubwild')
+                      .map((kategorie, idx) => (
+                        <option key={`raubwild-${idx}`} value={kategorie.kategorie}>
+                          {kategorie.fachbegriff}
+                        </option>
+                      ))}
+                  </optgroup>
+                  <optgroup label="Invasive Arten">
+                    {getKategorienFuerWildart('Sonstige')
+                      .filter(k => k.kategorie === 'Invasive Arten')
+                      .map((kategorie, idx) => (
+                        <option key={`invasiv-${idx}`} value={kategorie.kategorie}>
+                          {kategorie.fachbegriff}
+                        </option>
+                      ))}
+                  </optgroup>
+                </>
+              ) : (
+                getKategorienFuerWildart(formData.wildart).map(kategorie => (
+                  <option key={kategorie.kategorie} value={kategorie.kategorie}>
+                    {kategorie.kategorie}
+                  </option>
+                ))
+              )}
             </select>
           </div>
         </div>
