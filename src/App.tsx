@@ -159,6 +159,7 @@ const App = () => {
                   onToggleFilterPanel={handleToggleFilterPanel}
                   onToggleNewEntryForm={() => setShowNewEntryForm((v) => !v)}
                   onToggleImportDialog={() => setShowImportDialog((v) => !v)}
+                  currentUser={currentUser}
                 />
                 {/* Inline Formular über der Tabelle */}
                 {(showNewEntryForm || editingEntry) && (

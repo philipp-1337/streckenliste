@@ -7,6 +7,7 @@ interface ActionButtonsProps {
   onToggleFilterPanel?: () => void;
   onToggleNewEntryForm?: () => void;
   onToggleImportDialog?: () => void;
+  currentUser: any;
 }
 
 export const ActionButtons: React.FC<ActionButtonsProps> = ({
@@ -14,9 +15,12 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
   showNewEntryForm,
   onToggleFilterPanel,
   onToggleNewEntryForm,
-  onToggleImportDialog
+  onToggleImportDialog,
+  currentUser
 }) => {
   const navigate = useNavigate();
+
+  const isAdmin = currentUser?.role === 'admin';
 
   const buttons = [
     {
@@ -28,6 +32,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       activeColors: 'text-red-700 shadow-red-500/20',
       iconClass: showNewEntryForm ? 'rotate-45' : '',
       disabled: false,
+      show: true,
     },
     {
       id: 'import',
@@ -38,6 +43,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       activeColors: '',
       iconClass: '',
       disabled: showNewEntryForm,
+      show: isAdmin,
     },
     {
       id: 'filter',
@@ -48,6 +54,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       activeColors: 'text-green-700 shadow-green-500/20',
       iconClass: '',
       disabled: showNewEntryForm,
+      show: true,
     },
     {
       id: 'print',
@@ -58,12 +65,13 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       activeColors: '',
       iconClass: '',
       disabled: false,
+      show: true,
     },
   ];
 
   return (
     <div className="flex gap-3 mb-6 print:hidden">
-      {buttons.map((button) => {
+      {buttons.filter(button => button.show).map((button) => {
         const Icon = button.icon;
 
         return (

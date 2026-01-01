@@ -167,6 +167,11 @@ export const useFirestore = () => {
       toast.error("In der Demo sind Funktionen eingeschränkt.");
       throw new Error("Demo-Modus");
     }
+    if (currentUser.role !== 'admin') {
+      setError("Nur Administratoren können Daten importieren.");
+      toast.error("Nur Administratoren können Daten importieren.");
+      throw new Error("Keine Admin-Berechtigung");
+    }
     
     setLoading(true);
     try {
