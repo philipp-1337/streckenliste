@@ -10,7 +10,7 @@ interface HeaderProps {
   export const Header: React.FC<HeaderProps> = ({ onLogout }) => {
     const { currentUser } = useAuth();
     // Jagdbezirk und Name auslesen
-    const jagdbezirk = currentUser?.jagdbezirkName || currentUser?.jagdbezirkId || 'Unbekannt';
+    const jagdbezirk = currentUser?.jagdbezirk?.name || currentUser?.jagdbezirkId || 'Unbekannt';
     const userName = currentUser?.displayName || currentUser?.email || 'Unbekannt';
 
     return (

@@ -52,11 +52,16 @@ export interface SortConfig {
 
 export type Role = 'admin' | 'user';
 
+export interface Jagdbezirk {
+  id: string;
+  name: string;
+}
+
 export interface UserData {
   uid: string;
   email: string | null;
   displayName: string | null;
   jagdbezirkId: string;
-  jagdbezirkName: string;
+  jagdbezirk?: Jagdbezirk;
   role: Role;
 }

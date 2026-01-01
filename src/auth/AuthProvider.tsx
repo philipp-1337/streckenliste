@@ -17,7 +17,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const userDocRef = doc(db, 'users', user.uid);
         const userDocSnap = await getDoc(userDocRef);
         if (userDocSnap.exists()) {
-          setCurrentUser(userDocSnap.data() as UserData);
+          const userData = userDocSnap.data() as UserData;
+          
+          // Lade Jagdbezirk-Daten
+          if (userData.jagdbezirkId) {
+            const jagdbezirkDocRef = doc(db, 'jagdbezirke', userData.jagdbezirkId);
+            const jagdbezirkDocSnap = await getDoc(jagdbezirkDocRef);
+            if (jagdbezirkDocSnap.exists()) {
+              userData.jagdbezirk = {
+                id: jagdbezirkDocSnap.id,
+                name: jagdbezirkDocSnap.data().name || jagdbezirkDocSnap.id,
+              };
+            }
+          }
+          
+          setCurrentUser(userData);
         } else {
           console.error("No user profile found in Firestore for UID:", user.uid);
           setCurrentUser(null);
