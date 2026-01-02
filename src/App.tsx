@@ -4,6 +4,8 @@ import type { Eintrag } from '@types';
 import { useFirestore } from '@hooks/useFirestore';
 import { useStatistiken } from '@hooks/useStatistiken';
 import { useFilter } from '@hooks/useFilter';
+import { usePwaPrompt } from '@hooks/usePwaPrompt';
+import { usePwaUpdate } from '@hooks/usePwaUpdate';
 import { Header } from '@components/Header';
 import { ActionButtons } from '@components/ActionButtons';
 import { FilterPanel } from '@components/FilterPanel';
@@ -26,6 +28,10 @@ const App = () => {
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showNewEntryForm, setShowNewEntryForm] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
+
+  // PWA Hooks - sie zeigen die Toasts selbst an
+  usePwaPrompt();
+  usePwaUpdate();
 
   // Hook für Live Daten
   const firestore = useFirestore();

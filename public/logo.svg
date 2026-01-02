@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><style>
+    #light-icon {
+      display: inline;
+    }
+    #dark-icon {
+      display: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      #light-icon {
+        display: none;
+      }
+      #dark-icon {
+        display: inline;
+      }
+    }
+  </style><g id="light-icon"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><g clip-path="url(#SvgjsClipPath1185)"><rect width="1000" height="1000" fill="#f0fdf4"></rect><g transform="matrix(33.333333333333336,0,0,33.333333333333336,100,100)"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="url(#bowarrowGradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bow-arrow" aria-hidden="true">
+  <defs>
+    <linearGradient gradientUnits="userSpaceOnUse" x1="15.353" y1="3" x2="15.353" y2="14.293" id="gradient-0">
+      <stop offset="0" style="stop-color: rgb(0.78431% 39.216% 18.824%)"></stop>
+      <stop offset="1" style="stop-color: rgb(0% 25.204% 6.2042%)"></stop>
+    </linearGradient>
+  <clipPath id="SvgjsClipPath1185"><rect width="1000" height="1000" x="0" y="0" rx="350" ry="350"></rect></clipPath></defs>
+  <path d="M17 3h4v4" style="stroke: rgb(2, 100, 48);"></path>
+  <path d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17" style="stroke: rgb(66, 32, 6);"></path>
+  <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05" style="stroke: rgb(66, 32, 6);"></path>
+  <path d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z" style="stroke: rgb(0% 25.204% 6.2042%);"></path>
+  <path d="M9.707 14.293 21 3" style="stroke: url(&quot;#gradient-0&quot;);"></path>
+</svg></svg></g></g></svg></g><g id="dark-icon"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><g clip-path="url(#SvgjsClipPath1186)"><rect width="1000" height="1000" fill="#f0fdf4"></rect><g transform="matrix(33.333333333333336,0,0,33.333333333333336,100,100)"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="url(#bowarrowGradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bow-arrow" aria-hidden="true">
+  <defs>
+    <linearGradient gradientUnits="userSpaceOnUse" x1="15.353" y1="3" x2="15.353" y2="14.293" id="gradient-0">
+      <stop offset="0" style="stop-color: rgb(0.78431% 39.216% 18.824%)"></stop>
+      <stop offset="1" style="stop-color: rgb(0% 25.204% 6.2042%)"></stop>
+    </linearGradient>
+  <clipPath id="SvgjsClipPath1186"><rect width="1000" height="1000" x="0" y="0" rx="350" ry="350"></rect></clipPath></defs>
+  <path d="M17 3h4v4" style="stroke: rgb(2, 100, 48);"></path>
+  <path d="M18.575 11.082a13 13 0 0 1 1.048 9.027 1.17 1.17 0 0 1-1.914.597L14 17" style="stroke: rgb(66, 32, 6);"></path>
+  <path d="M7 10 3.29 6.29a1.17 1.17 0 0 1 .6-1.91 13 13 0 0 1 9.03 1.05" style="stroke: rgb(66, 32, 6);"></path>
+  <path d="M7 14a1.7 1.7 0 0 0-1.207.5l-2.646 2.646A.5.5 0 0 0 3.5 18H5a1 1 0 0 1 1 1v1.5a.5.5 0 0 0 .854.354L9.5 18.207A1.7 1.7 0 0 0 10 17v-2a1 1 0 0 0-1-1z" style="stroke: rgb(0% 25.204% 6.2042%);"></path>
+  <path d="M9.707 14.293 21 3" style="stroke: url(&quot;#gradient-0&quot;);"></path>
+</svg></svg></g></g></svg></g></svg>
