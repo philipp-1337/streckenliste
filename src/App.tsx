@@ -50,13 +50,24 @@ const App = () => {
   // entfernt: handleShowNewEntryForm
   if (userLoading) {
     return (
-      <div className="flex items-center justify-center h-screen text-xl">
-        Benutzerdaten werden geladen...
+      <div className="flex flex-col items-center justify-center h-screen bg-green-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-600 mb-4"></div>
+        <p className="text-xl text-gray-700">Benutzerdaten werden geladen...</p>
       </div>
     );
   }
   if (!currentUser) {
     return <Login />;
+  }
+
+  // Loading screen für Firestore-Daten nach dem Login
+  if (currentData.loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-green-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-600 mb-4"></div>
+        <p className="text-xl text-gray-700">Daten werden geladen...</p>
+      </div>
+    );
   }
 
   const handleLogout = async () => {
