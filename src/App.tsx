@@ -93,14 +93,14 @@ const App = () => {
   const handleDelete = async (id: string) => {
     toast.custom(
       (t: string | number) => (
-        <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-lg p-4 dark:bg-neutral-900 dark:border-neutral-700">
-          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+        <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-lg p-4">
+          <div className="text-sm font-medium text-gray-900">
             Eintrag wirklich löschen?
           </div>
           <div className="mt-3 flex justify-end gap-2">
             <button
               onClick={() => toast.dismiss(t)}
-              className="rounded-xl px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-neutral-800 transition"
+              className="rounded-xl px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 transition"
             >
               Abbrechen
             </button>
@@ -145,7 +145,7 @@ const App = () => {
     <>
       <Toaster
         richColors={true}
-        position="bottom-right"
+        position="top-right"
         mobileOffset={32}
         offset={32}
         closeButton={false}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Toaster, toast } from 'sonner';
+import { toast } from 'sonner';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { FirebaseError } from 'firebase/app';
@@ -29,11 +29,9 @@ const Login = () => {
   };
 
   return (
-    <>
-      <Toaster richColors={true} position="bottom-right" mobileOffset={32} offset={32} closeButton={false} expand={true} invert={false} gap={16} />
-      <div className="min-h-screen flex items-center justify-center bg-green-50 p-4">
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-          <h2 className="text-3xl font-bold text-center text-green-800 mb-6">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-green-50 p-4">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <h2 className="text-3xl font-bold text-center text-green-800 mb-6">Login</h2>
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
@@ -70,7 +68,6 @@ const Login = () => {
           </form>
         </div>
       </div>
-    </>
   );
 };
 

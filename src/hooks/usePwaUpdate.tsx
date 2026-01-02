@@ -25,16 +25,31 @@ export const usePwaUpdate = () => {
     if (needRefresh && !updateToastShown.current) {
       updateToastShown.current = true;
       toast(
-        <span style={{ display: 'block' }}>
-          <span style={{ display: 'block', marginBottom: 8 }}>Eine neue Version der App ist verfügbar!</span>
+        <div style={{ display: 'block' }}>
+          <div style={{ display: 'block', marginBottom: 8 }}>Eine neue Version der App ist verfügbar!</div>
           <button
-            style={{ marginLeft: 12 }}
-            onClick={() => updateServiceWorker(true)}
-            className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+            type="button"
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              updateServiceWorker(true);
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              updateServiceWorker(true);
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition active:bg-green-800"
+            style={{ 
+              marginLeft: 12,
+              WebkitTapHighlightColor: 'transparent',
+              cursor: 'pointer',
+              touchAction: 'manipulation',
+              minHeight: '44px',
+              minWidth: '44px'
+            }}
           >
             <RefreshCwIcon size={16} /> Aktualisieren
           </button>
-        </span>,
+        </div>,
         {
           duration: Infinity,
           className: 'update-toast',

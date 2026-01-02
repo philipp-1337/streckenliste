@@ -1,2 +1,7 @@
 @config "../tailwind.config.js";
 @import "tailwindcss";
+
+/* Hintergrundfarbe für iOS Overscroll (Bounce-Effekt) */
+html, body {
+  background-color: rgb(229 231 235); /* gray-200 */
+}
