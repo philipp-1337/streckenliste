@@ -31,10 +31,12 @@ export const usePwaUpdate = () => {
             type="button"
             onTouchEnd={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               updateServiceWorker(true);
             }}
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               updateServiceWorker(true);
             }}
             className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition active:bg-green-800"
@@ -44,7 +46,10 @@ export const usePwaUpdate = () => {
               cursor: 'pointer',
               touchAction: 'manipulation',
               minHeight: '44px',
-              minWidth: '44px'
+              minWidth: '44px',
+              pointerEvents: 'auto',
+              position: 'relative',
+              zIndex: 9999,
             }}
           >
             <RefreshCwIcon size={16} /> Aktualisieren

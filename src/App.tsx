@@ -163,6 +163,11 @@ const App = () => {
         expand={true}
         invert={false}
         gap={16}
+        toastOptions={{
+          style: {
+            pointerEvents: 'auto',
+          },
+        }}
       />
       <div className="min-h-screen bg-green-50 p-4">
         <div className="max-w-7xl mx-auto pb-16">
