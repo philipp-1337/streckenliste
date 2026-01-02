@@ -3,5 +3,5 @@
 
 /* Hintergrundfarbe für iOS Overscroll (Bounce-Effekt) */
 html, body {
-  background-color: rgb(229 231 235); /* gray-200 */
+  background-color: oklch(0.982 0.018 155.826004); /* green-50 */
 }
