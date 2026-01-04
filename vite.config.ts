@@ -68,6 +68,7 @@ export default defineConfig({
       "@data": path.resolve(__dirname, "src/data"),
       "@types": path.resolve(__dirname, "src/types"),
       "@auth": path.resolve(__dirname, "src/auth"),
+      "@constants": path.resolve(__dirname, "src/constants"),
     },
   },
   build: {

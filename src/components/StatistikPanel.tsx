@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { AllStats } from '@types';
 import { BarChart2Icon } from 'lucide-react';
 
@@ -5,7 +6,7 @@ interface StatistikPanelProps {
   stats: AllStats;
 }
 
-export const StatistikPanel: React.FC<StatistikPanelProps> = ({ stats }) => {
+export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ stats }) => {
   return (
     <div className="bg-white p-6 rounded-lg mb-6 shadow">
     <h3 className="font-semibold mb-3 flex items-center gap-2"><BarChart2Icon className="inline-block align-middle" size={20} /> <span className="align-middle">Statistiken</span></h3>
@@ -28,4 +29,4 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = ({ stats }) => {
       </div>
     </div>
   );
-};
+});

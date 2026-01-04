@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Filter } from 'lucide-react';
 import type { FilterState } from '@types';
 import { wildarten } from '@data/wildarten';
@@ -7,7 +8,7 @@ interface FilterPanelProps {
   onFilterChange: (filter: FilterState) => void;
 }
 
-export const FilterPanel: React.FC<FilterPanelProps> = ({ filter, onFilterChange }) => {
+export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterChange }) => {
   return (
     <div className="bg-white p-4 rounded-lg mb-6 shadow">
       <div className="flex items-center gap-2 mb-3">
@@ -51,4 +52,4 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filter, onFilterChange
       </div>
     </div>
   );
-};
+});

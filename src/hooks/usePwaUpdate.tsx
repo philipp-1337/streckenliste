@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { toast } from 'sonner';
 import { RefreshCwIcon } from 'lucide-react';
+import { SW_UPDATE_CHECK_INTERVAL } from '@constants';
 
 export const usePwaUpdate = () => {
   const updateToastShown = useRef(false);
@@ -12,9 +13,11 @@ export const usePwaUpdate = () => {
   } = useRegisterSW({
     onRegistered(r: ServiceWorkerRegistration | undefined) {
       // Prüfe alle 60 Sekunden auf Updates
-      r && setInterval(() => {
-        r.update();
-      }, 60000);
+      if (r) {
+        setInterval(() => {
+          r.update();
+        }, SW_UPDATE_CHECK_INTERVAL);
+      }
     },
     onRegisterError(error: Error) {
       console.log('SW registration error', error);

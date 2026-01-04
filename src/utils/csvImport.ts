@@ -18,6 +18,7 @@ interface CSVRow {
   Ort: string;
   Einnahmen: string;
   Notizen: string;
+  [key: string]: string;
 }
 
 /**
@@ -48,12 +49,12 @@ export const parseCSV = (csvText: string): CSVRow[] => {
       continue;
     }
     
-    const row: any = {};
+    const row: CSVRow = {} as CSVRow;
     headers.forEach((header, index) => {
       row[header.trim()] = values[index] ? values[index].trim() : '';
     });
     
-    result.push(row as CSVRow);
+    result.push(row);
   }
   
   return result;
