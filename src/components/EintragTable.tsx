@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Edit, Trash2 } from 'lucide-react';
 import type { Eintrag, UserData } from '@types';
 
@@ -8,7 +9,7 @@ interface EintragTableProps {
   currentUser: UserData | null;
 }
 
-export const EintragTable: React.FC<EintragTableProps> = ({
+export const EintragTable: React.FC<EintragTableProps> = memo(({
   eintraege,
   onEdit,
   onDelete,
@@ -79,4 +80,4 @@ export const EintragTable: React.FC<EintragTableProps> = ({
       )}
     </div>
   );
-};
+});

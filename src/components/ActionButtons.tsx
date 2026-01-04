@@ -1,5 +1,8 @@
+import { memo } from 'react';
 import { Plus, Filter, Printer, FunnelXIcon, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
+import type { UserData } from '@types';
 
 interface ActionButtonsProps {
   showFilter: boolean;
@@ -7,10 +10,10 @@ interface ActionButtonsProps {
   onToggleFilterPanel?: () => void;
   onToggleNewEntryForm?: () => void;
   onToggleImportDialog?: () => void;
-  currentUser: any;
+  currentUser: UserData | null;
 }
 
-export const ActionButtons: React.FC<ActionButtonsProps> = ({
+export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
   showFilter,
   showNewEntryForm,
   onToggleFilterPanel,
@@ -126,4 +129,4 @@ export const ActionButtons: React.FC<ActionButtonsProps> = ({
       })}
     </div>
   );
-};
+});

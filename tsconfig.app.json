@@ -33,7 +33,9 @@
       "@data/*": ["data/*"],
       "@types": ["types/index.ts"],
       "@types/*": ["types/*"],
-      "@auth/*": ["auth/*"]
+      "@auth/*": ["auth/*"],
+      "@constants": ["constants/index.ts"],
+      "@constants/*": ["constants/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "src/types/index.ts"]
