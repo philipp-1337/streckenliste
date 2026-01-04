@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import { db } from '../firebase';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where, CollectionReference } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
 import type { Eintrag } from '@types'; 
 import useAuth from '@hooks/useAuth';
 import { isUserAuthenticated, canPerformWriteOperation, isAdmin, getAuthErrorMessage } from '@utils/validation';
@@ -17,7 +17,7 @@ export const useFirestore = () => {
     if (!currentUser?.jagdbezirkId) {
       return null;
     }
-    return collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/eintraege`) as CollectionReference;
+    return collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/eintraege`);
   }, [currentUser?.jagdbezirkId]);
 
   const getEintraege = useCallback(async () => {
