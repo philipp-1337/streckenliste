@@ -4,7 +4,7 @@ import { db } from '../firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where, CollectionReference } from 'firebase/firestore';
 import type { Eintrag } from '@types'; 
 import useAuth from '@hooks/useAuth';
-import { DEMO_USER_UID } from '@constants';
+import { isUserAuthenticated, canPerformWriteOperation, isAdmin, getAuthErrorMessage } from '@utils/validation';
 
 export const useFirestore = () => {
   const { currentUser } = useAuth(); // Get current user
@@ -21,7 +21,7 @@ export const useFirestore = () => {
   }, [currentUser?.jagdbezirkId]);
 
   const getEintraege = useCallback(async () => {
-    if (!streckenCollectionRef || !currentUser?.uid || !currentUser?.jagdbezirkId) {
+    if (!streckenCollectionRef || !isUserAuthenticated(currentUser)) {
       return; // Not ready to fetch
     }
 
@@ -30,7 +30,7 @@ export const useFirestore = () => {
     try {
       let q;
       // If user is not an admin, only fetch their own entries
-      if (currentUser.role !== 'admin') {
+      if (!isAdmin(currentUser)) {
         q = query(streckenCollectionRef, where("userId", "==", currentUser.uid), orderBy("datum", "desc"));
       } else {
         // Admin gets all entries
@@ -48,7 +48,7 @@ export const useFirestore = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser?.uid, currentUser?.jagdbezirkId, currentUser?.role, streckenCollectionRef]);
+  }, [currentUser, streckenCollectionRef]);
 
   useEffect(() => {
     if (!currentUser?.jagdbezirkId) {
@@ -59,18 +59,13 @@ export const useFirestore = () => {
 
 
   const addEintrag = useCallback(async (eintrag: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>) => {
-    if (!streckenCollectionRef || !currentUser?.uid || !currentUser?.jagdbezirkId) {
-      const errorMessage = "Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.";
-      setError(errorMessage);
-      toast.error(errorMessage);
+    const errorMessage = getAuthErrorMessage(currentUser);
+    if (errorMessage || !streckenCollectionRef || !canPerformWriteOperation(currentUser) || !currentUser) {
+      setError(errorMessage || "Keine Berechtigung");
+      toast.error(errorMessage || "Keine Berechtigung");
       return;
     }
-    if (currentUser.uid === DEMO_USER_UID) {
-      const errorMessage = "In der Demo sind Funktionen eingeschränkt.";
-      setError(errorMessage);
-      toast.error(errorMessage);
-      return;
-    }
+    
     try {
       const newEintrag = {
         ...eintrag,
@@ -80,27 +75,22 @@ export const useFirestore = () => {
       await addDoc(streckenCollectionRef, newEintrag);
       await getEintraege();
     } catch (err) {
-      const errorMessage = "Fehler beim Speichern";
-      setError(errorMessage);
-      toast.error(errorMessage);
+      const errorMsg = "Fehler beim Speichern";
+      setError(errorMsg);
+      toast.error(errorMsg);
       console.error('Error adding entry:', err);
       throw err;
     }
-  }, [streckenCollectionRef, currentUser?.uid, currentUser?.jagdbezirkId, getEintraege]);
+  }, [streckenCollectionRef, currentUser, getEintraege]);
 
   const updateEintrag = useCallback(async (id: string, eintrag: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>) => {
-    if (!streckenCollectionRef || !currentUser?.uid || !currentUser?.jagdbezirkId) {
-      const errorMessage = "Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.";
-      setError(errorMessage);
-      toast.error(errorMessage);
+    const errorMessage = getAuthErrorMessage(currentUser);
+    if (errorMessage || !streckenCollectionRef || !canPerformWriteOperation(currentUser) || !currentUser) {
+      setError(errorMessage || "Keine Berechtigung");
+      toast.error(errorMessage || "Keine Berechtigung");
       return;
     }
-    if (currentUser.uid === DEMO_USER_UID) {
-      const errorMessage = "In der Demo sind Funktionen eingeschränkt.";
-      setError(errorMessage);
-      toast.error(errorMessage);
-      return;
-    }
+    
     try {
       const eintragDoc = doc(streckenCollectionRef, id);
       const updatedEintrag = {
@@ -111,57 +101,47 @@ export const useFirestore = () => {
       await updateDoc(eintragDoc, updatedEintrag);
       await getEintraege();
     } catch (err) {
-      const errorMessage = "Fehler beim Aktualisieren";
-      setError(errorMessage);
-      toast.error(errorMessage);
+      const errorMsg = "Fehler beim Aktualisieren";
+      setError(errorMsg);
+      toast.error(errorMsg);
       console.error('Error updating entry:', err);
       throw err;
     }
-  }, [streckenCollectionRef, currentUser?.uid, currentUser?.jagdbezirkId, getEintraege]);
+  }, [streckenCollectionRef, currentUser, getEintraege]);
 
   const deleteEintrag = useCallback(async (id: string) => {
-    if (!streckenCollectionRef || !currentUser?.uid || !currentUser?.jagdbezirkId) {
-      const errorMessage = "Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.";
-      setError(errorMessage);
-      toast.error(errorMessage);
+    const errorMessage = getAuthErrorMessage(currentUser);
+    if (errorMessage || !streckenCollectionRef || !canPerformWriteOperation(currentUser) || !currentUser) {
+      setError(errorMessage || "Keine Berechtigung");
+      toast.error(errorMessage || "Keine Berechtigung");
       return;
     }
-    if (currentUser.uid === DEMO_USER_UID) {
-      const errorMessage = "In der Demo sind Funktionen eingeschränkt.";
-      setError(errorMessage);
-      toast.error(errorMessage);
-      return;
-    }
+    
     try {
       const eintragDoc = doc(streckenCollectionRef, id);
       await deleteDoc(eintragDoc);
       await getEintraege();
     } catch (err) {
-      const errorMessage = "Fehler beim Löschen";
-      setError(errorMessage);
-      toast.error(errorMessage);
+      const errorMsg = "Fehler beim Löschen";
+      setError(errorMsg);
+      toast.error(errorMsg);
       console.error('Error deleting entry:', err);
       throw err;
     }
-  }, [streckenCollectionRef, currentUser?.uid, currentUser?.jagdbezirkId, getEintraege]);
+  }, [streckenCollectionRef, currentUser, getEintraege]);
 
   const importEintraege = useCallback(async (eintraege: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>[]) => {
-    if (!streckenCollectionRef || !currentUser?.uid || !currentUser?.jagdbezirkId) {
-      const errorMessage = "Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.";
-      setError(errorMessage);
-      toast.error(errorMessage);
-      throw new Error("Benutzer nicht authentifiziert");
+    const errorMessage = getAuthErrorMessage(currentUser);
+    if (errorMessage || !streckenCollectionRef || !canPerformWriteOperation(currentUser) || !currentUser) {
+      setError(errorMessage || "Keine Berechtigung");
+      toast.error(errorMessage || "Keine Berechtigung");
+      throw new Error(errorMessage || "Keine Berechtigung");
     }
-    if (currentUser.uid === DEMO_USER_UID) {
-      const errorMessage = "In der Demo sind Funktionen eingeschränkt.";
-      setError(errorMessage);
-      toast.error(errorMessage);
-      throw new Error("Demo-Modus");
-    }
-    if (currentUser.role !== 'admin') {
-      const errorMessage = "Nur Administratoren können Daten importieren.";
-      setError(errorMessage);
-      toast.error(errorMessage);
+    
+    if (!isAdmin(currentUser)) {
+      const errorMsg = "Nur Administratoren können Daten importieren.";
+      setError(errorMsg);
+      toast.error(errorMsg);
       throw new Error("Keine Admin-Berechtigung");
     }
     
@@ -180,15 +160,15 @@ export const useFirestore = () => {
       toast.success(`${eintraege.length} Einträge erfolgreich importiert`);
       await getEintraege();
     } catch (err) {
-      const errorMessage = "Fehler beim Importieren";
-      setError(errorMessage);
-      toast.error(errorMessage);
+      const errorMsg = "Fehler beim Importieren";
+      setError(errorMsg);
+      toast.error(errorMsg);
       console.error('Error importing entries:', err);
       throw err;
     } finally {
       setLoading(false);
     }
-  }, [streckenCollectionRef, currentUser?.uid, currentUser?.jagdbezirkId, currentUser?.role, getEintraege]);
+  }, [streckenCollectionRef, currentUser, getEintraege]);
 
   return {
     eintraege,

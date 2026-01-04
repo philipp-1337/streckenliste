@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Toaster, toast } from 'sonner';
 import type { Eintrag } from '@types';
 import { useFirestore } from '@hooks/useFirestore';
@@ -45,63 +45,43 @@ const App = () => {
   );
   const statistiken = useStatistiken(filteredEintraege);
 
-  // Toggle function for FilterPanel
-  const handleToggleFilterPanel = () => setShowFilterPanel((v) => !v);
-  // entfernt: handleShowNewEntryForm
-  if (userLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-green-50">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-600 mb-4"></div>
-        <p className="text-xl text-gray-700">Benutzerdaten werden geladen...</p>
-      </div>
-    );
-  }
-  if (!currentUser) {
-    return <Login />;
-  }
+  // All event handlers with useCallback to prevent unnecessary re-renders
+  const handleToggleFilterPanel = useCallback(() => setShowFilterPanel((v) => !v), []);
+  const handleToggleNewEntryForm = useCallback(() => setShowNewEntryForm((v) => !v), []);
+  const handleToggleImportDialog = useCallback(() => setShowImportDialog((v) => !v), []);
 
-  // Loading screen für Firestore-Daten nach dem Login
-  if (currentData.loading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-green-50">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-600 mb-4"></div>
-        <p className="text-xl text-gray-700">Daten werden geladen...</p>
-      </div>
-    );
-  }
-
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       await signOut(auth);
     } catch (error) {
       console.error("Fehler beim Abmelden:", error);
       toast.error("Fehler beim Abmelden");
     }
-  };
+  }, []);
 
-
-  const handleSubmit = async (data: Omit<Eintrag, "id">) => {
+  const handleSubmit = useCallback(async (data: Omit<Eintrag, "id">) => {
     try {
       if (editingEntry) {
         await currentData.updateEintrag(editingEntry.id, data);
       } else {
         await currentData.addEintrag(data);
       }
-      handleFormClose();
+      setEditingEntry(null);
+      setShowNewEntryForm(false);
     } catch (error) {
       console.error("Fehler beim Speichern:", error);
       if (firestore.error === "In der Demo sind Funktionen eingeschränkt.")
         return;
       toast.error("Fehler beim Speichern");
     }
-  };
+  }, [editingEntry, currentData, firestore.error]);
 
-  const handleEdit = (eintrag: Eintrag) => {
+  const handleEdit = useCallback((eintrag: Eintrag) => {
     setEditingEntry(eintrag);
     setShowNewEntryForm(false);
-  };
+  }, []);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     toast.custom(
       (t: string | number) => (
         <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-lg p-4">
@@ -139,16 +119,39 @@ const App = () => {
       ),
       { duration: 10000 }
     );
-  };
+  }, [currentData, firestore.error]);
 
-  const handleFormClose = () => {
+  const handleFormClose = useCallback(() => {
     setEditingEntry(null);
     setShowNewEntryForm(false);
-  };
+  }, []);
 
-  const handleImport = async (eintraege: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>[]) => {
+  const handleImport = useCallback(async (eintraege: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>[]) => {
     await currentData.importEintraege(eintraege);
-  };
+  }, [currentData]);
+
+  // Early returns after all hooks
+  if (userLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-green-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-600 mb-4"></div>
+        <p className="text-xl text-gray-700">Benutzerdaten werden geladen...</p>
+      </div>
+    );
+  }
+  if (!currentUser) {
+    return <Login />;
+  }
+
+  // Loading screen für Firestore-Daten nach dem Login
+  if (currentData.loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-green-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-600 mb-4"></div>
+        <p className="text-xl text-gray-700">Daten werden geladen...</p>
+      </div>
+    );
+  }
 
 
 
@@ -179,8 +182,8 @@ const App = () => {
                   showFilter={showFilterPanel}
                   showNewEntryForm={showNewEntryForm}
                   onToggleFilterPanel={handleToggleFilterPanel}
-                  onToggleNewEntryForm={() => setShowNewEntryForm((v) => !v)}
-                  onToggleImportDialog={() => setShowImportDialog((v) => !v)}
+                  onToggleNewEntryForm={handleToggleNewEntryForm}
+                  onToggleImportDialog={handleToggleImportDialog}
                   currentUser={currentUser}
                 />
                 {/* Inline Formular über der Tabelle */}
