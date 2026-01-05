@@ -1,5 +1,4 @@
 import type { UserData } from '@types';
-import { DEMO_USER_UID } from '@constants';
 
 /**
  * Validation utilities for user permissions and authentication
@@ -15,13 +14,6 @@ export const isUserAuthenticated = (
 };
 
 /**
- * Check if the user is the demo user
- */
-export const isDemoUser = (currentUser: UserData | null): boolean => {
-  return currentUser?.uid === DEMO_USER_UID;
-};
-
-/**
  * Check if the user is an admin
  */
 export const isAdmin = (currentUser: UserData | null): boolean => {
@@ -29,12 +21,12 @@ export const isAdmin = (currentUser: UserData | null): boolean => {
 };
 
 /**
- * Check if the user can perform write operations (not demo user)
+ * Check if the user can perform write operations
  */
 export const canPerformWriteOperation = (
   currentUser: UserData | null
 ): boolean => {
-  return isUserAuthenticated(currentUser) && !isDemoUser(currentUser);
+  return isUserAuthenticated(currentUser);
 };
 
 /**
@@ -56,9 +48,6 @@ export const getAuthErrorMessage = (
 ): string | null => {
   if (!isUserAuthenticated(currentUser)) {
     return "Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.";
-  }
-  if (isDemoUser(currentUser)) {
-    return "In der Demo sind Funktionen eingeschränkt.";
   }
   return null;
 };

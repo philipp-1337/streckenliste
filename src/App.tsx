@@ -70,8 +70,6 @@ const App = () => {
       setShowNewEntryForm(false);
     } catch (error) {
       console.error("Fehler beim Speichern:", error);
-      if (firestore.error === "In der Demo sind Funktionen eingeschränkt.")
-        return;
       toast.error("Fehler beim Speichern");
     }
   }, [editingEntry, currentData, firestore.error]);
@@ -102,11 +100,6 @@ const App = () => {
                   toast.dismiss(t);
                 } catch (error) {
                   console.error("Fehler beim Löschen:", error);
-                  if (
-                    firestore.error ===
-                    "In der Demo sind Funktionen eingeschränkt."
-                  )
-                    return;
                   toast.error("Fehler beim Löschen");
                 }
               }}
