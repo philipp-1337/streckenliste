@@ -6,6 +6,7 @@ import { SW_UPDATE_CHECK_INTERVAL } from '@constants';
 
 export const usePwaUpdate = () => {
   const updateToastShown = useRef(false);
+  const updateIntervalId = useRef<number | undefined>(undefined);
   
   const {
     needRefresh: [needRefresh],
@@ -14,7 +15,11 @@ export const usePwaUpdate = () => {
     onRegistered(r: ServiceWorkerRegistration | undefined) {
       // Prüfe alle 60 Sekunden auf Updates
       if (r) {
-        setInterval(() => {
+        // Cleanup existierendes Interval vor dem Erstellen eines neuen
+        if (updateIntervalId.current !== undefined) {
+          clearInterval(updateIntervalId.current);
+        }
+        updateIntervalId.current = window.setInterval(() => {
           r.update();
         }, SW_UPDATE_CHECK_INTERVAL);
       }
@@ -27,20 +32,21 @@ export const usePwaUpdate = () => {
   useEffect(() => {
     if (needRefresh && !updateToastShown.current) {
       updateToastShown.current = true;
+      
+      const handleUpdate = () => {
+        toast.dismiss('update-toast');
+        updateServiceWorker(true);
+      };
+      
       toast(
         <div style={{ display: 'block' }}>
           <div style={{ display: 'block', marginBottom: 8 }}>Eine neue Version der App ist verfügbar!</div>
           <button
             type="button"
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              updateServiceWorker(true);
-            }}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              updateServiceWorker(true);
+              handleUpdate();
             }}
             className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition active:bg-green-800"
             style={{ 
@@ -70,4 +76,13 @@ export const usePwaUpdate = () => {
       toast.dismiss('update-toast');
     }
   }, [needRefresh, updateServiceWorker]);
+
+  // Cleanup des Update-Intervals beim Unmount
+  useEffect(() => {
+    return () => {
+      if (updateIntervalId.current !== undefined) {
+        clearInterval(updateIntervalId.current);
+      }
+    };
+  }, []);
 };
