@@ -31,10 +31,10 @@ export const useFirestore = () => {
       let q;
       // If user is not an admin, only fetch their own entries
       if (!isAdmin(currentUser)) {
-        q = query(streckenCollectionRef, where("userId", "==", currentUser.uid), orderBy("datum", "desc"));
+        q = query(streckenCollectionRef, where("userId", "==", currentUser.uid), orderBy("datum", "asc"));
       } else {
         // Admin gets all entries
-        q = query(streckenCollectionRef, orderBy("datum", "desc"));
+        q = query(streckenCollectionRef, orderBy("datum", "asc"));
       }
 
       const data = await getDocs(q);
