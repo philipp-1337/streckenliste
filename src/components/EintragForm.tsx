@@ -101,7 +101,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               required
               value={formData.datum}
               onChange={(e) => setFormData({...formData, datum: e.target.value})}
-              className="w-full max-w-full border rounded-lg px-3 py-2"
+              className="w-full min-w-0 border rounded-lg px-3 py-2 h-[42px]"
             />
           </div>
           <div>
@@ -110,7 +110,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               required
               value={formData.wildart}
               onChange={(e) => handleWildartChange(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full border rounded-lg px-3 py-2 h-[42px]"
             >
               <option value="">Bitte wählen...</option>
               {Object.keys(wildarten).map(wildart => (
@@ -127,7 +127,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               value={formData.kategorie}
               onChange={(e) => handleKategorieChange(e.target.value)}
               disabled={!formData.wildart}
-              className="w-full border rounded-lg px-3 py-2 disabled:bg-gray-100"
+              className="w-full border rounded-lg px-3 py-2 disabled:bg-gray-100 h-[42px]"
             >
               <option value="">Bitte wählen...</option>
               {formData.wildart === 'Sonstige' ? (
@@ -182,7 +182,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               step="0.1"
               value={formData.gewicht}
               onChange={(e) => setFormData({...formData, gewicht: e.target.value})}
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full border rounded-lg px-3 py-2 h-[42px]"
             />
           </div>
           <div>
@@ -192,7 +192,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               step="0.01"
               value={formData.einnahmen}
               onChange={(e) => setFormData({...formData, einnahmen: e.target.value})}
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full border rounded-lg px-3 py-2 h-[42px]"
             />
           </div>
           <div>
@@ -201,7 +201,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               type="text"
               value={formData.jaeger}
               onChange={(e) => setFormData({...formData, jaeger: e.target.value})}
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full border rounded-lg px-3 py-2 h-[42px]"
             />
           </div>
           <div>
@@ -210,7 +210,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               type="text"
               value={formData.ort}
               onChange={(e) => setFormData({...formData, ort: e.target.value})}
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full border rounded-lg px-3 py-2 h-[42px]"
             />
           </div>
         </div>
@@ -221,7 +221,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             type="text"
             value={formData.bemerkung}
             onChange={(e) => setFormData({...formData, bemerkung: e.target.value})}
-            className="w-full border rounded-lg px-3 py-2"
+            className="w-full border rounded-lg px-3 py-2 h-[42px]"
             placeholder="z.B. Erleger, Unfallwild, Drückjagd, etc."
           />
         </div>
@@ -236,17 +236,17 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           />
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex flex-wrap gap-4">
           <button
             type="submit"
-            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors"
+            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors"
           >
             {editingEntry ? 'Aktualisieren' : 'Speichern'}
           </button>
           <button
             type="button"
             onClick={onCancel}
-            className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors"
+            className="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors"
           >
             Abbrechen
           </button>
