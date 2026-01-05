@@ -67,7 +67,7 @@ export const Nav: React.FC<NavProps> = ({ onLogout }) => {
                 ${tab.isLogout
                   ? 'text-gray-400 hover:text-red-400'
                   : isActive
-                    ? 'text-black font-semibold'
+                    ? 'text-green-800'
                     : 'text-black/70 hover:text-black/90'
                 }
                 ${isActive
