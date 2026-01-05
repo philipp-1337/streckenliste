@@ -39,8 +39,8 @@ export const usePwaUpdate = () => {
       };
       
       toast(
-        <div style={{ display: 'block' }}>
-          <div style={{ display: 'block', marginBottom: 8 }}>Eine neue Version der App ist verfügbar!</div>
+        <div className="block">
+          <div className="block mb-2">Eine neue Version der App ist verfügbar!</div>
           <button
             type="button"
             onClick={(e) => {
@@ -48,18 +48,7 @@ export const usePwaUpdate = () => {
               e.stopPropagation();
               handleUpdate();
             }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition active:bg-green-800"
-            style={{ 
-              marginLeft: 12,
-              WebkitTapHighlightColor: 'transparent',
-              cursor: 'pointer',
-              touchAction: 'manipulation',
-              minHeight: '44px',
-              minWidth: '44px',
-              pointerEvents: 'auto',
-              position: 'relative',
-              zIndex: 9999,
-            }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition active:bg-green-800 cursor-pointer touch-manipulation min-h-[44px] min-w-[44px] pointer-events-auto relative z-[9999]"
           >
             <RefreshCwIcon size={16} /> Aktualisieren
           </button>
