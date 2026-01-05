@@ -63,8 +63,6 @@ const Login = () => {
             >
               Login
             </button>
-            {/* Fehlermeldung wird jetzt als Toast angezeigt */}
-            <p className='text-sm text-center mt-4'>Demo: demo@example.com / demo-login</p>
           </form>
         </div>
       </div>
