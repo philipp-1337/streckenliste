@@ -48,7 +48,7 @@ export const usePwaUpdate = () => {
               e.stopPropagation();
               handleUpdate();
             }}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition active:bg-green-800 cursor-pointer touch-manipulation min-h-[44px] min-w-[44px] pointer-events-auto relative z-[9999]"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition active:bg-green-800 cursor-pointer touch-manipulation min-h-[44px] min-w-[44px] pointer-events-auto relative z-[9999]"
           >
             <RefreshCwIcon size={16} /> Aktualisieren
           </button>

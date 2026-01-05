@@ -104,7 +104,7 @@ const NonIosInstallToast = ({
           </button>
           <button
             onClick={onInstall}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition shadow-sm"
           >
             <DownloadIcon size={16} />
             Installieren
