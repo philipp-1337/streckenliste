@@ -46,7 +46,20 @@ const App = () => {
   const statistiken = useStatistiken(filteredEintraege);
 
   // All event handlers with useCallback to prevent unnecessary re-renders
-  const handleToggleFilterPanel = useCallback(() => setShowFilterPanel((v) => !v), []);
+  const handleToggleFilterPanel = useCallback(() => {
+    setShowFilterPanel((v) => {
+      // Wenn Panel geschlossen wird (v ist true -> wird false), Filter zurücksetzen
+      if (v) {
+        setFilter({
+          wildart: '',
+          jaeger: '',
+          jahr: '',
+          kategorie: ''
+        });
+      }
+      return !v;
+    });
+  }, [setFilter]);
   const handleToggleNewEntryForm = useCallback(() => setShowNewEntryForm((v) => !v), []);
   const handleToggleImportDialog = useCallback(() => setShowImportDialog((v) => !v), []);
 
