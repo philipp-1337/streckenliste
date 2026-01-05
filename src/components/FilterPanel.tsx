@@ -19,7 +19,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
         <select
           value={filter.wildart}
           onChange={(e) => onFilterChange({...filter, wildart: e.target.value})}
-          className="border rounded-lg px-3 py-2"
+          className="border rounded-lg px-3 py-2 h-[42px]"
         >
           <option value="">Alle Wildarten</option>
           {Object.keys(wildarten).map(wildart => (
@@ -31,19 +31,19 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
           placeholder="Kategorie suchen..."
           value={filter.kategorie}
           onChange={(e) => onFilterChange({...filter, kategorie: e.target.value})}
-          className="border rounded-lg px-3 py-2"
+          className="border rounded-lg px-3 py-2 h-[42px]"
         />
         <input
           type="text"
           placeholder="Jäger suchen..."
           value={filter.jaeger}
           onChange={(e) => onFilterChange({...filter, jaeger: e.target.value})}
-          className="border rounded-lg px-3 py-2"
+          className="border rounded-lg px-3 py-2 h-[42px]"
         />
         <select
           value={filter.jahr}
           onChange={(e) => onFilterChange({...filter, jahr: e.target.value})}
-          className="border rounded-lg px-3 py-2"
+          className="border rounded-lg px-3 py-2 h-[42px]"
         >
           <option value="">Alle Jahre</option>
           <option value="2024">2024</option>

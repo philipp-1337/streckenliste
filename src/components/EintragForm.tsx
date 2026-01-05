@@ -101,7 +101,8 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               required
               value={formData.datum}
               onChange={(e) => setFormData({...formData, datum: e.target.value})}
-              className="w-full min-w-0 border rounded-lg px-3 py-2 h-[42px]"
+              className="w-full min-w-0 max-w-full border rounded-lg px-3 py-2 h-[42px] text-base [appearance:textfield] [-webkit-appearance:none]"
+              style={{ boxSizing: 'border-box' }}
             />
           </div>
           <div>
@@ -239,7 +240,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
         <div className="flex flex-wrap gap-4">
           <button
             type="submit"
-            className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors"
+            className="w-full sm:w-auto bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg transition-colors"
           >
             {editingEntry ? 'Aktualisieren' : 'Speichern'}
           </button>

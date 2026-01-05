@@ -102,7 +102,7 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({ isOpen, onClose, onI
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors"
               >
                 <Upload className="w-5 h-5" />
                 Datei auswählen
@@ -189,7 +189,7 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({ isOpen, onClose, onI
           <button
             onClick={handleImport}
             disabled={preview.length === 0 || importing || success}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {importing ? (
               <>
