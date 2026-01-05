@@ -101,7 +101,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               required
               value={formData.datum}
               onChange={(e) => setFormData({...formData, datum: e.target.value})}
-              className="w-full border rounded-lg px-3 py-2"
+              className="w-full max-w-full border rounded-lg px-3 py-2"
             />
           </div>
           <div>
