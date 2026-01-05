@@ -62,11 +62,13 @@ export const Nav: React.FC<NavProps> = ({ onLogout }) => {
                 p-1.5 sm:p-1 h-full
                 bg-transparent border-none outline-none cursor-pointer
                 font-inherit text-[13px] sm:text-xs
-                transition-all duration-300 ease-bounce
+                transition-colors duration-300
                 relative rounded-3xl
                 ${tab.isLogout
                   ? 'text-gray-400 hover:text-red-400'
-                  : 'text-black/70 hover:text-black/90'
+                  : isActive
+                    ? 'text-black font-semibold'
+                    : 'text-black/70 hover:text-black/90'
                 }
                 ${isActive
                   ? 'before:absolute before:inset-0 before:rounded-3xl before:bg-gradient-active before:opacity-100'
@@ -78,7 +80,8 @@ export const Nav: React.FC<NavProps> = ({ onLogout }) => {
               <span className="relative z-10 flex flex-col items-center gap-1">
                 <Icon
                   size={20}
-                  className="transition-transform duration-300 group-hover:scale-105"
+                  strokeWidth={isActive && !tab.isLogout ? 2.5 : 2}
+                  className="transition-transform duration-300 group-hover:scale-105 will-change-transform"
                 />
                 <span>{tab.label}</span>
               </span>
