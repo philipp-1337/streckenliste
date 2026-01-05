@@ -13,7 +13,9 @@ export const FachbegriffeLegende: React.FC = () => {
               {kategorien.map((kat, idx) => (
                 <div key={idx} className="text-xs">
                   <span className="font-medium">{kat.fachbegriff}</span>
-                  <span className="text-gray-600 ml-1">({kat.altersklasse})</span>
+                  <span className="text-gray-600 ml-1">
+                    ({kat.altersklasse || kat.kategorie})
+                  </span>
                 </div>
               ))}
             </div>
