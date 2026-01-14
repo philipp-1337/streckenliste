@@ -22,7 +22,7 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, jagdjahr, availableJag
   return (
     <header className="mb-6 print:hidden">
       {/* Desktop Layout */}
-      <div className="hidden md:flex justify-between items-center">
+      <div className="md:flex justify-between items-center">
         <div className="flex-1">
           <h1 className="text-4xl font-bold text-green-800">
             Streckenliste
@@ -43,12 +43,17 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, jagdjahr, availableJag
               <BowArrow stroke="url(#bowarrowGradient)" strokeWidth={2} />
             </svg>
           </h1>
-          <div className="text-sm text-green-900 mt-1">
-            <span className="font-semibold">Jagdbezirk:</span> {jagdbezirk}{" "}
-            &nbsp;|&nbsp;
-            <span className="font-semibold">Benutzer:</span> {userName}
+          <div className="text-sm text-green-900 mt-1 flex flex-col sm:flex-row sm:gap-2">
+            <div>
+              <span className="font-semibold">Jagdbezirk:</span> {jagdbezirk}
+            </div>
+            <span className="hidden sm:inline">|</span>
+            <div>
+              <span className="font-semibold">Benutzer:</span> {userName}
+            </div>
           </div>
         </div>
+        <div className="hidden md:flex">
         {availableJagdjahre && onJagdjahrChange && (
           <JagdjahrSelect
             jagdjahr={jagdjahr}
@@ -57,26 +62,8 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, jagdjahr, availableJag
             variant="desktop"
           />
         )}
-        <Nav onLogout={onLogout} />
-      </div>
-
-      {/* Mobile Layout */}
-      <div className="md:hidden">
-        <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold text-green-800">
-              Streckenliste
-              <svg className="inline w-5 h-5 ml-1" viewBox="0 0 24 24">
-                <BowArrow stroke="url(#bowarrowGradient)" strokeWidth={2} />
-              </svg>
-            </h1>
-            <div className="text-xs text-green-900 mt-1">
-              <div><span className="font-semibold">Jagdbezirk:</span> {jagdbezirk}</div>
-              <div><span className="font-semibold">Benutzer:</span> {userName}</div>
-            </div>
-          </div>
-          <Nav onLogout={onLogout} />
         </div>
+        <Nav onLogout={onLogout} />
       </div>
     </header>
   );
