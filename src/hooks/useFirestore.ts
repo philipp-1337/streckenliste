@@ -192,28 +192,61 @@ export const useFirestore = () => {
       toast.error(errorMessage || "Keine Berechtigung");
       throw new Error(errorMessage || "Keine Berechtigung");
     }
-    
+
     if (!isAdmin(currentUser)) {
-      const errorMsg = "Nur Administratoren können Daten importieren.";
+      const errorMsg = "Nur Administratoren knnen Daten importieren.";
       setError(errorMsg);
       toast.error(errorMsg);
       throw new Error("Keine Admin-Berechtigung");
     }
-    
+
+    // Validierungsfunktion nach Firestore-Regeln
+    const isValidEntry = (data: any) => {
+      if (!data) return false;
+      // Pflichtfelder
+      if (
+        typeof data.datum !== 'string' ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(data.datum) ||
+        typeof data.wildart !== 'string' ||
+        data.wildart.length === 0 || data.wildart.length > 100
+      ) return false;
+      // Optionale Felder
+      if (data.gewicht && typeof data.gewicht !== 'string') return false;
+      if (data.einnahmen && typeof data.einnahmen !== 'string') return false;
+      if (data.ausgaben && typeof data.ausgaben !== 'string') return false;
+      if (data.geschlecht && typeof data.geschlecht !== 'string') return false;
+      if (data.altersklasse && typeof data.altersklasse !== 'string') return false;
+      if (data.kategorie && typeof data.kategorie !== 'string') return false;
+      if (data.notizen && (typeof data.notizen !== 'string' || data.notizen.length > 1000)) return false;
+      // Timestamp optional
+      return true;
+    };
+
     setLoading(true);
+    let importiert = 0;
+    let fehlerhafte: any[] = [];
     try {
-      // Importiere alle Einträge sequenziell
       for (const eintrag of eintraege) {
         const newEintrag = {
           ...eintrag,
           userId: currentUser.uid,
           jagdbezirkId: currentUser.jagdbezirkId,
         };
-        await addDoc(streckenCollectionRef, newEintrag);
+        if (isValidEntry(newEintrag)) {
+          await addDoc(streckenCollectionRef, newEintrag);
+          importiert++;
+        } else {
+          fehlerhafte.push(newEintrag);
+        }
       }
-      
-      toast.success(`${eintraege.length} Einträge erfolgreich importiert`);
-      // onSnapshot will automatically update eintraege
+      if (importiert > 0) {
+        toast.success(`${importiert} Einträge erfolgreich importiert`);
+      }
+      if (fehlerhafte.length > 0) {
+        toast.error(`${fehlerhafte.length} Einträge übersprungen (ungültig)`);
+        console.warn('Fehlerhafte Einträge:', fehlerhafte);
+      }
+      // onSnapshot wird automatisch aktualisieren
     } catch (err) {
       const errorMsg = "Fehler beim Importieren";
       setError(errorMsg);

@@ -1,6 +1,6 @@
 /**
  * Utility functions for handling hunting year (Jagdjahr) calculations
- * A hunting year runs from May to April (e.g., May 2025 - April 2026 = "2025/2026")
+ * A hunting year runs from April to March (e.g., April 2025 - March 2026 = "2025/2026")
  */
 
 /**
@@ -18,13 +18,13 @@ export function getJagdjahr(date: string | Date): string | null {
   const month = d.getMonth(); // 0-11
   const year = d.getFullYear();
   
-  // If month is May (4) or later, hunting year starts this year
-  // If month is before May (0-3 = Jan-Apr), hunting year started last year
-  if (month >= 4) {
-    // May-December: hunting year is current/next
+  // If month is April (3) or later, hunting year starts this year
+  // If month is before April (0-2 = Jan-Mar), hunting year started last year
+  if (month >= 3) {
+    // April-December: hunting year is current/next
     return `${year}/${year + 1}`;
   } else {
-    // January-April: hunting year is previous/current
+    // January-March: hunting year is previous/current
     return `${year - 1}/${year}`;
   }
 }

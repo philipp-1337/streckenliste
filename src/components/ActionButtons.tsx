@@ -5,6 +5,7 @@ import {
   Printer, 
   FunnelXIcon,
   Upload,
+  RefreshCw
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -32,7 +33,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
   jagdjahr,
   availableJagdjahre,
   onJagdjahrChange,
-  // onToggleFixDialog,
+  onToggleFixDialog,
   onToggleImportDialog,
   currentUser
 }) => {
@@ -63,17 +64,17 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
       disabled: showNewEntryForm,
       show: isAdmin,
     },
-    // {
-    //   id: 'fix-kategorien',
-    //   icon: RefreshCw,
-    //   title: 'Kategorien korrigieren',
-    //   onClick: onToggleFixDialog,
-    //   isActive: false,
-    //   activeColors: 'text-orange-700 shadow-orange-500/20',
-    //   iconClass: '',
-    //   disabled: showNewEntryForm,
-    //   show: isAdmin,
-    // },
+    {
+      id: 'fix-kategorien',
+      icon: RefreshCw,
+      title: 'Kategorien korrigieren',
+      onClick: onToggleFixDialog,
+      isActive: false,
+      activeColors: 'text-orange-700 shadow-orange-500/20',
+      iconClass: '',
+      disabled: showNewEntryForm,
+      show: isAdmin,
+    },
     {
       id: 'filter',
       icon: showFilter ? FunnelXIcon : Filter,
