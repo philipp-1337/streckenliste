@@ -6,13 +6,17 @@ import { sanitizeHtml } from '@utils/sanitization';
 
 interface OfficialPrintViewProps {
   eintraege: Eintrag[];
+  jagdjahr?: string;
 }
 
 
-const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
+const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdjahr }) => {
   const { currentUser } = useAuth();
   const jagdbezirk = currentUser?.jagdbezirk?.name || currentUser?.jagdbezirkId || 'Unbekannt';
   const navigate = useNavigate();
+  
+  // Display text for hunting year - show "Alle" if no specific year selected
+  const displayJagdjahr = jagdjahr || 'Alle Jagdjahre';
   
   // Sortiere Einträge nach Datum aufsteigend (älteste zuerst)
   const sortedEintraege = [...eintraege].sort((a, b) => 
@@ -63,7 +67,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
         <div className="text-xs">
             {/* Header */}
             <div className="text-left mb-2">
-              <span className="text-xs"><strong>Anlage zur Streckenliste für das Jagdjahr:</strong> 2025/2026</span>
+              <span className="text-xs"><strong>Anlage zur Streckenliste für das Jagdjahr:</strong> {displayJagdjahr}</span>
               <span className="ml-1 text-xs"><strong>Jagdbezirk:</strong> {jagdbezirk}</span>
             </div>
             {/* Haupttabelle */}

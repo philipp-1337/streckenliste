@@ -288,7 +288,7 @@ const App = () => {
                 <Route path="/legende" element={<FachbegriffeLegende />} />
                 <Route path="/print" element={
                   <Suspense fallback={<div className="p-4">Wird geladen...</div>}>
-                    <OfficialPrintView eintraege={filteredEintraege} />
+                    <OfficialPrintView eintraege={filteredEintraege} jagdjahr={filter.jagdjahr} />
                   </Suspense>
                 } />
               </Routes>
