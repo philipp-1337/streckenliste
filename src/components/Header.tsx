@@ -1,4 +1,5 @@
 import { Nav } from "./Nav";
+import { JagdjahrSelect } from "./JagdjahrSelect";
 import useAuth from "@hooks/useAuth";
 import { BowArrow } from "lucide-react";
 
@@ -11,6 +12,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onLogout, jagdjahr, availableJagdjahre, onJagdjahrChange }) => {
   const { currentUser } = useAuth();
+  
   // Jagdbezirk und Name auslesen
   const jagdbezirk =
     currentUser?.jagdbezirk?.name || currentUser?.jagdbezirkId || "Unbekannt";
@@ -48,28 +50,19 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, jagdjahr, availableJag
           </div>
         </div>
         {availableJagdjahre && onJagdjahrChange && (
-          <div className="mx-4">
-            <label className="block text-sm font-semibold text-green-900 mb-1">
-              Jagdjahr
-            </label>
-            <select
-              value={jagdjahr || ''}
-              onChange={(e) => onJagdjahrChange(e.target.value)}
-              className="border-2 border-green-600 rounded-lg px-3 py-2 bg-white text-green-900 font-medium min-w-[140px] focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm hover:border-green-700 transition-colors cursor-pointer"
-            >
-              <option value="">Alle Jagdjahre</option>
-              {availableJagdjahre.map(jahr => (
-                <option key={jahr} value={jahr}>{jahr}</option>
-              ))}
-            </select>
-          </div>
+          <JagdjahrSelect
+            jagdjahr={jagdjahr}
+            availableJagdjahre={availableJagdjahre}
+            onJagdjahrChange={onJagdjahrChange}
+            variant="desktop"
+          />
         )}
         <Nav onLogout={onLogout} />
       </div>
 
       {/* Mobile Layout */}
       <div className="md:hidden">
-        <div className="flex justify-between items-start mb-3">
+        <div className="flex justify-between items-start">
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-green-800">
               Streckenliste
@@ -84,25 +77,6 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, jagdjahr, availableJag
           </div>
           <Nav onLogout={onLogout} />
         </div>
-        {availableJagdjahre && onJagdjahrChange && (
-          <div className="bg-green-50 rounded-xl p-3 border border-green-200 shadow-sm">
-            <label htmlFor="jagdjahr-mobile" className="block text-xs font-semibold text-green-900 mb-1.5">
-              📅 Jagdjahr
-            </label>
-            <select
-              id="jagdjahr-mobile"
-              value={jagdjahr || ''}
-              onChange={(e) => onJagdjahrChange(e.target.value)}
-              aria-label="Jagdjahr auswählen"
-              className="w-full border-2 border-green-600 rounded-lg px-3 py-2.5 bg-white text-green-900 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm hover:border-green-700 transition-colors cursor-pointer"
-            >
-              <option value="">Alle Jagdjahre</option>
-              {availableJagdjahre.map(jahr => (
-                <option key={jahr} value={jahr}>{jahr}</option>
-              ))}
-            </select>
-          </div>
-        )}
       </div>
     </header>
   );
