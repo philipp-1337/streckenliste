@@ -19,7 +19,15 @@ import Login from '@auth/Login';
 import { auth } from './firebase';
 import { signOut } from 'firebase/auth';
 import { Routes, Route } from 'react-router-dom';
-import { getAvailableJagdjahre, getCurrentJagdjahr } from '@utils/jagdjahrUtils';
+import { getAvailableJagdjahre } from '@utils/jagdjahrUtils';
+
+// Compute current hunting year once at module level
+const getCurrentJagdjahrCached = (() => {
+  const now = new Date();
+  const month = now.getMonth();
+  const year = now.getFullYear();
+  return month >= 4 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+})();
 
 // Lazy load große Komponenten für bessere Bundle Size
 const StatistikPanel = lazy(() => import('@components/StatistikPanel'));
@@ -74,7 +82,7 @@ const App = () => {
           jaeger: '',
           jahr: '',
           kategorie: '',
-          jagdjahr: getCurrentJagdjahr()
+          jagdjahr: getCurrentJagdjahrCached
         });
       }
       return !v;

@@ -1,6 +1,14 @@
 import { useState, useMemo } from 'react';
 import type { Eintrag, FilterState } from '@types';
-import { isDateInJagdjahr, getCurrentJagdjahr } from '@utils/jagdjahrUtils';
+import { isDateInJagdjahr } from '@utils/jagdjahrUtils';
+
+// Compute current hunting year once at module level to avoid repeated calculations
+const getCurrentJagdjahrCached = (() => {
+  const now = new Date();
+  const month = now.getMonth();
+  const year = now.getFullYear();
+  return month >= 4 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+})();
 
 export const useFilter = (eintraege: Eintrag[]) => {
   const [filter, setFilter] = useState<FilterState>({
@@ -8,7 +16,7 @@ export const useFilter = (eintraege: Eintrag[]) => {
     jaeger: '',
     jahr: '',
     kategorie: '',
-    jagdjahr: getCurrentJagdjahr() // Default to current hunting year
+    jagdjahr: getCurrentJagdjahrCached // Use cached value for initial state
   });
 
   const filteredEintraege = useMemo(() => {
