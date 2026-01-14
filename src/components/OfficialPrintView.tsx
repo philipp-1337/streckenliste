@@ -29,12 +29,13 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
         body {
           print-color-adjust: exact;
           -webkit-print-color-adjust: exact;
-          margin: 10mm;
+          margin: 0;
         }
         .print-area {
           width: 100%;
           max-width: 100%;
           page-break-inside: avoid;
+          padding: 15mm 10mm;
         }
         .print-container {
           page-break-inside: avoid;

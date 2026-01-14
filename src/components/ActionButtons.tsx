@@ -1,5 +1,11 @@
 import { memo } from 'react';
-import { Plus, Filter, Printer, FunnelXIcon, Upload } from 'lucide-react';
+import { 
+  Plus, 
+  Filter, 
+  Printer, 
+  FunnelXIcon, 
+  // Upload 
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import type { UserData } from '@types';
@@ -18,12 +24,12 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
   showNewEntryForm,
   onToggleFilterPanel,
   onToggleNewEntryForm,
-  onToggleImportDialog,
-  currentUser
+  // onToggleImportDialog,
+  // currentUser
 }) => {
   const navigate = useNavigate();
 
-  const isAdmin = currentUser?.role === 'admin';
+  // const isAdmin = currentUser?.role === 'admin';
 
   const buttons = [
     {
@@ -37,17 +43,17 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
       disabled: false,
       show: true,
     },
-    {
-      id: 'import',
-      icon: Upload,
-      title: 'CSV importieren',
-      onClick: onToggleImportDialog,
-      isActive: false,
-      activeColors: '',
-      iconClass: '',
-      disabled: showNewEntryForm,
-      show: isAdmin,
-    },
+    // {
+    //   id: 'import',
+    //   icon: Upload,
+    //   title: 'CSV importieren',
+    //   onClick: onToggleImportDialog,
+    //   isActive: false,
+    //   activeColors: '',
+    //   iconClass: '',
+    //   disabled: showNewEntryForm,
+    //   show: isAdmin,
+    // },
     {
       id: 'filter',
       icon: showFilter ? FunnelXIcon : Filter,
