@@ -251,8 +251,8 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
               </button>
               <button
                 onClick={() => {
-                  void document.body.offsetHeight; // Force reflow
-                  setTimeout(() => window.print(), 400);
+                  // Minimale Verzögerung für bessere mobile Performance
+                  requestAnimationFrame(() => window.print());
                 }}
                 className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl shadow-lg font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2"
               >
