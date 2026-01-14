@@ -104,9 +104,21 @@ const App = () => {
     toast.custom(
       (t: string | number) => (
         <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-lg p-4">
-          <div className="text-sm font-medium text-gray-900">
-            Eintrag wirklich löschen?
-          </div>
+            <div className="text-sm font-medium text-gray-900">
+              {(() => {
+                const eintrag = currentData.eintraege.find(e => e.id === id);
+                let dateStr = "?";
+                if (eintrag?.datum) {
+                  const d = new Date(eintrag.datum);
+                  if (!isNaN(d.getTime())) {
+                    dateStr = d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+                  } else {
+                    dateStr = eintrag.datum;
+                  }
+                }
+                return `Soll der Eintrag vom ${dateStr} wirklich gelöscht werden?`;
+              })()}
+            </div>
           <div className="mt-3 flex justify-end gap-2">
             <button
               onClick={() => toast.dismiss(t)}
