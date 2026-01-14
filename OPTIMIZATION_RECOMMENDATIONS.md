@@ -36,6 +36,12 @@ This document contains recommendations for larger refactoring efforts and archit
 - ✅ Error Boundary implementiert für graceful error handling
 - ✅ Input Sanitization mit DOMPurify für XSS-Schutz
 - ✅ Benutzereingaben werden in allen Komponenten sanitiert
+- ✅ Enhanced Firestore Security Rules mit Datenvalidierung
+  - Datum-Format Validierung (YYYY-MM-DD)
+  - Pflichtfelder-Prüfung (datum, wildart, userId, jagdbezirkId)
+  - Zeichenlimits (Wildart max 100, Notizen max 1000)
+  - Typ-Validierung für alle Felder
+  - Separate Delete-Regel ohne Datenvalidierung
 
 ### 5. User Experience
 
@@ -43,65 +49,15 @@ This document contains recommendations for larger refactoring efforts and archit
 - ✅ Offline Support mit IndexedDB Persistence aktiviert
 - ✅ Progressive Web App (PWA) Funktionalität
 
----
+- ✅ **Real-time Data Synchronization** - Multi-user live updates with onSnapshot
+  - Implemented `onSnapshot()` listener for automatic data updates
+  - Removed all manual `getDocs()` refetch calls after CRUD operations
+  - Added iOS PWA visibility change handler for reliable sync on mobile
+  - Fallback mechanism ensures updates even when listener is paused (>5s inactivity)
 
 ---
 
 ## Recommended Larger Refactorings 🔧
-
-### 1. Real-time Data Synchronization
-
-**Current State:** The app uses manual `getDocs()` calls that refetch all data after every operation.
-
-**Recommendation:** Migrate to Firestore `onSnapshot()` for real-time listeners.
-
-**Benefits:**
-
-- Automatic updates when data changes
-- Better multi-user experience
-- Reduced code complexity (no manual refetch calls)
-- More efficient (only changed documents are sent)
-
-**Implementation Example:**
-
-```typescript
-// In useFirestore.ts
-useEffect(() => {
-  if (!streckenCollectionRef || !isUserAuthenticated(currentUser)) {
-    return;
-  }
-
-  let q;
-  if (!isAdmin(currentUser)) {
-    q = query(streckenCollectionRef, 
-      where("userId", "==", currentUser.uid), 
-      orderBy("datum", "desc")
-    );
-  } else {
-    q = query(streckenCollectionRef, orderBy("datum", "desc"));
-  }
-
-  const unsubscribe = onSnapshot(q, (snapshot) => {
-    const entries = snapshot.docs.map(doc => ({ 
-      ...doc.data(), 
-      id: doc.id 
-    } as Eintrag));
-    setEintraege(entries);
-    setLoading(false);
-  }, (error) => {
-    console.error("Error listening to entries:", error);
-    toast.error("Fehler beim Laden der Daten");
-    setLoading(false);
-  });
-
-  return () => unsubscribe();
-}, [streckenCollectionRef, currentUser]);
-```
-
-**Effort:** Medium (1-2 days)  
-**Impact:** High
-
----
 
 ### 2. Centralized State Management
 
@@ -265,74 +221,7 @@ export const VirtualizedEintragTable = ({ eintraege }: Props) => {
 **Status:** ✅ Acknowledged per requirements (this is normal for Firebase client apps)  
 **Note:** Firebase security is enforced through Firestore Security Rules, not hiding credentials.
 
-### 2. Firestore Security Rules Enhancement
-
-**Current Rules Analysis:**
-
-```javascript
-// Strengths:
-✅ User data isolation by jagdbezirkId
-✅ Demo user properly restricted
-✅ Admin vs regular user permissions
-✅ Helper function for user data access
-
-// Potential Improvements:
-⚠️ Consider rate limiting to prevent abuse
-⚠️ Add validation rules for data fields
-⚠️ Consider field-level security
-```
-
-**Recommended Enhanced Rules:**
-
-```javascript
-rules_version = '2';
-
-service cloud.firestore {
-  match /databases/{database}/documents {
-    
-    function getUserData() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-    }
-    
-    // Validate entry data structure
-    function isValidEntry() {
-      let data = request.resource.data;
-      return data.keys().hasAll(['datum', 'wildart', 'userId', 'jagdbezirkId'])
-        && data.datum is string
-        && data.datum.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
-        && data.wildart is string
-        && data.wildart.size() > 0
-        && data.userId is string
-        && data.jagdbezirkId is string;
-    }
-    
-    match /jagdbezirke/{jagdbezirkId}/eintraege/{eintragId} {
-      allow read: if request.auth != null &&
-        getUserData().jagdbezirkId == jagdbezirkId &&
-        (getUserData().role == 'admin' || resource.data.userId == request.auth.uid);
-      
-      allow create: if request.auth != null &&
-        getUserData().jagdbezirkId == jagdbezirkId &&
-        request.resource.data.userId == request.auth.uid &&
-        request.auth.uid != 'PQz2hNrf3gYSfKJ2eYjRlg67vaf1' &&
-        isValidEntry();
-      
-      allow update, delete: if request.auth != null &&
-        getUserData().jagdbezirkId == jagdbezirkId &&
-        (getUserData().role == 'admin' || resource.data.userId == request.auth.uid) &&
-        request.auth.uid != 'PQz2hNrf3gYSfKJ2eYjRlg67vaf1' &&
-        isValidEntry();
-    }
-  }
-}
-```
-
-**Effort:** Low-Medium (1 day)  
-**Impact:** High (prevents invalid data and abuse)
-
----
-
-### 3. Rate Limiting
+### 2. Rate Limiting
 
 **Recommendation:** Consider implementing Cloud Functions with rate limiting for sensitive operations.
 
@@ -457,3 +346,11 @@ Prioritize based on:
 1. **High Impact, Medium Effort** - Real-time sync, enhanced security rules
 2. **Medium Impact, Medium Effort** - State management, form validation, bundle optimization
 3. **Future Enhancements** - Virtual scrolling, comprehensive testing
+Maintainability** - Centralized state management, robust form validation
+- **Security** - Enhanced Firestore rules with data validation
+- **Performance** - Bundle size optimization, virtual scrolling for large datasets
+- **Quality Assurance** - Comprehensive testing suite
+
+Prioritize based on:
+
+1. **High Impact, Medium Effort** - E
