@@ -40,8 +40,8 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                 <td className="px-4 py-3 text-sm">{index + 1}</td>
                 <td className="px-4 py-3 text-sm">{new Date(eintrag.datum).toLocaleDateString('de-DE')}</td>
                 <td className="px-4 py-3 text-sm font-medium">{eintrag.wildart}</td>
-                <td className="px-4 py-3 text-sm font-medium text-green-700">{eintrag.fachbegriff}</td>
-                <td className="px-4 py-3 text-center text-sm">{eintrag.altersklasse}</td>
+                <td className="px-4 py-3 text-sm font-medium text-green-700 whitespace-nowrap">{eintrag.fachbegriff}</td>
+                <td className="px-4 py-3 text-center text-sm whitespace-nowrap">{eintrag.altersklasse}</td>
                 <td className="px-4 py-3 text-center text-sm">{eintrag.geschlecht === 'm' ? '♂' : '♀'}</td>
                 <td className="px-4 py-3 text-center text-sm">{eintrag.gewicht || '-'}</td>
                 <td className="px-4 py-3 text-sm">{eintrag.jaeger}</td>
