@@ -8,6 +8,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 import type { UserData } from '@types';
+import { JagdjahrSelect } from './JagdjahrSelect';
 
 interface ActionButtonsProps {
   showFilter: boolean;
@@ -17,6 +18,9 @@ interface ActionButtonsProps {
   onToggleImportDialog?: () => void;
   onToggleFixDialog?: () => void;
   currentUser: UserData | null;
+  jagdjahr?: string;
+  availableJagdjahre?: string[];
+  onJagdjahrChange?: (jagdjahr: string) => void;
 }
 
 export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
@@ -24,6 +28,9 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
   showNewEntryForm,
   onToggleFilterPanel,
   onToggleNewEntryForm,
+  jagdjahr,
+  availableJagdjahre,
+  onJagdjahrChange,
   // onToggleFixDialog,
   // onToggleImportDialog,
   // currentUser
@@ -92,6 +99,16 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
 
   return (
     <div className="flex gap-3 mb-6 print:hidden">
+      {/* Jagdjahr Button - nur mobil */}
+      {availableJagdjahre && onJagdjahrChange && (
+        <JagdjahrSelect
+          jagdjahr={jagdjahr}
+          availableJagdjahre={availableJagdjahre}
+          onJagdjahrChange={onJagdjahrChange}
+          variant="icon"
+        />
+      )}
+
       {buttons.filter(button => button.show).map((button) => {
         const Icon = button.icon;
 
