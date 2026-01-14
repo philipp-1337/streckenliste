@@ -89,6 +89,14 @@ export const EintragForm: React.FC<EintragFormProps> = ({
     onSubmit(formData as Omit<Eintrag, 'id'>); // Cast to Omit<Eintrag, 'id'>
   };
 
+  // Prüfe ob alle Pflichtfelder ausgefüllt sind
+  const isFormValid = () => {
+    const hasRequiredFields = Boolean(formData.datum && formData.wildart);
+    // Kategorie ist nur Pflicht, wenn Wildart nicht "Sonstige" ist
+    const hasKategorie = formData.wildart === 'Sonstige' || Boolean(formData.kategorie);
+    return hasRequiredFields && hasKategorie;
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg mb-6 shadow">
       <h3 className="text-xl font-bold mb-4">
@@ -260,7 +268,8 @@ export const EintragForm: React.FC<EintragFormProps> = ({
         <div className="flex flex-wrap gap-4">
           <button
             type="submit"
-            className="w-full sm:w-auto bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg transition-colors"
+            disabled={!isFormValid()}
+            className="w-full sm:w-auto bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
           >
             {editingEntry ? 'Aktualisieren' : 'Speichern'}
           </button>
