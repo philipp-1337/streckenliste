@@ -1,16 +1,17 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import { db } from '../firebase';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
+import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where, onSnapshot } from 'firebase/firestore';
 import type { Eintrag } from '@types'; 
 import useAuth from '@hooks/useAuth';
 import { isUserAuthenticated, canPerformWriteOperation, isAdmin, getAuthErrorMessage } from '@utils/validation';
 
 export const useFirestore = () => {
-  const { currentUser } = useAuth(); // Get current user
+  const { currentUser } = useAuth();
   const [eintraege, setEintraege] = useState<Eintrag[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const lastVisibilityChange = useRef<number>(Date.now());
 
   // Memoize the collection reference to prevent unnecessary re-creations
   const streckenCollectionRef = useMemo(() => {
@@ -20,43 +21,97 @@ export const useFirestore = () => {
     return collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/eintraege`);
   }, [currentUser?.jagdbezirkId]);
 
-  const getEintraege = useCallback(async () => {
+  // Helper function to manually fetch data (iOS PWA fallback)
+  const manualFetch = useCallback(async () => {
     if (!streckenCollectionRef || !isUserAuthenticated(currentUser)) {
-      return; // Not ready to fetch
+      return;
     }
 
-    setLoading(true);
-    setError(null);
     try {
       let q;
-      // If user is not an admin, only fetch their own entries
       if (!isAdmin(currentUser)) {
         q = query(streckenCollectionRef, where("userId", "==", currentUser.uid), orderBy("datum", "asc"));
       } else {
-        // Admin gets all entries
         q = query(streckenCollectionRef, orderBy("datum", "asc"));
       }
 
       const data = await getDocs(q);
       const geladeneEintraege = data.docs.map(doc => ({ ...doc.data(), id: doc.id } as Eintrag));
       setEintraege(geladeneEintraege);
+      console.log('🔄 Manual fetch completed:', geladeneEintraege.length, 'entries');
     } catch (err) {
-      const errorMessage = "Fehler beim Laden der Daten";
-      setError(errorMessage);
-      toast.error(errorMessage);
-      console.error("Error fetching data from Firestore:", err);
-    } finally {
-      setLoading(false);
+      console.error("Error in manual fetch:", err);
     }
-  }, [currentUser, streckenCollectionRef]);
+  }, [streckenCollectionRef, currentUser]);
 
+  // Set up real-time listener with onSnapshot
   useEffect(() => {
-    if (!currentUser?.jagdbezirkId) {
+    if (!streckenCollectionRef || !isUserAuthenticated(currentUser)) {
+      setEintraege([]);
+      setLoading(false);
       return;
     }
-    getEintraege();
-  }, [currentUser?.jagdbezirkId, getEintraege]); // Re-run when currentUser changes
 
+    setLoading(true);
+    setError(null);
+
+    let q;
+    // If user is not an admin, only fetch their own entries
+    if (!isAdmin(currentUser)) {
+      q = query(streckenCollectionRef, where("userId", "==", currentUser.uid), orderBy("datum", "asc"));
+    } else {
+      // Admin gets all entries
+      q = query(streckenCollectionRef, orderBy("datum", "asc"));
+    }
+
+    // Set up real-time listener
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const geladeneEintraege = snapshot.docs.map(doc => ({ 
+          ...doc.data(), 
+          id: doc.id 
+        } as Eintrag));
+        setEintraege(geladeneEintraege);
+        setLoading(false);
+        console.log('📡 onSnapshot update:', geladeneEintraege.length, 'entries');
+      },
+      (err) => {
+        const errorMessage = "Fehler beim Laden der Daten";
+        setError(errorMessage);
+        toast.error(errorMessage);
+        console.error("Error listening to Firestore:", err);
+        setLoading(false);
+      }
+    );
+
+    // iOS/Safari PWA Fix: Re-activate listener when page becomes visible
+    // This handles cases where iOS pauses background listeners
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const now = Date.now();
+        const timeSinceLastChange = now - lastVisibilityChange.current;
+        lastVisibilityChange.current = now;
+        
+        console.log('👁️ Page visible - time hidden:', timeSinceLastChange, 'ms');
+        
+        // If app was hidden for more than 5 seconds, do a manual fetch
+        // This ensures iOS PWAs get updates even if listener was paused
+        if (timeSinceLastChange > 5000) {
+          console.log('⚠️ App was hidden >5s, performing manual fetch for iOS');
+          manualFetch();
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Cleanup function to unsubscribe when component unmounts or dependencies change
+    return () => {
+      unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [streckenCollectionRef, currentUser, manualFetch]);
 
   const addEintrag = useCallback(async (eintrag: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>) => {
     const errorMessage = getAuthErrorMessage(currentUser);
@@ -73,7 +128,7 @@ export const useFirestore = () => {
         jagdbezirkId: currentUser.jagdbezirkId,
       };
       await addDoc(streckenCollectionRef, newEintrag);
-      await getEintraege();
+      // onSnapshot will automatically update eintraege
     } catch (err) {
       const errorMsg = "Fehler beim Speichern";
       setError(errorMsg);
@@ -81,7 +136,7 @@ export const useFirestore = () => {
       console.error('Error adding entry:', err);
       throw err;
     }
-  }, [streckenCollectionRef, currentUser, getEintraege]);
+  }, [streckenCollectionRef, currentUser]);
 
   const updateEintrag = useCallback(async (id: string, eintrag: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>) => {
     const errorMessage = getAuthErrorMessage(currentUser);
@@ -99,7 +154,7 @@ export const useFirestore = () => {
         jagdbezirkId: currentUser.jagdbezirkId,
       };
       await updateDoc(eintragDoc, updatedEintrag);
-      await getEintraege();
+      // onSnapshot will automatically update eintraege
     } catch (err) {
       const errorMsg = "Fehler beim Aktualisieren";
       setError(errorMsg);
@@ -107,7 +162,7 @@ export const useFirestore = () => {
       console.error('Error updating entry:', err);
       throw err;
     }
-  }, [streckenCollectionRef, currentUser, getEintraege]);
+  }, [streckenCollectionRef, currentUser]);
 
   const deleteEintrag = useCallback(async (id: string) => {
     const errorMessage = getAuthErrorMessage(currentUser);
@@ -120,7 +175,7 @@ export const useFirestore = () => {
     try {
       const eintragDoc = doc(streckenCollectionRef, id);
       await deleteDoc(eintragDoc);
-      await getEintraege();
+      // onSnapshot will automatically update eintraege
     } catch (err) {
       const errorMsg = "Fehler beim Löschen";
       setError(errorMsg);
@@ -128,7 +183,7 @@ export const useFirestore = () => {
       console.error('Error deleting entry:', err);
       throw err;
     }
-  }, [streckenCollectionRef, currentUser, getEintraege]);
+  }, [streckenCollectionRef, currentUser]);
 
   const importEintraege = useCallback(async (eintraege: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>[]) => {
     const errorMessage = getAuthErrorMessage(currentUser);
@@ -158,7 +213,7 @@ export const useFirestore = () => {
       }
       
       toast.success(`${eintraege.length} Einträge erfolgreich importiert`);
-      await getEintraege();
+      // onSnapshot will automatically update eintraege
     } catch (err) {
       const errorMsg = "Fehler beim Importieren";
       setError(errorMsg);
@@ -168,13 +223,12 @@ export const useFirestore = () => {
     } finally {
       setLoading(false);
     }
-  }, [streckenCollectionRef, currentUser, getEintraege]);
+  }, [streckenCollectionRef, currentUser]);
 
   return {
     eintraege,
     loading,
     error,
-    getEintraege,
     addEintrag,
     updateEintrag,
     deleteEintrag,
