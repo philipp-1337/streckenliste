@@ -156,7 +156,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               ) : (
                 getKategorienFuerWildart(formData.wildart).map(kategorie => (
                   <option key={kategorie.kategorie} value={kategorie.kategorie}>
-                    {kategorie.kategorie}
+                    {kategorie.kategorie} {kategorie.altersklasse && `(${kategorie.altersklasse})`}
                   </option>
                 ))
               )}
