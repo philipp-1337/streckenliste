@@ -1,6 +1,7 @@
 
 import { useNavigate } from 'react-router-dom';
 import { X, Printer } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import type { Eintrag } from '@types';
 import useAuth from '@hooks/useAuth';
 import { sanitizeHtml } from '@utils/sanitization';
@@ -15,6 +16,16 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
   const { currentUser } = useAuth();
   const jagdbezirk = currentUser?.jagdbezirk?.name || currentUser?.jagdbezirkId || 'Unbekannt';
   const navigate = useNavigate();
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  useEffect(() => {
+    const handleAfterPrint = () => {
+      setIsPrinting(false);
+    };
+
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => window.removeEventListener('afterprint', handleAfterPrint);
+  }, []);
   
   // Display text for hunting year - show "Alle" if no specific year selected
   const displayJagdjahr = jagdjahr || 'Alle Jagdjahre';
@@ -27,6 +38,19 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
   return (
     <>
     <style>{`
+      /* Gewicht Header - Vertikaler Text */
+      .gewicht-header {
+        position: relative;
+        overflow: visible;
+      }
+      
+      .gewicht-text {
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        white-space: nowrap;
+        display: inline-block;
+      }
+      
       @media print {
         @page {
           size: A4 landscape;
@@ -61,8 +85,37 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
         .print\\:hidden {
           display: none !important;
         }
+        
+        /* Safari-Fix für vertikalen Text im Druck */
+        .gewicht-header {
+          position: relative;
+          vertical-align: middle;
+        }
+        
+        .gewicht-text {
+          position: relative;
+          transform: rotate(180deg);
+          transform-origin: center center;
+          display: inline-block;
+          width: auto;
+          height: auto;
+        }
       }
     `}</style>
+    
+    {/* Full-Screen Loading Overlay */}
+    {isPrinting && (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
+        <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-md mx-4 text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-green-600 border-t-transparent mx-auto mb-4"></div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Druckvorschau wird vorbereitet...</h3>
+          <p className="text-gray-600 text-sm">
+            Dies kann auf mobilen Geräten bis zu einer Minute dauern. Bitte haben Sie einen Moment Geduld.
+          </p>
+        </div>
+      </div>
+    )}
+    
     <div className="print-area bg-white overflow-auto p-8">
       <div className="max-w-full text-xs print-container">
         <div className="text-xs">
@@ -82,7 +135,9 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
                   <th colSpan={8} className="border border-black p-1 bg-gray-100">
                     <strong>Schalenwild</strong>
                   </th>
-                  <th rowSpan={8} className="border border-black p-1 text-center w-8" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Gewicht (kg)</th>
+                  <th rowSpan={8} className="border border-black p-1 text-center w-8 gewicht-header">
+                    <div className="gewicht-text">Gewicht (kg)</div>
+                  </th>
                   <th rowSpan={5} colSpan={2} className="border border-black p-1 text-center w-64">Bemerkung</th>
                 </tr>
                 
@@ -245,19 +300,44 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
               <button
                 onClick={() => navigate(-1)}
                 className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl shadow-lg border border-gray-200 font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2"
+                disabled={isPrinting}
               >
                 <X size={20} />
                 Schließen
               </button>
               <button
                 onClick={() => {
-                  // Minimale Verzögerung für bessere mobile Performance
-                  requestAnimationFrame(() => window.print());
+                  setIsPrinting(true);
+                  // Kurze Verzögerung damit User den Loading-State sieht
+                  setTimeout(() => {
+                    // Safari Workaround: execCommand('print') ist schneller als window.print()
+                    try {
+                      if (!document.execCommand('print', false)) {
+                        // Fallback zu window.print() wenn execCommand nicht funktioniert
+                        window.print();
+                      }
+                    } catch (e) {
+                      // execCommand ist in manchen Browsern nicht verfügbar
+                      window.print();
+                    }
+                    // Fallback falls afterprint Event nicht funktioniert (z.B. bei Abbruch)
+                    setTimeout(() => setIsPrinting(false), 3000);
+                  }, 300);
                 }}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl shadow-lg font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2"
+                disabled={isPrinting}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl shadow-lg font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait"
               >
-                <Printer size={20} />
-                Drucken
+                {isPrinting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    Wird vorbereitet...
+                  </>
+                ) : (
+                  <>
+                    <Printer size={20} />
+                    Drucken
+                  </>
+                )}
               </button>
             </div>
           </div>
