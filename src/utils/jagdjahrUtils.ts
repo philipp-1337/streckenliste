@@ -35,7 +35,12 @@ export function getJagdjahr(date: string | Date): string | null {
  */
 export function getCurrentJagdjahr(): string {
   const jagdjahr = getJagdjahr(new Date());
-  return jagdjahr || '';
+  // This should never be null for current date, but return a fallback just in case
+  if (!jagdjahr) {
+    const year = new Date().getFullYear();
+    return `${year}/${year + 1}`;
+  }
+  return jagdjahr;
 }
 
 /**
