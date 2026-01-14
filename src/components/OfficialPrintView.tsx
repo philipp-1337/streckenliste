@@ -1,5 +1,6 @@
 
 import { useNavigate } from 'react-router-dom';
+import { X, Printer } from 'lucide-react';
 import type { Eintrag } from '@types';
 import useAuth from '@hooks/useAuth';
 import { sanitizeHtml } from '@utils/sanitization';
@@ -240,21 +241,23 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
             </div> */}
 
             {/* Action Buttons (nicht druckbar) */}
-            <div className="fixed top-4 right-4 print:hidden flex gap-2">
-               <button
+            <div className="fixed right-6 top-1/2 -translate-y-1/2 print:hidden flex flex-col gap-3 z-[1002]">
+              <button
+                onClick={() => navigate(-1)}
+                className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl shadow-lg border border-gray-200 font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2"
+              >
+                <X size={20} />
+                Schließen
+              </button>
+              <button
                 onClick={() => {
                   void document.body.offsetHeight; // Force reflow
                   setTimeout(() => window.print(), 400);
                 }}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl shadow-lg font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2"
               >
+                <Printer size={20} />
                 Drucken
-              </button>
-              <button
-                onClick={() => navigate(-1)}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
-              >
-                Schließen
               </button>
             </div>
           </div>
