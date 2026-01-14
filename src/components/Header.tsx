@@ -4,9 +4,12 @@ import { BowArrow } from "lucide-react";
 
 interface HeaderProps {
   onLogout: () => void;
+  jagdjahr?: string;
+  availableJagdjahre?: string[];
+  onJagdjahrChange?: (jagdjahr: string) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onLogout }) => {
+export const Header: React.FC<HeaderProps> = ({ onLogout, jagdjahr, availableJagdjahre, onJagdjahrChange }) => {
   const { currentUser } = useAuth();
   // Jagdbezirk und Name auslesen
   const jagdbezirk =
@@ -16,7 +19,7 @@ export const Header: React.FC<HeaderProps> = ({ onLogout }) => {
 
   return (
     <header className="flex justify-between items-center mb-6 print:hidden">
-      <div>
+      <div className="flex-1">
         <h1 className="text-4xl font-bold text-green-800">
           Streckenliste
           <svg className="inline w-7 h-7 ml-1" viewBox="0 0 24 24">
@@ -42,6 +45,23 @@ export const Header: React.FC<HeaderProps> = ({ onLogout }) => {
           <span className="font-semibold">Benutzer:</span> {userName}
         </div>
       </div>
+      {availableJagdjahre && onJagdjahrChange && (
+        <div className="mx-4">
+          <label className="block text-sm font-semibold text-green-900 mb-1">
+            Jagdjahr
+          </label>
+          <select
+            value={jagdjahr || ''}
+            onChange={(e) => onJagdjahrChange(e.target.value)}
+            className="border-2 border-green-600 rounded-lg px-3 py-2 bg-white text-green-900 font-medium min-w-[140px] focus:outline-none focus:ring-2 focus:ring-green-500"
+          >
+            <option value="">Alle Jagdjahre</option>
+            {availableJagdjahre.map(jahr => (
+              <option key={jahr} value={jahr}>{jahr}</option>
+            ))}
+          </select>
+        </div>
+      )}
       <Nav onLogout={onLogout} />
     </header>
   );

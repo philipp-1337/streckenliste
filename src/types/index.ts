@@ -44,6 +44,7 @@ export interface FilterState {
   jaeger: string;
   jahr: string;
   kategorie: string;
+  jagdjahr: string; // Hunting year filter like "2025/2026" or "" for all
 }
 
 export interface SortConfig {

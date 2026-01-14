@@ -1,4 +1,4 @@
-import { useState, useCallback, lazy, Suspense } from 'react';
+import { useState, useCallback, lazy, Suspense, useMemo } from 'react';
 import { Toaster, toast } from 'sonner';
 import type { Eintrag } from '@types';
 import { useFirestore } from '@hooks/useFirestore';
@@ -19,6 +19,7 @@ import Login from '@auth/Login';
 import { auth } from './firebase';
 import { signOut } from 'firebase/auth';
 import { Routes, Route } from 'react-router-dom';
+import { getAvailableJagdjahre, getCurrentJagdjahr } from '@utils/jagdjahrUtils';
 
 // Lazy load große Komponenten für bessere Bundle Size
 const StatistikPanel = lazy(() => import('@components/StatistikPanel'));
@@ -52,6 +53,17 @@ const App = () => {
   );
   const statistiken = useStatistiken(filteredEintraege);
 
+  // Calculate available hunting years from all entries
+  const availableJagdjahre = useMemo(() => 
+    getAvailableJagdjahre(currentData.eintraege),
+    [currentData.eintraege]
+  );
+
+  // Handler for hunting year change
+  const handleJagdjahrChange = useCallback((jagdjahr: string) => {
+    setFilter(prev => ({ ...prev, jagdjahr }));
+  }, [setFilter]);
+
   // All event handlers with useCallback to prevent unnecessary re-renders
   const handleToggleFilterPanel = useCallback(() => {
     setShowFilterPanel((v) => {
@@ -61,7 +73,8 @@ const App = () => {
           wildart: '',
           jaeger: '',
           jahr: '',
-          kategorie: ''
+          kategorie: '',
+          jagdjahr: getCurrentJagdjahr()
         });
       }
       return !v;
@@ -189,7 +202,12 @@ const App = () => {
       ) : currentData.loading || isLoggingIn ? (
         <div className="min-h-screen bg-green-50 p-4">
           <div className="max-w-7xl mx-auto">
-            <Header onLogout={handleLogout} />
+            <Header 
+              onLogout={handleLogout}
+              jagdjahr={filter.jagdjahr}
+              availableJagdjahre={availableJagdjahre}
+              onJagdjahrChange={handleJagdjahrChange}
+            />
             <div className="space-y-6 mt-6">
               <SkeletonTable />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -203,7 +221,12 @@ const App = () => {
         <>
           <div className="min-h-screen bg-green-50 p-4">
             <div className="max-w-7xl mx-auto pb-16">
-              <Header onLogout={handleLogout} />
+              <Header 
+                onLogout={handleLogout}
+                jagdjahr={filter.jagdjahr}
+                availableJagdjahre={availableJagdjahre}
+                onJagdjahrChange={handleJagdjahrChange}
+              />
               <Routes>
                 <Route path="/" element={
                   <>
