@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import type { Eintrag } from '@types';
 import useAuth from '@hooks/useAuth';
+import { sanitizeHtml } from '@utils/sanitization';
 
 interface OfficialPrintViewProps {
   eintraege: Eintrag[];
@@ -194,7 +195,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
                       {eintrag.altersklasse === 'AK 4' && eintrag.geschlecht === 'm' ? 'x' : ''}
                     </td>
                     <td className="border border-black p-1 text-center">{eintrag.gewicht}</td>
-                    <td className="border-l border-b border-black p-1 text-xs">{eintrag.bemerkung}</td>
+                    <td className="border-l border-b border-black p-1 text-xs">{sanitizeHtml(eintrag.bemerkung || '')}</td>
                     <td className="border-r border-b border-black p-1 text-xs">{eintrag.wildursprungsschein}</td>
                   </tr>
                 ))}

@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { Edit, Trash2, Mars, Venus } from 'lucide-react';
 import type { Eintrag, UserData } from '@types';
+import { sanitizeHtml } from '@utils/sanitization';
 
 interface EintragTableProps {
   eintraege: Eintrag[];
@@ -53,7 +54,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                 </td>
                 <td className="px-4 py-3 text-center text-sm">{eintrag.gewicht || '-'}</td>
                 <td className="px-4 py-3 text-sm">{eintrag.jaeger}</td>
-                <td className="px-4 py-3 text-sm">{eintrag.bemerkung}</td>
+                <td className="px-4 py-3 text-sm">{sanitizeHtml(eintrag.bemerkung || '')}</td>
                 <td className="px-4 py-3 text-sm">{eintrag.wildursprungsschein || '-'}</td>
                 <td className="px-4 py-3 text-center">
                   {(currentUser?.role === 'admin' || currentUser?.uid === eintrag.userId) && (

@@ -6,6 +6,10 @@ import './index.css';
 import { AuthProvider } from '@auth/AuthProvider';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { ErrorBoundary } from '@components/ErrorBoundary';
+import { initWebVitals } from '@utils/webVitals';
+
+// Initialize Web Vitals tracking
+initWebVitals();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

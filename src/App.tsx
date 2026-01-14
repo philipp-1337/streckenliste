@@ -17,6 +17,7 @@ import { FachbegriffeLegende } from '@components/FachbegriffeLegende';
 import { OfficialPrintView } from '@components/OfficialPrintView';
 import { ImportDialog } from '@components/ImportDialog';
 import { KategorienFixDialog } from '@components/KategorienFixDialog';
+import { SkeletonTable, SkeletonStatistik } from '@components/SkeletonLoaders';
 import useAuth from '@hooks/useAuth';
 import Login from '@auth/Login';
 import { auth } from './firebase';
@@ -155,9 +156,17 @@ const App = () => {
   // Loading screen für Firestore-Daten nach dem Login
   if (currentData.loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-green-50">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-600 mb-4"></div>
-        <p className="text-xl text-gray-700">Daten werden geladen...</p>
+      <div className="min-h-screen bg-green-50 p-4">
+        <div className="max-w-7xl mx-auto">
+          <Header onLogout={handleLogout} />
+          <div className="space-y-6 mt-6">
+            <SkeletonTable />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <SkeletonStatistik />
+              <SkeletonStatistik />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
