@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, lazy, Suspense } from 'react';
 import { Toaster, toast } from 'sonner';
 import type { Eintrag } from '@types';
 import { useFirestore } from '@hooks/useFirestore';
@@ -10,19 +10,21 @@ import { Header } from '@components/Header';
 import { ActionButtons } from '@components/ActionButtons';
 import { FilterPanel } from '@components/FilterPanel';
 import { Nav } from '@components/Nav';
-import { StatistikPanel } from '@components/StatistikPanel';
 import { EintragForm } from '@components/EintragForm';
 import { EintragTable } from '@components/EintragTable';
 import { FachbegriffeLegende } from '@components/FachbegriffeLegende';
-import { OfficialPrintView } from '@components/OfficialPrintView';
-import { ImportDialog } from '@components/ImportDialog';
-import { KategorienFixDialog } from '@components/KategorienFixDialog';
 import { SkeletonTable, SkeletonStatistik } from '@components/SkeletonLoaders';
 import useAuth from '@hooks/useAuth';
 import Login from '@auth/Login';
 import { auth } from './firebase';
 import { signOut } from 'firebase/auth';
 import { Routes, Route } from 'react-router-dom';
+
+// Lazy load große Komponenten für bessere Bundle Size
+const StatistikPanel = lazy(() => import('@components/StatistikPanel'));
+const OfficialPrintView = lazy(() => import('@components/OfficialPrintView'));
+const ImportDialog = lazy(() => import('@components/ImportDialog'));
+const KategorienFixDialog = lazy(() => import('@components/KategorienFixDialog'));
 
 const App = () => {  
   const { currentUser, loading: userLoading } = useAuth();
@@ -239,25 +241,33 @@ const App = () => {
               />
             } />
             <Route path="/stats" element={
-              <StatistikPanel stats={statistiken} />
+              <Suspense fallback={<SkeletonStatistik />}>
+                <StatistikPanel stats={statistiken} />
+              </Suspense>
             } />
             <Route path="/legende" element={<FachbegriffeLegende />} />
             <Route path="/print" element={
-              <OfficialPrintView eintraege={filteredEintraege} />
+              <Suspense fallback={<div className="p-4">Wird geladen...</div>}>
+                <OfficialPrintView eintraege={filteredEintraege} />
+              </Suspense>
             } />
           </Routes>
         </div>
       </div>
       <Nav onLogout={handleLogout} />
-      <ImportDialog
-        isOpen={showImportDialog}
-        onClose={() => setShowImportDialog(false)}
-        onImport={handleImport}
-      />
-      <KategorienFixDialog
-        isOpen={showFixDialog}
-        onClose={() => setShowFixDialog(false)}
-      />
+      <Suspense fallback={null}>
+        <ImportDialog
+          isOpen={showImportDialog}
+          onClose={() => setShowImportDialog(false)}
+          onImport={handleImport}
+        />
+      </Suspense>
+      <Suspense fallback={null}>
+        <KategorienFixDialog
+          isOpen={showFixDialog}
+          onClose={() => setShowFixDialog(false)}
+        />
+      </Suspense>
     </>
   );
 };

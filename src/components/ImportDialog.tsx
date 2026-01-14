@@ -208,3 +208,5 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({ isOpen, onClose, onI
     </div>
   );
 };
+
+export default ImportDialog;

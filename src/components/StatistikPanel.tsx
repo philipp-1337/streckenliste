@@ -30,3 +30,5 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ stats }) =>
     </div>
   );
 });
+
+export default StatistikPanel;

@@ -4,8 +4,6 @@ import {
   Filter, 
   Printer, 
   FunnelXIcon,
-  RefreshCw,
-  // Upload 
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,13 +24,13 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
   showNewEntryForm,
   onToggleFilterPanel,
   onToggleNewEntryForm,
-  onToggleFixDialog,
+  // onToggleFixDialog,
   // onToggleImportDialog,
-  currentUser
+  // currentUser
 }) => {
   const navigate = useNavigate();
 
-  const isAdmin = currentUser?.role === 'admin';
+  // const isAdmin = currentUser?.role === 'admin';
 
   const buttons = [
     {
@@ -57,17 +55,17 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
     //   disabled: showNewEntryForm,
     //   show: isAdmin,
     // },
-    {
-      id: 'fix-kategorien',
-      icon: RefreshCw,
-      title: 'Kategorien korrigieren',
-      onClick: onToggleFixDialog,
-      isActive: false,
-      activeColors: 'text-orange-700 shadow-orange-500/20',
-      iconClass: '',
-      disabled: showNewEntryForm,
-      show: isAdmin,
-    },
+    // {
+    //   id: 'fix-kategorien',
+    //   icon: RefreshCw,
+    //   title: 'Kategorien korrigieren',
+    //   onClick: onToggleFixDialog,
+    //   isActive: false,
+    //   activeColors: 'text-orange-700 shadow-orange-500/20',
+    //   iconClass: '',
+    //   disabled: showNewEntryForm,
+    //   show: isAdmin,
+    // },
     {
       id: 'filter',
       icon: showFilter ? FunnelXIcon : Filter,

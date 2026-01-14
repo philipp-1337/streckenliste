@@ -260,4 +260,4 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
   );
 };
 
-export { OfficialPrintView };
+export default OfficialPrintView;

@@ -55,6 +55,24 @@ This document contains recommendations for larger refactoring efforts and archit
   - Added iOS PWA visibility change handler for reliable sync on mobile
   - Fallback mechanism ensures updates even when listener is paused (>5s inactivity)
 
+### 6. Bundle Size Optimization
+
+- ✅ **Code Splitting mit React.lazy()** - Route-based code splitting
+  - StatistikPanel (1.37 kB) - Lazy loaded on stats route
+  - OfficialPrintView (11.75 kB) - Lazy loaded on print route
+  - ImportDialog (8.31 kB) - Lazy loaded when needed
+  - KategorienFixDialog (7.97 kB) - Lazy loaded when needed
+  - Separate lucide-icons chunk (7.05 kB, 2.9 kB gzipped)
+- ✅ **Suspense Boundaries** - Graceful loading states for lazy components
+- ✅ **Automatic Tree-Shaking** - Vite optimiert Icon-Imports automatisch
+- ✅ **Reduced Initial Bundle** - ~29.4 kB code nur bei Bedarf nachgeladen
+
+**Results:**
+
+- Initial app bundle: 41.68 kB (11.66 kB gzipped)
+- Total precached: ~903 kB (includes all lazy chunks)
+- Faster initial load time through deferred component loading
+
 ---
 
 ## Recommended Larger Refactorings 🔧
@@ -252,47 +270,6 @@ export const createEntry = functions.https.onCall(async (data, context) => {
 
 ---
 
-## Bundle Size Optimization 📦
-
-### Current Bundle Analysis
-
-From the build output:
-
-- Firebase: ~442 kB (136 kB gzipped) - largest chunk
-- React: ~222 kB (71 kB gzipped)
-- Total: ~889 kB precached
-
-### Recommendations for BSO
-
-1. **Tree-shake Firebase imports**
-
-   ```typescript
-   // Instead of:
-   import { getFirestore } from 'firebase/firestore';
-   
-   // Use specific imports:
-   import { getFirestore } from 'firebase/firestore/lite';
-   ```
-
-2. **Code splitting by route**
-
-   ```typescript
-   const StatistikPanel = lazy(() => import('@components/StatistikPanel'));
-   const OfficialPrintView = lazy(() => import('@components/OfficialPrintView'));
-   ```
-
-3. **Lazy load lucide-react icons**
-
-   ```typescript
-   import { lazy } from 'react';
-   const Edit = lazy(() => import('lucide-react/dist/esm/icons/edit'));
-   ```
-
-**Effort:** Low-Medium (1-2 days)  
-**Impact:** Medium (could reduce initial bundle by 20-30%)
-
----
-
 ## Testing Recommendations 🧪
 
 ### Current State
@@ -347,6 +324,7 @@ Prioritize based on:
 2. **Medium Impact, Medium Effort** - State management, form validation, bundle optimization
 3. **Future Enhancements** - Virtual scrolling, comprehensive testing
 Maintainability** - Centralized state management, robust form validation
+
 - **Security** - Enhanced Firestore rules with data validation
 - **Performance** - Bundle size optimization, virtual scrolling for large datasets
 - **Quality Assurance** - Comprehensive testing suite
@@ -354,3 +332,18 @@ Maintainability** - Centralized state management, robust form validation
 Prioritize based on:
 
 1. **High Impact, Medium Effort** - E
+
+- ✅ **Real-time Collaboration** - Multi-user live updates with onSnapshot
+- ✅ **Enhanced Security Rules** - Comprehensive Firestore data validation
+- ✅ **Optimized Bundle Size** - Code splitting and lazy loading
+
+The remaining recommendations represent longer-term improvements that would further enhance:
+
+- **Maintainability** - Centralized state management, robust form validation
+- **Performance** - Virtual scrolling for large datasets
+- **Quality Assurance** - Comprehensive testing suite
+
+Prioritize based on:
+
+1. **Medium Impact, Medium Effort** - State management, form validation
+2

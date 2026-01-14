@@ -204,3 +204,5 @@ export const KategorienFixDialog: React.FC<KategorienFixDialogProps> = ({ isOpen
   );
 };
 
+export default KategorienFixDialog;
+
