@@ -4,6 +4,7 @@ import {
   Filter, 
   Printer, 
   FunnelXIcon,
+  Upload,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -32,12 +33,12 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
   availableJagdjahre,
   onJagdjahrChange,
   // onToggleFixDialog,
-  // onToggleImportDialog,
-  // currentUser
+  onToggleImportDialog,
+  currentUser
 }) => {
   const navigate = useNavigate();
 
-  // const isAdmin = currentUser?.role === 'admin';
+  const isAdmin = currentUser?.role === 'admin';
 
   const buttons = [
     {
@@ -51,17 +52,17 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
       disabled: false,
       show: true,
     },
-    // {
-    //   id: 'import',
-    //   icon: Upload,
-    //   title: 'CSV importieren',
-    //   onClick: onToggleImportDialog,
-    //   isActive: false,
-    //   activeColors: '',
-    //   iconClass: '',
-    //   disabled: showNewEntryForm,
-    //   show: isAdmin,
-    // },
+    {
+      id: 'import',
+      icon: Upload,
+      title: 'CSV importieren',
+      onClick: onToggleImportDialog,
+      isActive: false,
+      activeColors: '',
+      iconClass: '',
+      disabled: showNewEntryForm,
+      show: isAdmin,
+    },
     // {
     //   id: 'fix-kategorien',
     //   icon: RefreshCw,
@@ -99,16 +100,6 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
 
   return (
     <div className="flex gap-3 mb-6 print:hidden">
-      {/* Jagdjahr Button - nur mobil */}
-      {availableJagdjahre && onJagdjahrChange && (
-        <JagdjahrSelect
-          jagdjahr={jagdjahr}
-          availableJagdjahre={availableJagdjahre}
-          onJagdjahrChange={onJagdjahrChange}
-          variant="icon"
-        />
-      )}
-
       {buttons.filter(button => button.show).map((button) => {
         const Icon = button.icon;
 
@@ -162,6 +153,16 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
           </button>
         );
       })}
+      {/* Jagdjahr Button - nur mobil */}
+      {availableJagdjahre && onJagdjahrChange && (
+        <JagdjahrSelect
+          jagdjahr={jagdjahr}
+          availableJagdjahre={availableJagdjahre}
+          onJagdjahrChange={onJagdjahrChange}
+          variant="icon"
+        />
+      )}
+
     </div>
   );
 });
