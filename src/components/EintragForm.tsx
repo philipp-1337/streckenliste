@@ -28,6 +28,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
       fachbegriff: '',
       gewicht: '',
       bemerkung: '',
+      wildursprungsschein: '',
       jaeger: '',
       ort: '',
       einnahmen: '',
@@ -224,6 +225,17 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             onChange={(e) => setFormData({...formData, bemerkung: e.target.value})}
             className="w-full border rounded-lg px-3 py-2 h-[42px]"
             placeholder="z.B. Erleger, Unfallwild, Drückjagd, etc."
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Wildursprungsschein (Schwarzwild)</label>
+          <input
+            type="text"
+            value={formData.wildursprungsschein}
+            onChange={(e) => setFormData({...formData, wildursprungsschein: e.target.value})}
+            className="w-full border rounded-lg px-3 py-2 h-[42px]"
+            placeholder="z.B. 124368"
           />
         </div>
 

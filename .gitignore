@@ -24,6 +24,6 @@ dist-ssr
 *.sln
 *.sw?
 .firebase
-Streckenliste.csv
+Streckenliste*.csv
 CSV_IMPORT_ANLEITUNG.md
 PWA-Stuff-from-previous-App.md

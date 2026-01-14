@@ -29,6 +29,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
               <th className="px-4 py-3 text-center text-sm font-medium">AK</th>
               <th className="px-4 py-3 text-center text-sm font-medium">♂/♀</th>
               <th className="px-4 py-3 text-center text-sm font-medium">kg</th>
+              <th className="px-4 py-3 text-left text-sm font-medium">WUS-Nr.</th>
               <th className="px-4 py-3 text-left text-sm font-medium">Jäger</th>
               <th className="px-4 py-3 text-left text-sm font-medium">Bemerkung</th>
               <th className="px-4 py-3 text-center text-sm font-medium">Aktionen</th>
@@ -45,6 +46,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                 <td className="px-4 py-3 text-center text-sm">{eintrag.altersklasse}</td>
                 <td className="px-4 py-3 text-center text-sm">{eintrag.geschlecht === 'm' ? '♂' : '♀'}</td>
                 <td className="px-4 py-3 text-center text-sm">{eintrag.gewicht || '-'}</td>
+                <td className="px-4 py-3 text-sm">{eintrag.wildursprungsschein || '-'}</td>
                 <td className="px-4 py-3 text-sm">{eintrag.jaeger}</td>
                 <td className="px-4 py-3 text-sm">{eintrag.bemerkung}</td>
                 <td className="px-4 py-3 text-center">

@@ -33,10 +33,10 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
               <thead>
                 {/* Header Row 1 */}
                 <tr>
-                  <th rowSpan={4} className="border border-black p-1 text-center w-12">lfd. Nr.</th>
-                  <th rowSpan={4} className="border border-black p-1 text-center w-20">Datum</th>
-                  <th rowSpan={4} className="border border-black p-1 text-center w-20">Wildart</th>
-                  <th colSpan={8} className="border border-black p-1 text-center bg-gray-100">
+                  <th rowSpan={8} className="border border-black p-1 text-left w-12 whitespace-nowrap">lfd. Nr.</th>
+                  <th rowSpan={8} className="border border-black p-1 text-left w-20">Datum</th>
+                  <th rowSpan={4} className="border border-black p-1 text-left w-20">Wildart</th>
+                  <th colSpan={8} className="border border-black p-1 bg-gray-100">
                     <strong>Schalenwild</strong>
                   </th>
                   <th rowSpan={4} className="border border-black p-1 text-center w-16">Gewicht</th>
@@ -52,25 +52,78 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
 
                 {/* Header Row 3 - Altersklassen */}
                 <tr>
-                  <th className="border border-black p-1 text-center text-xs">AK 0 (m)</th>
-                  <th className="border border-black p-1 text-center text-xs">AK 0 (w)</th>
-                  <th className="border border-black p-1 text-center text-xs">AK 1</th>
-                  <th className="border border-black p-1 text-center text-xs">AK 2+</th>
-                  <th className="border border-black p-1 text-center text-xs">AK 1</th>
-                  <th className="border border-black p-1 text-center text-xs">AK 2</th>
-                  <th className="border border-black p-1 text-center text-xs">AK 3</th>
-                  <th className="border border-black p-1 text-center text-xs">AK 4</th>
+                  <th className="border-l border-r border-t border-black p-1 pb-0 text-center text-xs">AK 0 (m)</th>
+                  <th className="border-r border-t border-black p-1 pb-0 text-center text-xs">AK 0 (w)</th>
+                  <th className="border-l border-r border-t border-black p-1 pb-0 text-center text-xs">AK 1</th>
+                  <th className="border-r border-t border-black p-1 pb-0 text-center text-xs">AK 2+</th>
+                  <th className="border-l border-r border-t border-black p-1 pb-0 text-center text-xs">AK 1</th>
+                  <th className="border-r border-t border-black p-1 pb-0 text-center text-xs">AK 2</th>
+                  <th className="border-r border-t border-black p-1 pb-0 text-center text-xs">AK 3</th>
+                  <th className="border-r border-t border-black p-1 pb-0 text-center text-xs">AK 4</th>
                 </tr>
 
                 {/* Header Row 4 - Altersangaben */}
                 <tr>
-                  <th colSpan={2} className="border border-black p-1 text-center text-xs">(unter 1 Jahr)</th>
-                  <th className="border border-black p-1 text-center text-xs">(1 Jahr)</th>
-                  <th className="border border-black p-1 text-center text-xs">(ab 2 Jahre)</th>
-                  <th className="border border-black p-1 text-center text-xs">(1 Jahr)</th>
-                  <th className="border border-black p-1 text-center text-xs">(ab 2 Jahre)</th>
-                  <th className="border border-black p-1 text-center text-xs">mittelalte</th>
-                  <th className="border border-black p-1 text-center text-xs">alte</th>
+                  <th className="border-l border-r border-black p-1 pt-0 text-center text-[0.6rem] text-gray-500 font-light whitespace-nowrap">(unter 1 Jahr)</th>
+                  <th className="border-l border-r border-black p-1 pt-0 text-center text-[0.6rem] text-gray-500 font-light whitespace-nowrap">(unter 1 Jahr)</th>
+                  <th className="border-l border-r border-black p-1 pt-0 text-center text-[0.6rem] text-gray-500 font-light whitespace-nowrap">(1 Jahr)</th>
+                  <th className="border-l border-r border-black p-1 pt-0 text-center text-[0.6rem] text-gray-500 font-light whitespace-nowrap">(ab 2 Jahre)</th>
+                  <th className="border-l border-r border-black p-1 pt-0 text-center text-[0.6rem] text-gray-500 font-light whitespace-nowrap">(1 Jahr)</th>
+                  <th className="border-l border-r border-black p-1 pt-0 text-center text-[0.6rem] text-gray-500 font-light whitespace-nowrap">(ab 2 Jahre)</th>
+                  <th className="border-l border-r border-black p-1 pt-0 text-center text-[0.6rem] text-gray-500 font-light"></th>
+                  <th className="border-l border-r border-b border-black p-1 pt-0 text-center text-[0.6rem] text-gray-500 font-light"></th>
+                </tr>
+
+                {/* Header Row 5 - Rotwild Fachbegriffe */}
+                <tr>
+                  <th className="border border-black p-1 text-left text-xs font-semibold">Rotwild</th>
+                  <th colSpan={2} className="border border-black p-1 text-center text-xs">Kälber</th>
+                  <th className="border border-black p-1 text-center text-xs">Schmaltiere</th>
+                  <th className="border border-black p-1 text-center text-xs">Alttiere</th>
+                  <th className="border border-black p-1 text-center text-xs">Schmalspießer</th>
+                  <th className="border border-black p-1 text-center text-xs">Junge Hirsche (2-4 J.)</th>
+                  <th className="border border-black p-1 text-center text-xs">Mittelalte Hirsche (5-9 J.)</th>
+                  <th className="border border-black p-1 text-center text-xs">Alte Hirsche (ab 10 J.)</th>
+                  <th colSpan={2} className="border border-black p-1"></th>
+                </tr>
+
+                {/* Header Row 6 - Damwild Fachbegriffe */}
+                <tr>
+                  <th className="border border-black p-1 text-left text-xs font-semibold">Damwild</th>
+                  <th colSpan={2} className="border border-black p-1 text-center text-xs">Kälber</th>
+                  <th className="border border-black p-1 text-center text-xs">Schmaltiere</th>
+                  <th className="border border-black p-1 text-center text-xs">Alttiere</th>
+                  <th className="border border-black p-1 text-center text-xs">Schmalspießer</th>
+                  <th className="border border-black p-1 text-center text-xs">Junge Hirsche (2-4 J.)</th>
+                  <th className="border border-black p-1 text-center text-xs">Mittelalte Hirsche (3-7 J.)</th>
+                  <th className="border border-black p-1 text-center text-xs">Alte Hirsche (ab 8 J.)</th>
+                  <th colSpan={2} className="border border-black p-1"></th>
+                </tr>
+
+                {/* Header Row 7 - Rehwild Fachbegriffe */}
+                <tr>
+                  <th className="border border-black p-1 text-left text-xs font-semibold">Rehwild</th>
+                  <th colSpan={2} className="border border-black p-1 text-center text-xs">Kitze</th>
+                  <th className="border border-black p-1 text-center text-xs">Schmalrehe</th>
+                  <th className="border border-black p-1 text-center text-xs">Ricken</th>
+                  <th className="border border-black p-1 text-center text-xs">Jährling</th>
+                  <th className="border border-black p-1 text-center text-xs">Rehböcke (ab 2 J.)</th>
+                  <th className="border border-black p-1 text-center text-xs">-</th>
+                  <th className="border border-black p-1 text-center text-xs">-</th>
+                  <th colSpan={2} className="border border-black p-1"></th>
+                </tr>
+
+                {/* Header Row 8 - Schwarzwild Fachbegriffe */}
+                <tr>
+                  <th className="border border-black p-1 text-left text-xs font-semibold">Schwarzwild</th>
+                  <th colSpan={2} className="border border-black p-1 text-center text-xs">Frischlinge</th>
+                  <th className="border border-black p-1 text-center text-xs">Überläuferbache</th>
+                  <th className="border border-black p-1 text-center text-xs">Bachen</th>
+                  <th className="border border-black p-1 text-center text-xs">Überläuferkeiler</th>
+                  <th className="border border-black p-1 text-center text-xs">Keiler (ab 2 J.)</th>
+                  <th className="border border-black p-1 text-center text-xs">-</th>
+                  <th className="border border-black p-1 text-center text-xs">-</th>
+                  <th colSpan={2} className="border border-black p-1"></th>
                 </tr>
               </thead>
               <tbody>
@@ -78,7 +131,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
                 {sortedEintraege.map((eintrag, index) => (
                   <tr key={eintrag.id}>
                     <td className="border border-black p-1 text-center">{index + 1}</td>
-                    <td className="border border-black p-1 text-center">{new Date(eintrag.datum).toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit'})}</td>
+                    <td className="border border-black p-1 text-left">{new Date(eintrag.datum).toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric'})}</td>
                     <td className="border border-black p-1">{eintrag.wildart}</td>
                     <td className="border border-black p-1 text-center">
                       {eintrag.altersklasse === 'AK 0' && eintrag.geschlecht === 'm' ? 'x' : ''}
@@ -105,7 +158,13 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege }) => {
                       {eintrag.altersklasse === 'AK 4' && eintrag.geschlecht === 'm' ? 'x' : ''}
                     </td>
                     <td className="border border-black p-1 text-center">{eintrag.gewicht}</td>
-                    <td className="border border-black p-1 text-xs">{eintrag.bemerkung}</td>
+                    <td className="border border-black p-1 text-xs">
+                      {eintrag.wildursprungsschein && (
+                        <span className="font-semibold">WUS: {eintrag.wildursprungsschein}</span>
+                      )}
+                      {eintrag.wildursprungsschein && eintrag.bemerkung && ' | '}
+                      {eintrag.bemerkung}
+                    </td>
                   </tr>
                 ))}
 

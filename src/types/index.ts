@@ -8,6 +8,7 @@ export interface Eintrag {
   fachbegriff: string;
   gewicht: string;
   bemerkung: string;
+  wildursprungsschein: string;
   jaeger: string;
   ort: string;
   einnahmen: string;
