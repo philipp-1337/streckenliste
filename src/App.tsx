@@ -16,6 +16,7 @@ import { EintragTable } from '@components/EintragTable';
 import { FachbegriffeLegende } from '@components/FachbegriffeLegende';
 import { OfficialPrintView } from '@components/OfficialPrintView';
 import { ImportDialog } from '@components/ImportDialog';
+import { KategorienFixDialog } from '@components/KategorienFixDialog';
 import useAuth from '@hooks/useAuth';
 import Login from '@auth/Login';
 import { auth } from './firebase';
@@ -28,6 +29,7 @@ const App = () => {
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showNewEntryForm, setShowNewEntryForm] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showFixDialog, setShowFixDialog] = useState(false);
 
   // PWA Hooks - sie zeigen die Toasts selbst an
   usePwaPrompt();
@@ -61,6 +63,7 @@ const App = () => {
     });
   }, [setFilter]);
   const handleToggleNewEntryForm = useCallback(() => setShowNewEntryForm((v) => !v), []);
+  const handleToggleFixDialog = useCallback(() => setShowFixDialog((v) => !v), []);
   const handleToggleImportDialog = useCallback(() => setShowImportDialog((v) => !v), []);
 
   const handleLogout = useCallback(async () => {
@@ -190,6 +193,7 @@ const App = () => {
                   onToggleFilterPanel={handleToggleFilterPanel}
                   onToggleNewEntryForm={handleToggleNewEntryForm}
                   onToggleImportDialog={handleToggleImportDialog}
+                  onToggleFixDialog={handleToggleFixDialog}
                   currentUser={currentUser}
                 />
                 {/* Inline Formular über der Tabelle */}
@@ -240,6 +244,10 @@ const App = () => {
         isOpen={showImportDialog}
         onClose={() => setShowImportDialog(false)}
         onImport={handleImport}
+      />
+      <KategorienFixDialog
+        isOpen={showFixDialog}
+        onClose={() => setShowFixDialog(false)}
       />
     </>
   );

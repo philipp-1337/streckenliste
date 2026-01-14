@@ -1,4 +1,5 @@
 import type { Eintrag } from '@types';
+import { wildarten } from '@data/wildarten';
 
 interface CSVRow {
   Nr: string;
@@ -61,6 +62,23 @@ export const parseCSV = (csvText: string): CSVRow[] => {
 };
 
 /**
+ * Findet die korrekte Kategorie und den Fachbegriff aus wildarten.ts
+ */
+const findWildartInfo = (wildart: string, altersklasse: string, geschlecht: string): { kategorie: string; fachbegriff: string } | null => {
+  const wildartInfo = wildarten[wildart];
+  
+  if (!wildartInfo) {
+    return null;
+  }
+  
+  const match = wildartInfo.find(info => 
+    info.altersklasse === altersklasse && info.geschlecht === geschlecht
+  );
+  
+  return match ? { kategorie: match.kategorie, fachbegriff: match.fachbegriff } : null;
+};
+
+/**
  * Konvertiert ein CSV-Row-Objekt in ein Eintrag-Objekt
  */
 export const csvRowToEintrag = (row: CSVRow): Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'> | null => {
@@ -79,67 +97,39 @@ export const csvRowToEintrag = (row: CSVRow): Omit<Eintrag, 'id' | 'userId' | 'j
   if (row['AK 0m']?.toLowerCase() === 'x') {
     altersklasse = 'AK 0';
     geschlecht = 'm';
-    kategorie = 'Jungwild';
   } else if (row['AK 0w']?.toLowerCase() === 'x') {
     altersklasse = 'AK 0';
     geschlecht = 'w';
-    kategorie = 'Jungwild';
   } else if (row['AK 1w']?.toLowerCase() === 'x') {
     altersklasse = 'AK 1';
     geschlecht = 'w';
-    kategorie = 'weibliches Wild';
   } else if (row['AK 2w']?.toLowerCase() === 'x') {
     altersklasse = 'AK 2';
     geschlecht = 'w';
-    kategorie = 'weibliches Wild';
   } else if (row['AK 1m']?.toLowerCase() === 'x') {
     altersklasse = 'AK 1';
     geschlecht = 'm';
-    kategorie = 'männliches Wild';
   } else if (row['AK 2m']?.toLowerCase() === 'x') {
     altersklasse = 'AK 2';
     geschlecht = 'm';
-    kategorie = 'männliches Wild';
   } else if (row['AK  3m']?.toLowerCase() === 'x') {
     altersklasse = 'AK 3';
     geschlecht = 'm';
-    kategorie = 'männliches Wild';
   } else if (row['AK 4m']?.toLowerCase() === 'x') {
     altersklasse = 'AK 4';
     geschlecht = 'm';
-    kategorie = 'männliches Wild';
   }
   
-  // Bestimme Fachbegriff basierend auf Wildart und Altersklasse
+  // Wildart aus CSV
   const wildart = row.Wildart || '';
-  if (wildart === 'Schwarzwild') {
-    if (altersklasse === 'AK 0') fachbegriff = 'Frischlinge';
-    else if (altersklasse === 'AK 1' && geschlecht === 'w') fachbegriff = 'Überläuferbachen';
-    else if (altersklasse === 'AK 2' && geschlecht === 'w') fachbegriff = 'Bachen';
-    else if (altersklasse === 'AK 1' && geschlecht === 'm') fachbegriff = 'Überläuferkeiler';
-    else if (altersklasse === 'AK 2' && geschlecht === 'm') fachbegriff = 'Keiler (ab 2 Jahre)';
-  } else if (wildart === 'Rehwild') {
-    if (altersklasse === 'AK 0') fachbegriff = 'Kitze';
-    else if (altersklasse === 'AK 1' && geschlecht === 'w') fachbegriff = 'Schmalrehe';
-    else if (altersklasse === 'AK 2' && geschlecht === 'w') fachbegriff = 'Ricken';
-    else if (altersklasse === 'AK 1' && geschlecht === 'm') fachbegriff = 'Jährlinge';
-    else if (altersklasse === 'AK 2' && geschlecht === 'm') fachbegriff = 'Rehböcke (ab 2 Jahre)';
-  } else if (wildart === 'Rotwild') {
-    if (altersklasse === 'AK 0') fachbegriff = 'Kälber';
-    else if (altersklasse === 'AK 1' && geschlecht === 'w') fachbegriff = 'Schmaltiere';
-    else if (altersklasse === 'AK 2' && geschlecht === 'w') fachbegriff = 'Alttiere';
-    else if (altersklasse === 'AK 1' && geschlecht === 'm') fachbegriff = 'Schmalspießer';
-    else if (altersklasse === 'AK 2' && geschlecht === 'm') fachbegriff = 'junge Hirsche (2-4 Jahre)';
-    else if (altersklasse === 'AK 3' && geschlecht === 'm') fachbegriff = 'mittelalte Hirsche (5-9 Jahre)';
-    else if (altersklasse === 'AK 4' && geschlecht === 'm') fachbegriff = 'alte Hirsche (ab 10 Jahre)';
-  } else if (wildart === 'Damwild') {
-    if (altersklasse === 'AK 0') fachbegriff = 'Kälber';
-    else if (altersklasse === 'AK 1' && geschlecht === 'w') fachbegriff = 'Schmaltiere';
-    else if (altersklasse === 'AK 2' && geschlecht === 'w') fachbegriff = 'Alttiere';
-    else if (altersklasse === 'AK 1' && geschlecht === 'm') fachbegriff = 'Schmalspießer';
-    else if (altersklasse === 'AK 2' && geschlecht === 'm') fachbegriff = 'junge Hirsche (2-4 Jahre)';
-    else if (altersklasse === 'AK 3' && geschlecht === 'm') fachbegriff = 'mittelalte Hirsche (3-7 Jahre)';
-    else if (altersklasse === 'AK 4' && geschlecht === 'm') fachbegriff = 'alte Hirsche (ab 8 Jahre)';
+  
+  // Bestimme Kategorie und Fachbegriff aus wildarten.ts
+  if (wildart && altersklasse && geschlecht) {
+    const info = findWildartInfo(wildart, altersklasse, geschlecht);
+    if (info) {
+      kategorie = info.kategorie;
+      fachbegriff = info.fachbegriff;
+    }
   }
   
   // Wenn kein Schalenwild, prüfe Bemerkung für Raubwild oder Invasive Arten
@@ -176,6 +166,7 @@ export const csvRowToEintrag = (row: CSVRow): Omit<Eintrag, 'id' | 'userId' | 'j
           ort: row.Ort || '',
           einnahmen: parseEinnahmen(row.Einnahmen),
           notizen: row.Notizen || '',
+          wildursprungsschein: '',
         };
       }
     }
@@ -196,6 +187,7 @@ export const csvRowToEintrag = (row: CSVRow): Omit<Eintrag, 'id' | 'userId' | 'j
           ort: row.Ort || '',
           einnahmen: parseEinnahmen(row.Einnahmen),
           notizen: row.Notizen || '',
+          wildursprungsschein: '',
         };
       }
     }
@@ -219,6 +211,7 @@ export const csvRowToEintrag = (row: CSVRow): Omit<Eintrag, 'id' | 'userId' | 'j
     ort: row.Ort || '',
     einnahmen: parseEinnahmen(row.Einnahmen),
     notizen: row.Notizen || '',
+    wildursprungsschein: '',
   };
 };
 
