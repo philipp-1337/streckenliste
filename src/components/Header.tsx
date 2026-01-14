@@ -21,12 +21,11 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, jagdjahr, availableJag
 
   return (
     <header className="mb-6 print:hidden">
-      {/* Desktop Layout */}
-      <div className="md:flex justify-between items-center">
+      <div className="flex justify-between items-start gap-2">
         <div className="flex-1">
-          <h1 className="text-4xl font-bold text-green-800">
+          <h1 className="text-3xl sm:text-4xl font-bold text-green-800 whitespace-nowrap overflow-hidden text-ellipsis flex items-center">
             Streckenliste
-            <svg className="inline w-7 h-7 ml-1" viewBox="0 0 24 24">
+            <svg className="inline w-7 h-7 sm:w-9 sm:h-9 ml-1" viewBox="0 0 24 24">
               <defs>
                 <linearGradient
                   id="bowarrowGradient"
@@ -43,26 +42,41 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, jagdjahr, availableJag
               <BowArrow stroke="url(#bowarrowGradient)" strokeWidth={2} />
             </svg>
           </h1>
-          <div className="text-sm text-green-900 mt-1 flex flex-col sm:flex-row sm:gap-2">
-            <div>
-              <span className="font-semibold">Jagdbezirk:</span> {jagdbezirk}
-            </div>
-            <span className="hidden sm:inline">|</span>
-            <div>
-              <span className="font-semibold">Benutzer:</span> {userName}
+          <div className="text-sm text-green-900 mt-1">
+            <div className="sm:flex sm:gap-2">
+              <div>
+                <span className="font-semibold">Jagdbezirk:</span> {jagdbezirk}
+              </div>
+              <span className="hidden sm:inline">|</span>
+              <div>
+                <span className="font-semibold">Benutzer:</span> {userName}
+              </div>
             </div>
           </div>
         </div>
-        <div className="hidden md:flex">
+        
+        {/* Jagdjahr - Icon für Mobile, Desktop-Variante für Desktop */}
         {availableJagdjahre && onJagdjahrChange && (
-          <JagdjahrSelect
-            jagdjahr={jagdjahr}
-            availableJagdjahre={availableJagdjahre}
-            onJagdjahrChange={onJagdjahrChange}
-            variant="desktop"
-          />
+          <>
+            <div className="sm:hidden">
+              <JagdjahrSelect
+                jagdjahr={jagdjahr}
+                availableJagdjahre={availableJagdjahre}
+                onJagdjahrChange={onJagdjahrChange}
+                variant="icon"
+              />
+            </div>
+            <div className="hidden sm:block">
+              <JagdjahrSelect
+                jagdjahr={jagdjahr}
+                availableJagdjahre={availableJagdjahre}
+                onJagdjahrChange={onJagdjahrChange}
+                variant="desktop"
+              />
+            </div>
+          </>
         )}
-        </div>
+        
         <Nav onLogout={onLogout} />
       </div>
     </header>

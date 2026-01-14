@@ -4,13 +4,12 @@ import {
   Filter, 
   Printer, 
   FunnelXIcon,
-  Upload,
-  RefreshCw
+  // Upload,
+  // RefreshCw
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import type { UserData } from '@types';
-import { JagdjahrSelect } from './JagdjahrSelect';
 
 interface ActionButtonsProps {
   showFilter: boolean;
@@ -20,9 +19,6 @@ interface ActionButtonsProps {
   onToggleImportDialog?: () => void;
   onToggleFixDialog?: () => void;
   currentUser: UserData | null;
-  jagdjahr?: string;
-  availableJagdjahre?: string[];
-  onJagdjahrChange?: (jagdjahr: string) => void;
 }
 
 export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
@@ -30,16 +26,13 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
   showNewEntryForm,
   onToggleFilterPanel,
   onToggleNewEntryForm,
-  jagdjahr,
-  availableJagdjahre,
-  onJagdjahrChange,
-  onToggleFixDialog,
-  onToggleImportDialog,
-  currentUser
+  // onToggleFixDialog,
+  // onToggleImportDialog,
+  // currentUser
 }) => {
   const navigate = useNavigate();
 
-  const isAdmin = currentUser?.role === 'admin';
+  // const isAdmin = currentUser?.role === 'admin';
 
   const buttons = [
     {
@@ -53,28 +46,28 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
       disabled: false,
       show: true,
     },
-    {
-      id: 'import',
-      icon: Upload,
-      title: 'CSV importieren',
-      onClick: onToggleImportDialog,
-      isActive: false,
-      activeColors: '',
-      iconClass: '',
-      disabled: showNewEntryForm,
-      show: isAdmin,
-    },
-    {
-      id: 'fix-kategorien',
-      icon: RefreshCw,
-      title: 'Kategorien korrigieren',
-      onClick: onToggleFixDialog,
-      isActive: false,
-      activeColors: 'text-orange-700 shadow-orange-500/20',
-      iconClass: '',
-      disabled: showNewEntryForm,
-      show: isAdmin,
-    },
+    // {
+    //   id: 'import',
+    //   icon: Upload,
+    //   title: 'CSV importieren',
+    //   onClick: onToggleImportDialog,
+    //   isActive: false,
+    //   activeColors: '',
+    //   iconClass: '',
+    //   disabled: showNewEntryForm,
+    //   show: isAdmin,
+    // },
+    // {
+    //   id: 'fix-kategorien',
+    //   icon: RefreshCw,
+    //   title: 'Kategorien korrigieren',
+    //   onClick: onToggleFixDialog,
+    //   isActive: false,
+    //   activeColors: 'text-orange-700 shadow-orange-500/20',
+    //   iconClass: '',
+    //   disabled: showNewEntryForm,
+    //   show: isAdmin,
+    // },
     {
       id: 'filter',
       icon: showFilter ? FunnelXIcon : Filter,
@@ -154,16 +147,6 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
           </button>
         );
       })}
-      {/* Jagdjahr Button - nur mobil */}
-      {availableJagdjahre && onJagdjahrChange && (
-        <JagdjahrSelect
-          jagdjahr={jagdjahr}
-          availableJagdjahre={availableJagdjahre}
-          onJagdjahrChange={onJagdjahrChange}
-          variant="icon"
-        />
-      )}
-
     </div>
   );
 });

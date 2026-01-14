@@ -246,9 +246,6 @@ const App = () => {
                       onToggleImportDialog={handleToggleImportDialog}
                       onToggleFixDialog={handleToggleFixDialog}
                       currentUser={currentUser}
-                      jagdjahr={filter.jagdjahr}
-                      availableJagdjahre={availableJagdjahre}
-                      onJagdjahrChange={handleJagdjahrChange}
                     />
                     {/* Inline Formular über der Tabelle */}
                     {(showNewEntryForm || editingEntry) && (
