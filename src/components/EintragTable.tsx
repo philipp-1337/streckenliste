@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Mars, Venus } from 'lucide-react';
 import type { Eintrag, UserData } from '@types';
 
 interface EintragTableProps {
@@ -26,7 +26,11 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
               <th className="px-4 py-3 text-left text-sm font-medium">Wildart</th>
               <th className="px-4 py-3 text-left text-sm font-medium">Fachbegriff</th>
               <th className="px-4 py-3 text-center text-sm font-medium">AK</th>
-              <th className="px-4 py-3 text-center text-sm font-medium">♂/♀</th>
+              <th className="px-4 py-3 text-center text-sm font-medium">
+                <div className="flex items-center justify-center gap-0.5">
+                  <Mars size={14} /><span>/</span><Venus size={14} />
+                </div>
+              </th>
               <th className="px-4 py-3 text-center text-sm font-medium">kg</th>
               <th className="px-4 py-3 text-left text-sm font-medium">Jäger</th>
               <th className="px-4 py-3 text-left text-sm font-medium">Bemerkung</th>
@@ -42,7 +46,11 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                 <td className="px-4 py-3 text-sm font-medium">{eintrag.wildart}</td>
                 <td className="px-4 py-3 text-sm font-medium text-green-700 whitespace-nowrap">{eintrag.fachbegriff}</td>
                 <td className="px-4 py-3 text-center text-sm whitespace-nowrap">{eintrag.altersklasse}</td>
-                <td className="px-4 py-3 text-center text-sm">{eintrag.geschlecht === 'm' ? '♂' : '♀'}</td>
+                <td className="px-4 py-3 text-center text-sm">
+                  <div className="flex items-center justify-center">
+                    {eintrag.geschlecht === 'm' ? <Mars size={16} /> : <Venus size={16} />}
+                  </div>
+                </td>
                 <td className="px-4 py-3 text-center text-sm">{eintrag.gewicht || '-'}</td>
                 <td className="px-4 py-3 text-sm">{eintrag.jaeger}</td>
                 <td className="px-4 py-3 text-sm">{eintrag.bemerkung}</td>

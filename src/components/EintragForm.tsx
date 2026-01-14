@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import { Mars, Venus } from 'lucide-react';
 import type { Eintrag } from '@types';
 import { wildarten } from '@data/wildarten';
 
@@ -171,7 +172,14 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <p><strong>Fachbegriff:</strong> {formData.fachbegriff}</p>
               <p><strong>Altersklasse:</strong> {formData.altersklasse}</p>
-              <p><strong>Geschlecht:</strong> {formData.geschlecht === 'm' ? '♂ männlich' : '♀ weiblich'}</p>
+              <p className="flex items-center gap-1">
+                <strong>Geschlecht:</strong>
+                {formData.geschlecht === 'm' ? (
+                  <span className="flex items-center gap-1"><Mars size={16} /> männlich</span>
+                ) : (
+                  <span className="flex items-center gap-1"><Venus size={16} /> weiblich</span>
+                )}
+              </p>
             </div>
           </div>
         )}
