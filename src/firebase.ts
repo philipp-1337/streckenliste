@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 import { getPerformance } from "firebase/performance";
+import { getAnalytics, isSupported, type Analytics } from "firebase/analytics";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -27,6 +28,16 @@ const auth = getAuth(app);
 // Initialize Performance Monitoring
 const perf = getPerformance(app);
 
+// Initialize Analytics (only in supported environments)
+let analytics: Analytics | null = null;
+isSupported().then((supported) => {
+  if (supported) {
+    analytics = getAnalytics(app);
+  }
+}).catch(() => {
+  console.warn('Firebase Analytics wird in dieser Umgebung nicht unterstützt.');
+});
+
 // Enable offline persistence
 enableIndexedDbPersistence(db)
   .catch((err) => {
@@ -39,4 +50,4 @@ enableIndexedDbPersistence(db)
     }
   });
 
-export { db, auth, perf };
+export { db, auth, perf, analytics };

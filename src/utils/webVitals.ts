@@ -1,8 +1,9 @@
 import { onCLS, onINP, onFCP, onLCP, onTTFB, type Metric } from 'web-vitals';
+import { logEvent } from 'firebase/analytics';
+import { analytics } from '../firebase';
 
 /**
- * Reports Web Vitals metrics to console in development
- * In production, you might want to send these to an analytics service
+ * Reports Web Vitals metrics to console in development and Firebase Analytics in production
  */
 const reportWebVitals = (metric: Metric) => {
   // Log to console in development
@@ -10,14 +11,15 @@ const reportWebVitals = (metric: Metric) => {
     console.log(`[Web Vitals] ${metric.name}:`, metric.value, metric);
   }
   
-  // In production, you could send to analytics:
-  // Example: sendToAnalytics(metric);
-  // Or use Firebase Analytics:
-  // logEvent(analytics, 'web_vitals', {
-  //   metric_name: metric.name,
-  //   metric_value: metric.value,
-  //   metric_rating: metric.rating,
-  // });
+  // Send to Firebase Analytics in production
+  if (analytics) {
+    logEvent(analytics, 'web_vitals', {
+      metric_name: metric.name,
+      metric_value: Math.round(metric.value),
+      metric_rating: metric.rating,
+      metric_delta: Math.round(metric.delta),
+    });
+  }
 };
 
 /**
