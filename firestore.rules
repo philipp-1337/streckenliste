@@ -8,10 +8,31 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
+    // Validate entry data structure and content
+    function isValidEntry() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['datum', 'wildart', 'userId', 'jagdbezirkId'])
+        && data.datum is string
+        && data.datum.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && data.wildart is string
+        && data.wildart.size() > 0
+        && data.wildart.size() <= 100
+        && data.userId is string
+        && data.jagdbezirkId is string
+        && (!data.keys().hasAny(['gewicht']) || data.gewicht is string)
+        && (!data.keys().hasAny(['einnahmen']) || data.einnahmen is string)
+        && (!data.keys().hasAny(['ausgaben']) || data.ausgaben is string)
+        && (!data.keys().hasAny(['geschlecht']) || data.geschlecht is string)
+        && (!data.keys().hasAny(['altersklasse']) || data.altersklasse is string)
+        && (!data.keys().hasAny(['kategorie']) || data.kategorie is string)
+        && (!data.keys().hasAny(['notizen']) || (data.notizen is string && data.notizen.size() <= 1000))
+        && (!data.keys().hasAny(['timestamp']) || data.timestamp is timestamp);
+    }
+
     // Users can read/update their own profile
     match /users/{userId} {
     allow read: if request.auth.uid == userId;
-    allow update: if request.auth.uid == userId && request.auth.uid != 'PQz2hNrf3gYSfKJ2eYjRlg67vaf1';
+    allow update: if request.auth.uid == userId;
     }
 
     // Jagdbezirk document itself (for metadata)
@@ -19,7 +40,7 @@ service cloud.firestore {
       // Any user in the district can read its metadata
     allow read: if request.auth != null && getUserData().jagdbezirkId == jagdbezirkId;
       // Only admins can modify the district (e.g. add hunters later)
-    allow write: if request.auth != null && getUserData().role == 'admin' && request.auth.uid != 'PQz2hNrf3gYSfKJ2eYjRlg67vaf1';
+    allow write: if request.auth != null && getUserData().role == 'admin';
     }
 
     // Entries within a Jagdbezirk
@@ -33,13 +54,18 @@ service cloud.firestore {
     allow create: if request.auth != null &&
              getUserData().jagdbezirkId == jagdbezirkId &&
              request.resource.data.userId == request.auth.uid &&
-             request.auth.uid != 'PQz2hNrf3gYSfKJ2eYjRlg67vaf1';
+             isValidEntry();
 
-      // Allow update/delete if user is admin OR owns the entry
-    allow update, delete: if request.auth != null &&
+      // Allow update if user is admin OR owns the entry
+    allow update: if request.auth != null &&
              getUserData().jagdbezirkId == jagdbezirkId &&
              (getUserData().role == 'admin' || resource.data.userId == request.auth.uid) &&
-             request.auth.uid != 'PQz2hNrf3gYSfKJ2eYjRlg67vaf1';
+             isValidEntry();
+
+      // Allow delete if user is admin OR owns the entry (no data validation needed)
+    allow delete: if request.auth != null &&
+             getUserData().jagdbezirkId == jagdbezirkId &&
+             (getUserData().role == 'admin' || resource.data.userId == request.auth.uid);
     }
   }
 }
