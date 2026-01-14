@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import Spinner from '@components/Spinner';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Mars, Venus } from 'lucide-react';
@@ -17,6 +18,9 @@ export const EintragForm: React.FC<EintragFormProps> = ({
   onSubmit,
   onCancel
 }) => {
+  // Local loading state for save/update
+  const [loading, setLoading] = useState(false);
+
   // Initialize form with React Hook Form and Zod validation
   const {
     register,
@@ -136,13 +140,17 @@ export const EintragForm: React.FC<EintragFormProps> = ({
     trigger();
   };
 
-  const onSubmitForm: SubmitHandler<Omit<Eintrag, 'id'>> = (data) => {
-    // userId und jagdbezirkId werden vom Backend gesetzt, also mit leeren Strings übergeben
-    onSubmit({
-      ...data,
-      jagdbezirkId: data.jagdbezirkId || '',
-      userId: data.userId || ''
-    });
+  const onSubmitForm: SubmitHandler<Omit<Eintrag, 'id'>> = async (data) => {
+    setLoading(true);
+    try {
+      await Promise.resolve(onSubmit({
+        ...data,
+        jagdbezirkId: data.jagdbezirkId || '',
+        userId: data.userId || ''
+      }));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -355,15 +363,17 @@ export const EintragForm: React.FC<EintragFormProps> = ({
         <div className="flex flex-wrap gap-4">
           <button
             type="submit"
-            disabled={!isValid}
-            className="w-full sm:w-auto bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
+            disabled={!isValid || loading}
+            className="w-full sm:w-auto bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
           >
-            {editingEntry ? 'Aktualisieren' : 'Speichern'}
+            {loading ? <Spinner size={20} /> : null}
+            {loading ? (editingEntry ? 'Aktualisiere...' : 'Speichere...') : (editingEntry ? 'Aktualisieren' : 'Speichern')}
           </button>
           <button
             type="button"
             onClick={onCancel}
             className="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors"
+            disabled={loading}
           >
             Abbrechen
           </button>

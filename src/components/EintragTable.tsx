@@ -1,4 +1,5 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
+import Spinner from '@components/Spinner';
 import { Edit, Trash2, Mars, Venus } from 'lucide-react';
 import type { Eintrag, UserData } from '@types';
 import { sanitizeHtml } from '@utils/sanitization';
@@ -16,6 +17,20 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
   onDelete,
   currentUser,
 }) => {
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+
+  const handleEdit = async (eintrag: Eintrag) => {
+    setLoadingId(eintrag.id);
+    await Promise.resolve(onEdit(eintrag));
+    setLoadingId(null);
+  };
+
+  const handleDelete = async (id: string) => {
+    setLoadingId(id);
+    await Promise.resolve(onDelete(id));
+    setLoadingId(null);
+  };
+
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <div className="overflow-x-auto">
@@ -60,18 +75,20 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                   {(currentUser?.role === 'admin' || currentUser?.uid === eintrag.userId) && (
                     <div className="flex justify-center gap-2">
                       <button
-                        onClick={() => onEdit(eintrag)}
-                        className="text-blue-600 hover:text-blue-800 transition-colors"
+                        onClick={() => handleEdit(eintrag)}
+                        className="text-blue-600 hover:text-blue-800 transition-colors flex items-center justify-center gap-1"
                         title="Bearbeiten"
+                        disabled={loadingId === eintrag.id}
                       >
-                        <Edit size={16} />
+                        {loadingId === eintrag.id ? <Spinner size={16} /> : <Edit size={16} />}
                       </button>
                       <button
-                        onClick={() => onDelete(eintrag.id)}
-                        className="text-red-600 hover:text-red-800 transition-colors"
+                        onClick={() => handleDelete(eintrag.id)}
+                        className="text-red-600 hover:text-red-800 transition-colors flex items-center justify-center gap-1"
                         title="Löschen"
+                        disabled={loadingId === eintrag.id}
                       >
-                        <Trash2 size={16} />
+                        {loadingId === eintrag.id ? <Spinner size={16} /> : <Trash2 size={16} />}
                       </button>
                     </div>
                   )}

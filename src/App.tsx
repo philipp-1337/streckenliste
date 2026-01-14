@@ -33,6 +33,8 @@ const App = () => {
   const [showNewEntryForm, setShowNewEntryForm] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showFixDialog, setShowFixDialog] = useState(false);
+  // Login-Flow Flag
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // PWA Hooks - sie zeigen die Toasts selbst an
   usePwaPrompt();
@@ -142,38 +144,10 @@ const App = () => {
     await currentData.importEintraege(eintraege);
   }, [currentData]);
 
-  // Early returns after all hooks
-  if (userLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-green-50">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-600 mb-4"></div>
-        <p className="text-xl text-gray-700">Benutzerdaten werden geladen...</p>
-      </div>
-    );
+  // Setze isLoggingIn zurück, sobald User und Daten geladen sind
+  if (isLoggingIn && currentUser && !currentData.loading) {
+    setTimeout(() => setIsLoggingIn(false), 0);
   }
-  if (!currentUser) {
-    return <Login />;
-  }
-
-  // Loading screen für Firestore-Daten nach dem Login
-  if (currentData.loading) {
-    return (
-      <div className="min-h-screen bg-green-50 p-4">
-        <div className="max-w-7xl mx-auto">
-          <Header onLogout={handleLogout} />
-          <div className="space-y-6 mt-6">
-            <SkeletonTable />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <SkeletonStatistik />
-              <SkeletonStatistik />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-
 
   return (
     <>
@@ -192,82 +166,107 @@ const App = () => {
           },
         }}
       />
-      <div className="min-h-screen bg-green-50 p-4">
-        <div className="max-w-7xl mx-auto pb-16">
-          <Header onLogout={handleLogout} />
-          <Routes>
-            <Route path="/" element={
-              <>
-                <ActionButtons
-                  showFilter={showFilterPanel}
-                  showNewEntryForm={showNewEntryForm}
-                  onToggleFilterPanel={handleToggleFilterPanel}
-                  onToggleNewEntryForm={handleToggleNewEntryForm}
-                  onToggleImportDialog={handleToggleImportDialog}
-                  onToggleFixDialog={handleToggleFixDialog}
-                  currentUser={currentUser}
-                />
-                {/* Inline Formular über der Tabelle */}
-                {(showNewEntryForm || editingEntry) && (
-                  <div className="mx-auto mb-6">
-                    <EintragForm
-                      editingEntry={editingEntry}
-                      onSubmit={async (data) => {
-                        await handleSubmit(data);
-                        handleFormClose();
-                      }}
-                      onCancel={handleFormClose}
-                      />
-                  </div>
-                )}
-                {showFilterPanel && (
-                  <FilterPanel filter={filter} onFilterChange={setFilter} />
-                )}
-                {!(showNewEntryForm || editingEntry) && (
-                <EintragTable
-                  eintraege={filteredEintraege}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  currentUser={currentUser}
-                />
-                )}
-              </>
-            } />
-            <Route path="/form" element={
-              <EintragForm
-                editingEntry={editingEntry}
-                onSubmit={handleSubmit}
-                onCancel={handleFormClose}
-              />
-            } />
-            <Route path="/stats" element={
-              <Suspense fallback={<SkeletonStatistik />}>
-                <StatistikPanel stats={statistiken} />
-              </Suspense>
-            } />
-            <Route path="/legende" element={<FachbegriffeLegende />} />
-            <Route path="/print" element={
-              <Suspense fallback={<div className="p-4">Wird geladen...</div>}>
-                <OfficialPrintView eintraege={filteredEintraege} />
-              </Suspense>
-            } />
-          </Routes>
+      {/* Early returns nach Toaster! */}
+      {userLoading ? (
+        <div className="flex flex-col items-center justify-center h-screen bg-green-50">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-600 mb-4"></div>
+          <p className="text-xl text-gray-700">Benutzerdaten werden geladen...</p>
         </div>
-      </div>
-      <Nav onLogout={handleLogout} />
-      <Suspense fallback={null}>
-        <ImportDialog
-          isOpen={showImportDialog}
-          onClose={() => setShowImportDialog(false)}
-          onImport={handleImport}
-        />
-      </Suspense>
-      <Suspense fallback={null}>
-        <KategorienFixDialog
-          isOpen={showFixDialog}
-          onClose={() => setShowFixDialog(false)}
-        />
-      </Suspense>
+      ) : !currentUser ? (
+        <Login isLoggingIn={isLoggingIn} setIsLoggingIn={setIsLoggingIn} />
+      ) : currentData.loading || isLoggingIn ? (
+        <div className="min-h-screen bg-green-50 p-4">
+          <div className="max-w-7xl mx-auto">
+            <Header onLogout={handleLogout} />
+            <div className="space-y-6 mt-6">
+              <SkeletonTable />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SkeletonStatistik />
+                <SkeletonStatistik />
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="min-h-screen bg-green-50 p-4">
+            <div className="max-w-7xl mx-auto pb-16">
+              <Header onLogout={handleLogout} />
+              <Routes>
+                <Route path="/" element={
+                  <>
+                    <ActionButtons
+                      showFilter={showFilterPanel}
+                      showNewEntryForm={showNewEntryForm}
+                      onToggleFilterPanel={handleToggleFilterPanel}
+                      onToggleNewEntryForm={handleToggleNewEntryForm}
+                      onToggleImportDialog={handleToggleImportDialog}
+                      onToggleFixDialog={handleToggleFixDialog}
+                      currentUser={currentUser}
+                    />
+                    {/* Inline Formular über der Tabelle */}
+                    {(showNewEntryForm || editingEntry) && (
+                      <div className="mx-auto mb-6">
+                        <EintragForm
+                          editingEntry={editingEntry}
+                          onSubmit={async (data) => {
+                            await handleSubmit(data);
+                            handleFormClose();
+                          }}
+                          onCancel={handleFormClose}
+                          />
+                      </div>
+                    )}
+                    {showFilterPanel && (
+                      <FilterPanel filter={filter} onFilterChange={setFilter} />
+                    )}
+                    {!(showNewEntryForm || editingEntry) && (
+                    <EintragTable
+                      eintraege={filteredEintraege}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      currentUser={currentUser}
+                    />
+                    )}
+                  </>
+                } />
+                <Route path="/form" element={
+                  <EintragForm
+                    editingEntry={editingEntry}
+                    onSubmit={handleSubmit}
+                    onCancel={handleFormClose}
+                  />
+                } />
+                <Route path="/stats" element={
+                  <Suspense fallback={<SkeletonStatistik />}>
+                    <StatistikPanel stats={statistiken} />
+                  </Suspense>
+                } />
+                <Route path="/legende" element={<FachbegriffeLegende />} />
+                <Route path="/print" element={
+                  <Suspense fallback={<div className="p-4">Wird geladen...</div>}>
+                    <OfficialPrintView eintraege={filteredEintraege} />
+                  </Suspense>
+                } />
+              </Routes>
+            </div>
+          </div>
+          <Nav onLogout={handleLogout} />
+          <Suspense fallback={null}>
+            <ImportDialog
+              isOpen={showImportDialog}
+              onClose={() => setShowImportDialog(false)}
+              onImport={handleImport}
+            />
+          </Suspense>
+          <Suspense fallback={null}>
+            <KategorienFixDialog
+              isOpen={showFixDialog}
+              onClose={() => setShowFixDialog(false)}
+            />
+          </Suspense>
+        </>
+      )}
     </>
   );
 };
