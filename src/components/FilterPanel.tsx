@@ -28,7 +28,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
         </select>
         <input
           type="text"
-          placeholder="Kategorie suchen..."
+          placeholder="Fachbegriff suchen..."
           value={filter.kategorie}
           onChange={(e) => onFilterChange({...filter, kategorie: e.target.value})}
           className="border rounded-lg px-3 py-2 h-[42px]"

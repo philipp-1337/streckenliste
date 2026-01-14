@@ -14,7 +14,7 @@ export const useFilter = (eintraege: Eintrag[]) => {
       const matchWildart = !filter.wildart || eintrag.wildart === filter.wildart;
       const matchJaeger = !filter.jaeger || eintrag.jaeger.toLowerCase().includes(filter.jaeger.toLowerCase());
       const matchJahr = !filter.jahr || eintrag.datum.startsWith(filter.jahr);
-      const matchKategorie = !filter.kategorie || eintrag.kategorie.toLowerCase().includes(filter.kategorie.toLowerCase());
+      const matchKategorie = !filter.kategorie || eintrag.fachbegriff.toLowerCase().includes(filter.kategorie.toLowerCase());
       return matchWildart && matchJaeger && matchJahr && matchKategorie;
     });
   }, [eintraege, filter]);

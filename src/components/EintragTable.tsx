@@ -24,7 +24,6 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
               <th className="px-4 py-3 text-left text-sm font-medium">Nr.</th>
               <th className="px-4 py-3 text-left text-sm font-medium">Datum</th>
               <th className="px-4 py-3 text-left text-sm font-medium">Wildart</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">Kategorie</th>
               <th className="px-4 py-3 text-left text-sm font-medium">Fachbegriff</th>
               <th className="px-4 py-3 text-center text-sm font-medium">AK</th>
               <th className="px-4 py-3 text-center text-sm font-medium">♂/♀</th>
@@ -41,7 +40,6 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                 <td className="px-4 py-3 text-sm">{index + 1}</td>
                 <td className="px-4 py-3 text-sm">{new Date(eintrag.datum).toLocaleDateString('de-DE')}</td>
                 <td className="px-4 py-3 text-sm font-medium">{eintrag.wildart}</td>
-                <td className="px-4 py-3 text-sm">{eintrag.kategorie}</td>
                 <td className="px-4 py-3 text-sm font-medium text-green-700">{eintrag.fachbegriff}</td>
                 <td className="px-4 py-3 text-center text-sm">{eintrag.altersklasse}</td>
                 <td className="px-4 py-3 text-center text-sm">{eintrag.geschlecht === 'm' ? '♂' : '♀'}</td>
