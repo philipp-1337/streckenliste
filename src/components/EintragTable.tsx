@@ -45,8 +45,8 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
 
     const sortedEintraege = [...eintraege].sort((a, b) => {
       if (!sortColumn) return 0;
-      let aValue = a[sortColumn as keyof Eintrag];
-      let bValue = b[sortColumn as keyof Eintrag];
+      let aValue: string | number | undefined = a[sortColumn as keyof Eintrag];
+      let bValue: string | number | undefined = b[sortColumn as keyof Eintrag];
 
       // Spezialbehandlung für bestimmte Felder
       if (sortColumn === 'datum') {
@@ -54,8 +54,8 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
         bValue = new Date(b.datum).getTime();
       }
       if (sortColumn === 'gewicht') {
-        aValue = a.gewicht || 0;
-        bValue = b.gewicht || 0;
+        aValue = a.gewicht ? Number(a.gewicht) : 0;
+        bValue = b.gewicht ? Number(b.gewicht) : 0;
       }
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         const cmp = aValue.localeCompare(bValue, 'de', { numeric: true });
