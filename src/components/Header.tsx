@@ -51,6 +51,12 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, jagdjahr, availableJag
               <div>
                 <span className="font-semibold">Benutzer:</span> {userName}
               </div>
+              {/* Jagdjahr unter Benutzer auf kleinen Screens */}
+              {jagdjahr && (
+                <div className="sm:hidden">
+                  <span className="font-semibold">Jagdjahr:</span> {jagdjahr}
+                </div>
+              )}
             </div>
           </div>
         </div>
