@@ -1,6 +1,6 @@
 import { memo, useState } from 'react';
 import Spinner from '@components/Spinner';
-import { Edit, Trash2, Mars, Venus } from 'lucide-react';
+import { Edit, Trash2, Mars, Venus, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import type { Eintrag, UserData } from '@types';
 import { sanitizeHtml } from '@utils/sanitization';
 
@@ -17,19 +17,55 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
   onDelete,
   currentUser,
 }) => {
-  const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  const handleEdit = async (eintrag: Eintrag) => {
-    setLoadingId(eintrag.id);
-    await Promise.resolve(onEdit(eintrag));
-    setLoadingId(null);
-  };
+    const [loadingId, setLoadingId] = useState<string | null>(null);
+    const [sortColumn, setSortColumn] = useState<string>('');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  const handleDelete = async (id: string) => {
-    setLoadingId(id);
-    await Promise.resolve(onDelete(id));
-    setLoadingId(null);
-  };
+    const handleEdit = async (eintrag: Eintrag) => {
+      setLoadingId(eintrag.id);
+      await Promise.resolve(onEdit(eintrag));
+      setLoadingId(null);
+    };
+
+    const handleDelete = async (id: string) => {
+      setLoadingId(id);
+      await Promise.resolve(onDelete(id));
+      setLoadingId(null);
+    };
+
+    const handleSort = (column: string) => {
+      if (sortColumn === column) {
+        setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      } else {
+        setSortColumn(column);
+        setSortDirection('asc');
+      }
+    };
+
+    const sortedEintraege = [...eintraege].sort((a, b) => {
+      if (!sortColumn) return 0;
+      let aValue = a[sortColumn as keyof Eintrag];
+      let bValue = b[sortColumn as keyof Eintrag];
+
+      // Spezialbehandlung für bestimmte Felder
+      if (sortColumn === 'datum') {
+        aValue = new Date(a.datum).getTime();
+        bValue = new Date(b.datum).getTime();
+      }
+      if (sortColumn === 'gewicht') {
+        aValue = a.gewicht || 0;
+        bValue = b.gewicht || 0;
+      }
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        const cmp = aValue.localeCompare(bValue, 'de', { numeric: true });
+        return sortDirection === 'asc' ? cmp : -cmp;
+      }
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+      return 0;
+    });
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -38,24 +74,96 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
           <thead className="bg-green-800 text-white">
             <tr>
               <th className="px-4 py-3 text-left text-sm font-medium">Nr.</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">Datum</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">Wildart</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">Fachbegriff</th>
-              <th className="px-4 py-3 text-center text-sm font-medium">AK</th>
+              <th className="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('datum')}>
+                <span className="inline-flex items-center gap-1">
+                  Datum
+                  {sortColumn === 'datum' ? (
+                    sortDirection === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+                  ) : (
+                    <ChevronsUpDown size={16} className="opacity-70 group-hover:opacity-100" />
+                  )}
+                </span>
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('wildart')}>
+                <span className="inline-flex items-center gap-1">
+                  Wildart
+                  {sortColumn === 'wildart' ? (
+                    sortDirection === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+                  ) : (
+                    <ChevronsUpDown size={16} className="opacity-70 group-hover:opacity-100" />
+                  )}
+                </span>
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('fachbegriff')}>
+                <span className="inline-flex items-center gap-1">
+                  Fachbegriff
+                  {sortColumn === 'fachbegriff' ? (
+                    sortDirection === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+                  ) : (
+                    <ChevronsUpDown size={16} className="opacity-70 group-hover:opacity-100" />
+                  )}
+                </span>
+              </th>
+              <th className="px-4 py-3 text-center text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('altersklasse')}>
+                <span className="inline-flex items-center gap-1">
+                  AK
+                  {sortColumn === 'altersklasse' ? (
+                    sortDirection === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+                  ) : (
+                    <ChevronsUpDown size={16} className="opacity-70 group-hover:opacity-100" />
+                  )}
+                </span>
+              </th>
               <th className="px-4 py-3 text-center text-sm font-medium">
                 <div className="flex items-center justify-center gap-0.5">
                   <Mars size={14} /><span>/</span><Venus size={14} />
                 </div>
               </th>
-              <th className="px-4 py-3 text-center text-sm font-medium">kg</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">Jäger</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">Bemerkung</th>
-              <th className="px-4 py-3 text-left text-sm font-medium">WUS</th>
+              <th className="px-4 py-3 text-center text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('gewicht')}>
+                <span className="inline-flex items-center gap-1">
+                  kg
+                  {sortColumn === 'gewicht' ? (
+                    sortDirection === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+                  ) : (
+                    <ChevronsUpDown size={16} className="opacity-70 group-hover:opacity-100" />
+                  )}
+                </span>
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('jaeger')}>
+                <span className="inline-flex items-center gap-1">
+                  Jäger
+                  {sortColumn === 'jaeger' ? (
+                    sortDirection === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+                  ) : (
+                    <ChevronsUpDown size={16} className="opacity-70 group-hover:opacity-100" />
+                  )}
+                </span>
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('bemerkung')}>
+                <span className="inline-flex items-center gap-1">
+                  Bemerkung
+                  {sortColumn === 'bemerkung' ? (
+                    sortDirection === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+                  ) : (
+                    <ChevronsUpDown size={16} className="opacity-70 group-hover:opacity-100" />
+                  )}
+                </span>
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('wildursprungsschein')}>
+                <span className="inline-flex items-center gap-1">
+                  WUS
+                  {sortColumn === 'wildursprungsschein' ? (
+                    sortDirection === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+                  ) : (
+                    <ChevronsUpDown size={16} className="opacity-70 group-hover:opacity-100" />
+                  )}
+                </span>
+              </th>
               <th className="px-4 py-3 text-center text-sm font-medium">Aktionen</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {eintraege.map((eintrag, index) => (
+            {sortedEintraege.map((eintrag, index) => (
               <tr key={eintrag.id} className="hover:bg-gray-50">
                 <td className="px-4 py-3 text-sm">{index + 1}</td>
                 <td className="px-4 py-3 text-sm">{new Date(eintrag.datum).toLocaleDateString('de-DE')}</td>
