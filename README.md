@@ -37,7 +37,7 @@ Streckenliste ist eine Progressive Web App (PWA) zur Verwaltung von Jagdabschüs
 ### Voraussetzungen
 
 - Node.js (Version 18 oder höher)
-- npm oder yarn
+- Bun (Package Manager)
 - Firebase-Projekt mit Firestore und Authentication
 
 ### Entwicklungsumgebung einrichten
@@ -48,13 +48,13 @@ git clone <repository-url>
 cd streckenliste
 
 # Dependencies installieren
-npm install
+bun install
 
 # Firebase-Konfiguration erstellen
 # Erstelle eine Datei src/firebase.ts mit deiner Firebase-Config
 
 # Entwicklungsserver starten
-npm run dev
+bun run dev
 ```
 
 ### Firebase-Konfiguration
@@ -92,16 +92,16 @@ firebase deploy --only firestore:rules
 
 ```bash
 # Entwicklungsserver mit Hot Module Replacement
-npm run dev
+bun run dev
 
 # Production Build erstellen
-npm run build
+bun run build
 
 # Production Build lokal testen
-npm run preview
+bun run preview
 
 # Linting
-npm run lint
+bun run lint
 ```
 
 ## 🎯 Features im Detail
@@ -184,7 +184,7 @@ src/
 
 ```bash
 # Build erstellen
-npm run build
+bun run build
 
 # Zu Firebase deployen
 firebase deploy --only hosting
@@ -195,7 +195,7 @@ firebase deploy --only hosting
 Die App kann auf jedem statischen Hosting-Service deployed werden:
 
 ```bash
-npm run build
+bun run build
 # Inhalt des dist/-Ordners hochladen
 ```
 

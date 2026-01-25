@@ -7,11 +7,13 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Miscellaneous
 node_modules
 dist
 build
 dist-ssr
 *.local
+bun.lockb
 
 # Editor directories and files
 .vscode/*
