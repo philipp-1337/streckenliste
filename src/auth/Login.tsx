@@ -88,7 +88,7 @@ const Login: React.FC<LoginProps> = ({ isLoggingIn, setIsLoggingIn }) => {
           </div>
           <button
             type="submit"
-            className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer"
             disabled={loading}
           >
             {loading ? <Spinner size={24} /> : null}

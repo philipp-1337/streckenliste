@@ -76,7 +76,7 @@ export const KategorienFixDialog: React.FC<KategorienFixDialogProps> = ({ isOpen
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
             title="Schließen"
           >
             <X className="w-5 h-5" />
@@ -95,7 +95,7 @@ export const KategorienFixDialog: React.FC<KategorienFixDialogProps> = ({ isOpen
               <button
                 onClick={handleVorschau}
                 disabled={loading}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 cursor-pointer"
               >
                 <Eye className="w-4 h-4" />
                 Vorschau anzeigen
@@ -104,7 +104,7 @@ export const KategorienFixDialog: React.FC<KategorienFixDialogProps> = ({ isOpen
               <button
                 onClick={handleFix}
                 disabled={loading || !vorschau}
-                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50 cursor-pointer"
               >
                 <Play className="w-4 h-4" />
                 Kategorien korrigieren

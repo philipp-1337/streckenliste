@@ -299,7 +299,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
             <div className="fixed right-6 top-1/2 -translate-y-1/2 print:hidden flex flex-col gap-3 z-[1002]">
               <button
                 onClick={() => navigate(-1)}
-                className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl shadow-lg border border-gray-200 font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2"
+                className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl shadow-lg border border-gray-200 font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2 cursor-pointer"
                 disabled={isPrinting}
               >
                 <X size={20} />
@@ -316,7 +316,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
                         // Fallback zu window.print() wenn execCommand nicht funktioniert
                         window.print();
                       }
-                    } catch (e) {
+                    } catch {
                       // execCommand ist in manchen Browsern nicht verfügbar
                       window.print();
                     }
@@ -325,7 +325,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
                   }, 300);
                 }}
                 disabled={isPrinting}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl shadow-lg font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait"
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl shadow-lg font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait cursor-pointer"
               >
                 {isPrinting ? (
                   <>

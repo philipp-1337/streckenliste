@@ -177,7 +177,9 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                 <td className="px-4 py-3 text-center text-sm whitespace-nowrap">{eintrag.altersklasse}</td>
                 <td className="px-4 py-3 text-center text-sm">
                   <div className="flex items-center justify-center">
-                    {eintrag.geschlecht === 'm' ? <Mars size={16} /> : <Venus size={16} />}
+                    {!['Raubwild', 'Invasive Arten'].includes(eintrag.kategorie) && (
+                      eintrag.geschlecht === 'm' ? <Mars size={16} /> : eintrag.geschlecht === 'w' ? <Venus size={16} /> : null
+                    )}
                   </div>
                 </td>
                 <td className="px-4 py-3 text-center text-sm">{eintrag.gewicht || '-'}</td>
@@ -189,7 +191,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                     <div className="flex justify-center gap-2">
                       <button
                         onClick={() => handleEdit(eintrag)}
-                        className="text-blue-600 hover:text-blue-800 transition-colors flex items-center justify-center gap-1"
+                        className="text-blue-600 hover:text-blue-800 transition-colors flex items-center justify-center gap-1 cursor-pointer"
                         title="Bearbeiten"
                         disabled={loadingId === eintrag.id}
                       >
@@ -197,7 +199,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                       </button>
                       <button
                         onClick={() => handleDelete(eintrag.id)}
-                        className="text-red-600 hover:text-red-800 transition-colors flex items-center justify-center gap-1"
+                        className="text-red-600 hover:text-red-800 transition-colors flex items-center justify-center gap-1 cursor-pointer"
                         title="Löschen"
                         disabled={loadingId === eintrag.id}
                       >

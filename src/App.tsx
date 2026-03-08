@@ -29,6 +29,14 @@ const getCurrentJagdjahrCached = (() => {
   return month >= 4 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
 })();
 
+const getDefaultFilterState = () => ({
+  wildart: '',
+  jaeger: '',
+  jahr: '',
+  kategorie: '',
+  jagdjahr: getCurrentJagdjahrCached
+});
+
 // Lazy load große Komponenten für bessere Bundle Size
 const StatistikPanel = lazy(() => import('@components/StatistikPanel'));
 const OfficialPrintView = lazy(() => import('@components/OfficialPrintView'));
@@ -74,20 +82,19 @@ const App = () => {
 
   // All event handlers with useCallback to prevent unnecessary re-renders
   const handleToggleFilterPanel = useCallback(() => {
-    setShowFilterPanel((v) => {
-      // Wenn Panel geschlossen wird (v ist true -> wird false), Filter zurücksetzen
-      if (v) {
-        setFilter({
-          wildart: '',
-          jaeger: '',
-          jahr: '',
-          kategorie: '',
-          jagdjahr: getCurrentJagdjahrCached
-        });
-      }
-      return !v;
-    });
+    setShowFilterPanel((v) => !v);
+  }, []);
+  const handleResetFilters = useCallback(() => {
+    setFilter(getDefaultFilterState());
   }, [setFilter]);
+
+  const activeFilterCount = useMemo(() => {
+    const defaults = getDefaultFilterState();
+    return Number(filter.wildart !== defaults.wildart) +
+      Number(filter.jaeger !== defaults.jaeger) +
+      Number(filter.jahr !== defaults.jahr) +
+      Number(filter.kategorie !== defaults.kategorie);
+  }, [filter]);
   const handleToggleNewEntryForm = useCallback(() => setShowNewEntryForm((v) => !v), []);
   const handleToggleFixDialog = useCallback(() => setShowFixDialog((v) => !v), []);
   const handleToggleImportDialog = useCallback(() => setShowImportDialog((v) => !v), []);
@@ -114,7 +121,7 @@ const App = () => {
       console.error("Fehler beim Speichern:", error);
       toast.error("Fehler beim Speichern");
     }
-  }, [editingEntry, currentData, firestore.error]);
+  }, [editingEntry, currentData]);
 
   const handleEdit = useCallback((eintrag: Eintrag) => {
     setEditingEntry(eintrag);
@@ -143,7 +150,7 @@ const App = () => {
           <div className="mt-3 flex justify-end gap-2">
             <button
               onClick={() => toast.dismiss(t)}
-              className="rounded-xl px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 transition"
+              className="rounded-xl px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 transition cursor-pointer"
             >
               Abbrechen
             </button>
@@ -157,7 +164,7 @@ const App = () => {
                   toast.error("Fehler beim Löschen");
                 }
               }}
-              className="rounded-xl px-3 py-1.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition"
+              className="rounded-xl px-3 py-1.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition cursor-pointer"
             >
               Löschen
             </button>
@@ -166,7 +173,7 @@ const App = () => {
       ),
       { duration: 10000 }
     );
-  }, [currentData, firestore.error]);
+  }, [currentData]);
 
   const handleFormClose = useCallback(() => {
     setEditingEntry(null);
@@ -211,7 +218,6 @@ const App = () => {
         <div className="min-h-screen bg-green-50 p-4">
           <div className="max-w-7xl mx-auto">
             <Header 
-              onLogout={handleLogout}
               jagdjahr={filter.jagdjahr}
               availableJagdjahre={availableJagdjahre}
               onJagdjahrChange={handleJagdjahrChange}
@@ -230,7 +236,6 @@ const App = () => {
           <div className="min-h-screen bg-green-50 p-4">
             <div className="max-w-7xl mx-auto pb-16">
               <Header 
-                onLogout={handleLogout}
                 jagdjahr={filter.jagdjahr}
                 availableJagdjahre={availableJagdjahre}
                 onJagdjahrChange={handleJagdjahrChange}
@@ -246,6 +251,9 @@ const App = () => {
                       onToggleImportDialog={handleToggleImportDialog}
                       onToggleFixDialog={handleToggleFixDialog}
                       currentUser={currentUser}
+                      activeFilterCount={activeFilterCount}
+                      filteredCount={filteredEintraege.length}
+                      totalCount={currentData.eintraege.length}
                     />
                     {/* Inline Formular über der Tabelle */}
                     {(showNewEntryForm || editingEntry) && (
@@ -261,7 +269,11 @@ const App = () => {
                       </div>
                     )}
                     {showFilterPanel && (
-                      <FilterPanel filter={filter} onFilterChange={setFilter} />
+                      <FilterPanel
+                        filter={filter}
+                        onFilterChange={setFilter}
+                        onResetFilters={handleResetFilters}
+                      />
                     )}
                     {!(showNewEntryForm || editingEntry) && (
                     <EintragTable

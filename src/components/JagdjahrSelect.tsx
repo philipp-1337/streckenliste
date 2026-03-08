@@ -39,7 +39,7 @@ export const JagdjahrSelect: React.FC<JagdjahrSelectProps> = ({
             active:scale-95
             focus:outline-none focus:ring-2 focus:ring-green-500/20
             text-green-700
-          "
+           cursor-pointer"
           title="Jagdjahr auswählen"
         >
           <Calendar size={18} className="transition-transform" />
@@ -90,7 +90,7 @@ export const JagdjahrSelect: React.FC<JagdjahrSelectProps> = ({
       </label>
       <button
         onClick={toggle}
-        className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border-2 border-green-600 shadow-sm hover:border-green-700 hover:shadow-md transition-all active:scale-[0.98] min-w-[140px]"
+        className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border-2 border-green-600 shadow-sm hover:border-green-700 hover:shadow-md transition-all active:scale-[0.98] min-w-[140px] cursor-pointer"
         aria-label="Jagdjahr auswählen"
       >
         <span className="flex-1 text-left text-green-900 font-medium text-sm">

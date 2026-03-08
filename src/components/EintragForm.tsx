@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import Spinner from '@components/Spinner';
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import { useForm, type Resolver, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Mars, Venus } from 'lucide-react';
 import type { Eintrag } from '@types';
@@ -31,7 +31,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
     trigger,
     formState: { errors, isValid }
   } = useForm<Omit<Eintrag, 'id'>>({
-    resolver: zodResolver(eintragFormSchema) as any,
+    resolver: zodResolver(eintragFormSchema) as Resolver<Omit<Eintrag, 'id'>>,
     mode: 'onChange', // Validate on change for better UX
     defaultValues: editingEntry
       ? {
@@ -364,7 +364,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           <button
             type="submit"
             disabled={!isValid || loading}
-            className="w-full sm:w-auto bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
+            className="w-full sm:w-auto bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300 cursor-pointer"
           >
             {loading ? <Spinner size={20} /> : null}
             {loading ? (editingEntry ? 'Aktualisiere...' : 'Speichere...') : (editingEntry ? 'Aktualisieren' : 'Speichern')}
@@ -372,7 +372,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           <button
             type="button"
             onClick={onCancel}
-            className="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors"
+            className="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors cursor-pointer"
             disabled={loading}
           >
             Abbrechen

@@ -79,7 +79,7 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({ isOpen, onClose, onI
           <h2 className="text-xl font-bold text-gray-900">CSV Import</h2>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
           >
             <X className="w-6 h-6" />
           </button>
@@ -102,7 +102,7 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({ isOpen, onClose, onI
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors cursor-pointer"
               >
                 <Upload className="w-5 h-5" />
                 Datei auswählen
@@ -181,7 +181,7 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({ isOpen, onClose, onI
         <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
           <button
             onClick={handleClose}
-            className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+            className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
             disabled={importing}
           >
             Abbrechen
@@ -189,7 +189,7 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({ isOpen, onClose, onI
           <button
             onClick={handleImport}
             disabled={preview.length === 0 || importing || success}
-            className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
           >
             {importing ? (
               <>

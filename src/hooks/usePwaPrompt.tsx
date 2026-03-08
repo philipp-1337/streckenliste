@@ -30,15 +30,14 @@ const checkIsIos = () => {
 const isIos = checkIsIos();
 const iosVersion = getIosVersion();
 
-// CustomToast-Komponente für iOS
-const IosInstallToast = ({ onClose }: { onClose: () => void }) => {
+const renderIosInstallToast = (onClose: () => void) => {
   const isNewIos = iosVersion && iosVersion >= 18;
 
   return (
     <div className="relative bg-white text-gray-900 rounded-lg shadow-lg p-4 max-w-sm">
       <button
         onClick={onClose}
-        className="absolute -top-3 -left-3 p-1 text-gray-400 hover:text-gray-600 rounded transition"
+        className="absolute -top-3 -left-3 p-1 text-gray-400 hover:text-gray-600 rounded transition cursor-pointer"
         aria-label="Schließen"
       >
         <XIcon size={16} />
@@ -83,14 +82,7 @@ const IosInstallToast = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
-// CustomToast-Komponente für Non-iOS
-const NonIosInstallToast = ({
-  onInstall,
-  onLater,
-}: {
-  onInstall: () => void;
-  onLater: () => void;
-}) => {
+const renderNonIosInstallToast = (onInstall: () => void, onLater: () => void) => {
   return (
     <div className="bg-white text-gray-900 rounded-lg shadow-lg p-4 max-w-sm">
       <div className="text-center">
@@ -98,13 +90,13 @@ const NonIosInstallToast = ({
         <div className="flex gap-2 justify-center">
           <button
             onClick={onLater}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition shadow-sm cursor-pointer"
           >
             Später
           </button>
           <button
             onClick={onInstall}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition shadow-sm cursor-pointer"
           >
             <DownloadIcon size={16} />
             Installieren
@@ -158,12 +150,10 @@ export const usePwaPrompt = () => {
       };
 
       toast.custom(
-        (_) =>
-          isIos ? (
-            <IosInstallToast onClose={handleClose} />
-          ) : (
-            <NonIosInstallToast onInstall={handleInstall} onLater={handleClose} />
-          ),
+        () =>
+          isIos
+            ? renderIosInstallToast(handleClose)
+            : renderNonIosInstallToast(handleInstall, handleClose),
         {
           duration: Infinity,
           id: 'pwa-toast',

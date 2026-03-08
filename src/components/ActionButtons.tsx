@@ -19,6 +19,9 @@ interface ActionButtonsProps {
   onToggleImportDialog?: () => void;
   onToggleFixDialog?: () => void;
   currentUser: UserData | null;
+  activeFilterCount: number;
+  filteredCount: number;
+  totalCount: number;
 }
 
 export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
@@ -29,6 +32,9 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
   // onToggleFixDialog,
   // onToggleImportDialog,
   // currentUser
+  activeFilterCount,
+  filteredCount,
+  totalCount
 }) => {
   const navigate = useNavigate();
 
@@ -96,6 +102,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
     <div className="flex gap-3 mb-6 print:hidden">
       {buttons.filter(button => button.show).map((button) => {
         const Icon = button.icon;
+        const isFilterButton = button.id === 'filter';
 
         return (
           <button
@@ -137,6 +144,12 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
               `}
             />
 
+            {isFilterButton && activeFilterCount > 0 && (
+              <span className="absolute -top-1 -right-1 z-20 min-w-[20px] h-5 px-1 rounded-full bg-green-700 text-white text-[11px] leading-5 font-semibold">
+                {activeFilterCount}
+              </span>
+            )}
+
             {/* Ripple effect on click */}
             <div className="
               absolute inset-0 rounded-2xl
@@ -147,6 +160,9 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
           </button>
         );
       })}
+      <div className="ml-auto self-center text-sm text-gray-600">
+        {filteredCount} / {totalCount} Treffer
+      </div>
     </div>
   );
 });

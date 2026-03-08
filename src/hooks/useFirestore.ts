@@ -200,31 +200,33 @@ export const useFirestore = () => {
       throw new Error("Keine Admin-Berechtigung");
     }
 
+    type ImportedEintrag = Omit<Eintrag, 'id'>;
     // Validierungsfunktion nach Firestore-Regeln
-    const isValidEntry = (data: any) => {
-      if (!data) return false;
+    const isValidEntry = (data: unknown): data is ImportedEintrag => {
+      if (!data || typeof data !== 'object') return false;
+      const candidate = data as Record<string, unknown>;
       // Pflichtfelder
       if (
-        typeof data.datum !== 'string' ||
-        !/^\d{4}-\d{2}-\d{2}$/.test(data.datum) ||
-        typeof data.wildart !== 'string' ||
-        data.wildart.length === 0 || data.wildart.length > 100
+        typeof candidate.datum !== 'string' ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(candidate.datum) ||
+        typeof candidate.wildart !== 'string' ||
+        candidate.wildart.length === 0 || candidate.wildart.length > 100
       ) return false;
       // Optionale Felder
-      if (data.gewicht && typeof data.gewicht !== 'string') return false;
-      if (data.einnahmen && typeof data.einnahmen !== 'string') return false;
-      if (data.ausgaben && typeof data.ausgaben !== 'string') return false;
-      if (data.geschlecht && typeof data.geschlecht !== 'string') return false;
-      if (data.altersklasse && typeof data.altersklasse !== 'string') return false;
-      if (data.kategorie && typeof data.kategorie !== 'string') return false;
-      if (data.notizen && (typeof data.notizen !== 'string' || data.notizen.length > 1000)) return false;
+      if (candidate.gewicht && typeof candidate.gewicht !== 'string') return false;
+      if (candidate.einnahmen && typeof candidate.einnahmen !== 'string') return false;
+      if (candidate.ausgaben && typeof candidate.ausgaben !== 'string') return false;
+      if (candidate.geschlecht && typeof candidate.geschlecht !== 'string') return false;
+      if (candidate.altersklasse && typeof candidate.altersklasse !== 'string') return false;
+      if (candidate.kategorie && typeof candidate.kategorie !== 'string') return false;
+      if (candidate.notizen && (typeof candidate.notizen !== 'string' || candidate.notizen.length > 1000)) return false;
       // Timestamp optional
       return true;
     };
 
     setLoading(true);
     let importiert = 0;
-    let fehlerhafte: any[] = [];
+    const fehlerhafte: ImportedEintrag[] = [];
     try {
       for (const eintrag of eintraege) {
         const newEintrag = {

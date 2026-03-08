@@ -6,14 +6,24 @@ import { wildarten } from '@data/wildarten';
 interface FilterPanelProps {
   filter: FilterState;
   onFilterChange: (filter: FilterState) => void;
+  onResetFilters: () => void;
 }
 
-export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterChange }) => {
+export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterChange, onResetFilters }) => {
   return (
     <div className="bg-white p-4 rounded-lg mb-6 shadow">
-      <div className="flex items-center gap-2 mb-3">
-        <Filter size={20} />
-        <h3 className="font-semibold">Filter</h3>
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <div className="flex items-center gap-2">
+          <Filter size={20} />
+          <h3 className="font-semibold">Filter</h3>
+        </div>
+        <button
+          type="button"
+          onClick={onResetFilters}
+          className="text-sm font-medium text-green-800 hover:text-green-900 underline underline-offset-2 cursor-pointer"
+        >
+          Filter zurücksetzen
+        </button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <select

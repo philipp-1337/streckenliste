@@ -13,6 +13,13 @@
 
 import { fixKategorienFuerJagdbezirk, previewKategorienKorrektur } from './fixKategorien';
 
+type MigrationFn = (jagdbezirkId: string) => Promise<unknown>;
+
+interface MigrationWindow extends Window {
+  migrateKategorien?: MigrationFn;
+  previewMigration?: MigrationFn;
+}
+
 // Diese Funktion kann direkt in der Konsole aufgerufen werden
 export const migrateKategorien = async (jagdbezirkId: string) => {
   console.log('🔍 Starte Kategorien-Migration...');
@@ -62,8 +69,9 @@ export const previewMigration = async (jagdbezirkId: string) => {
 
 // Exportiere beide Funktionen für window-Objekt
 if (typeof window !== 'undefined') {
-  (window as any).migrateKategorien = migrateKategorien;
-  (window as any).previewMigration = previewMigration;
+  const migrationWindow = window as MigrationWindow;
+  migrationWindow.migrateKategorien = migrateKategorien;
+  migrationWindow.previewMigration = previewMigration;
   console.log('✅ Migrations-Funktionen verfügbar:');
   console.log('   - previewMigration(jagdbezirkId) - Vorschau');
   console.log('   - migrateKategorien(jagdbezirkId) - Migration durchführen');

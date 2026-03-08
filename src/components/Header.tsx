@@ -1,16 +1,14 @@
-import { Nav } from "./Nav";
 import { JagdjahrSelect } from "./JagdjahrSelect";
 import useAuth from "@hooks/useAuth";
 import { BowArrow } from "lucide-react";
 
 interface HeaderProps {
-  onLogout: () => void;
   jagdjahr?: string;
   availableJagdjahre?: string[];
   onJagdjahrChange?: (jagdjahr: string) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onLogout, jagdjahr, availableJagdjahre, onJagdjahrChange }) => {
+export const Header: React.FC<HeaderProps> = ({ jagdjahr, availableJagdjahre, onJagdjahrChange }) => {
   const { currentUser } = useAuth();
   
   // Jagdbezirk und Name auslesen
@@ -82,8 +80,6 @@ export const Header: React.FC<HeaderProps> = ({ onLogout, jagdjahr, availableJag
             </div>
           </>
         )}
-        
-        <Nav onLogout={onLogout} />
       </div>
     </header>
   );
