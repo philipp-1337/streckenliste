@@ -80,10 +80,15 @@ export const EintragForm: React.FC<EintragFormProps> = ({
   // Reset form when editingEntry changes
   useEffect(() => {
     if (editingEntry) {
+      let kategorieValue = editingEntry.kategorie;
+      // Wenn Sonstige, dann kombiniere Kategorie und Fachbegriff für das neue value-Format
+      if (editingEntry.wildart === 'Sonstige' && editingEntry.kategorie && editingEntry.fachbegriff) {
+        kategorieValue = `${editingEntry.kategorie}|${editingEntry.fachbegriff}`;
+      }
       reset({
         datum: editingEntry.datum,
         wildart: editingEntry.wildart,
-        kategorie: editingEntry.kategorie,
+        kategorie: kategorieValue,
         altersklasse: editingEntry.altersklasse,
         geschlecht: editingEntry.geschlecht,
         fachbegriff: editingEntry.fachbegriff,
@@ -115,22 +120,18 @@ export const EintragForm: React.FC<EintragFormProps> = ({
   };
 
   const handleKategorieChange = (kategorie: string) => {
-    const wildartData = getKategorienFuerWildart(watchedWildart);
-    const selectedKategorie = wildartData.find(k => k.kategorie === kategorie);
-
-    // Bei "Sonstige": Kategorie bleibt (Raubwild/Invasive Arten), Tier kommt in Bemerkung
     const isSonstige = watchedWildart === 'Sonstige';
-    
     if (isSonstige) {
-      // Bei Sonstige: kategorie ist bereits richtig (Raubwild/Invasive Arten)
-      // fachbegriff enthält das Tier, das in die Bemerkung kommt
-      setValue('kategorie', kategorie, { shouldValidate: true });
+      // value ist jetzt "Kategorie|Fachbegriff"
+      const fachbegriff = kategorie.split('|')[1];
+      setValue('kategorie', kategorie, { shouldValidate: true }); // Wert bleibt Kategorie|Fachbegriff
       setValue('altersklasse', '', { shouldValidate: true });
       setValue('geschlecht', '', { shouldValidate: true });
-      setValue('fachbegriff', selectedKategorie?.fachbegriff || '', { shouldValidate: true });
-      setValue('bemerkung', selectedKategorie?.fachbegriff || '', { shouldValidate: true });
+      setValue('fachbegriff', fachbegriff || '', { shouldValidate: true });
+      setValue('bemerkung', fachbegriff || '', { shouldValidate: true });
     } else {
-      // Normales Schalenwild
+      const wildartData = getKategorienFuerWildart(watchedWildart);
+      const selectedKategorie = wildartData.find(k => k.kategorie === kategorie);
       setValue('kategorie', kategorie, { shouldValidate: true });
       setValue('altersklasse', selectedKategorie?.altersklasse || '', { shouldValidate: true });
       setValue('geschlecht', selectedKategorie?.geschlecht || '', { shouldValidate: true });
@@ -211,7 +212,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
                     {getKategorienFuerWildart('Sonstige')
                       .filter(k => k.kategorie === 'Raubwild')
                       .map((kategorie, idx) => (
-                        <option key={`raubwild-${idx}`} value={kategorie.kategorie}>
+                        <option key={`raubwild-${idx}`} value={`Raubwild|${kategorie.fachbegriff}`}>
                           {kategorie.fachbegriff}
                         </option>
                       ))}
@@ -220,7 +221,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
                     {getKategorienFuerWildart('Sonstige')
                       .filter(k => k.kategorie === 'Invasive Arten')
                       .map((kategorie, idx) => (
-                        <option key={`invasiv-${idx}`} value={kategorie.kategorie}>
+                        <option key={`invasiv-${idx}`} value={`Invasive Arten|${kategorie.fachbegriff}`}>
                           {kategorie.fachbegriff}
                         </option>
                       ))}
