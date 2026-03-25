@@ -3,9 +3,8 @@ import { toast } from 'sonner';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { FirebaseError } from 'firebase/app';
-
-
 import Spinner from '@components/Spinner';
+import { BowArrow } from 'lucide-react';
 
 
 interface LoginProps {
@@ -54,14 +53,21 @@ const Login: React.FC<LoginProps> = ({ isLoggingIn, setIsLoggingIn }) => {
         <div className="flex flex-col items-center mb-8">
           <h1 className="text-3xl font-bold text-green-800 flex items-center gap-1">
             Streckenliste
-            <svg className="inline w-8 h-8 ml-0.5" viewBox="0 0 24 24">
+            <svg className="inline w-7 h-7 sm:w-9 sm:h-9 ml-1" viewBox="0 0 24 24">
               <defs>
-                <linearGradient id="loginLogoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="hsl(148 97% 20%)" />
-                  <stop offset="100%" stopColor="hsl(151 100% 30%)" />
+                <linearGradient
+                  id="bowarrowGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
+                  <stop offset="0%" stopColor="hsl(148 97% 20%)" /> {/* green-800 */}
+                  <stop offset="100%" stopColor="hsl(151 100% 30%)" />{" "}
+                  {/* green-500 */}
                 </linearGradient>
               </defs>
-              <path d="M19 3L5 12l4 1.5L7 21l3-4 4 2 5-16z" stroke="url(#loginLogoGradient)" strokeWidth={2} fill="none" strokeLinejoin="round" strokeLinecap="round" />
+              <BowArrow stroke="url(#bowarrowGradient)" strokeWidth={2} />
             </svg>
           </h1>
           <p className="text-sm text-green-900/60 mt-1">Digitale Jagdstrecke</p>
