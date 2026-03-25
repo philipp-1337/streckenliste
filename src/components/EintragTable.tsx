@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import Spinner from '@components/Spinner';
 import { Edit, Trash2, Mars, Venus, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import type { Eintrag, UserData } from '@types';
@@ -47,30 +47,31 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
       }
     };
 
-    const sortedEintraege = sortColumn
-      ? [...eintraege].sort((a, b) => {
-          let aValue: string | number | undefined = a[sortColumn as keyof Eintrag];
-          let bValue: string | number | undefined = b[sortColumn as keyof Eintrag];
+    const sortedEintraege = useMemo(() => {
+      if (!sortColumn) return eintraege;
+      return [...eintraege].sort((a, b) => {
+        let aValue: string | number | undefined = a[sortColumn as keyof Eintrag];
+        let bValue: string | number | undefined = b[sortColumn as keyof Eintrag];
 
-          // Spezialbehandlung für bestimmte Felder
-          if (sortColumn === 'datum') {
-            aValue = new Date(a.datum).getTime();
-            bValue = new Date(b.datum).getTime();
-          }
-          if (sortColumn === 'gewicht') {
-            aValue = a.gewicht ? Number(a.gewicht) : 0;
-            bValue = b.gewicht ? Number(b.gewicht) : 0;
-          }
-          if (typeof aValue === 'string' && typeof bValue === 'string') {
-            const cmp = aValue.localeCompare(bValue, 'de', { numeric: true });
-            return sortDirection === 'asc' ? cmp : -cmp;
-          }
-          if (typeof aValue === 'number' && typeof bValue === 'number') {
-            return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
-          }
-          return 0;
-        })
-      : eintraege;
+        // Spezialbehandlung für bestimmte Felder
+        if (sortColumn === 'datum') {
+          aValue = new Date(a.datum).getTime();
+          bValue = new Date(b.datum).getTime();
+        }
+        if (sortColumn === 'gewicht') {
+          aValue = a.gewicht ? Number(a.gewicht) : 0;
+          bValue = b.gewicht ? Number(b.gewicht) : 0;
+        }
+        if (typeof aValue === 'string' && typeof bValue === 'string') {
+          const cmp = aValue.localeCompare(bValue, 'de', { numeric: true });
+          return sortDirection === 'asc' ? cmp : -cmp;
+        }
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+          return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+        }
+        return 0;
+      });
+    }, [eintraege, sortColumn, sortDirection]);
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">

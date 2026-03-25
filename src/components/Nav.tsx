@@ -81,7 +81,7 @@ export const Nav: React.FC<NavProps> = ({ onLogout }) => {
                 <Icon
                   size={20}
                   strokeWidth={isActive && !tab.isLogout ? 2.5 : 2}
-                  className="transition-transform duration-300 group-hover:scale-105 will-change-transform"
+                  className="transition-transform duration-300 group-hover:scale-105"
                 />
                 <span>{tab.label}</span>
               </span>

@@ -160,8 +160,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
           </button>
         );
       })}
-      <div className="ml-auto self-center text-sm text-gray-600">
-        {filteredCount} / {totalCount} Treffer
+      <div className="ml-auto self-center text-sm text-green-900/50">
+        {filteredCount} / {totalCount}
       </div>
     </div>
   );

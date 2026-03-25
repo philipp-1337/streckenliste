@@ -166,8 +166,8 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             <input
               type="date"
               {...register('datum')}
-              className={`w-full min-w-0 max-w-full border rounded-lg px-3 py-2 h-[42px] text-base [appearance:textfield] [-webkit-appearance:none] ${
-                errors.datum ? 'border-red-500' : ''
+              className={`w-full min-w-0 max-w-full border rounded-lg px-3 py-2 h-[42px] text-base [appearance:textfield] [-webkit-appearance:none] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+                errors.datum ? 'border-red-500' : 'border-gray-300'
               }`}
               style={{ boxSizing: 'border-box' }}
             />
@@ -180,8 +180,8 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             <select
               {...register('wildart')}
               onChange={(e) => handleWildartChange(e.target.value)}
-              className={`w-full border rounded-lg px-3 py-2 h-[42px] ${
-                errors.wildart ? 'border-red-500' : ''
+              className={`w-full border rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+                errors.wildart ? 'border-red-500' : 'border-gray-300'
               }`}
             >
               <option value="">Bitte wählen...</option>
@@ -201,8 +201,8 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               {...register('kategorie')}
               onChange={(e) => handleKategorieChange(e.target.value)}
               disabled={!watchedWildart}
-              className={`w-full border rounded-lg px-3 py-2 disabled:bg-gray-100 h-[42px] ${
-                errors.kategorie ? 'border-red-500' : ''
+              className={`w-full border rounded-lg px-3 py-2 disabled:bg-gray-100 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+                errors.kategorie ? 'border-red-500' : 'border-gray-300'
               }`}
             >
               <option value="">Bitte wählen...</option>
@@ -243,8 +243,8 @@ export const EintragForm: React.FC<EintragFormProps> = ({
 
         {/* Automatisch ausgefüllte Felder */}
         {watchedKategorie && watchedWildart !== 'Sonstige' && (
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h4 className="font-semibold mb-2">📋 Automatisch ermittelt:</h4>
+          <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+            <h4 className="font-semibold mb-2 text-green-800">Automatisch ermittelt</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <p><strong>Fachbegriff:</strong> {watchedFachbegriff}</p>
               <p><strong>Altersklasse:</strong> {watchedAltersklasse}</p>
@@ -267,8 +267,8 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               type="number"
               step="0.1"
               {...register('gewicht')}
-              className={`w-full border rounded-lg px-3 py-2 h-[42px] ${
-                errors.gewicht ? 'border-red-500' : ''
+              className={`w-full border rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+                errors.gewicht ? 'border-red-500' : 'border-gray-300'
               }`}
             />
             {errors.gewicht && (
@@ -281,8 +281,8 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               type="number"
               step="0.01"
               {...register('einnahmen')}
-              className={`w-full border rounded-lg px-3 py-2 h-[42px] ${
-                errors.einnahmen ? 'border-red-500' : ''
+              className={`w-full border rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+                errors.einnahmen ? 'border-red-500' : 'border-gray-300'
               }`}
             />
             {errors.einnahmen && (
@@ -294,8 +294,8 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             <input
               type="text"
               {...register('jaeger')}
-              className={`w-full border rounded-lg px-3 py-2 h-[42px] ${
-                errors.jaeger ? 'border-red-500' : ''
+              className={`w-full border rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+                errors.jaeger ? 'border-red-500' : 'border-gray-300'
               }`}
             />
             {errors.jaeger && (
@@ -307,8 +307,8 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             <input
               type="text"
               {...register('ort')}
-              className={`w-full border rounded-lg px-3 py-2 h-[42px] ${
-                errors.ort ? 'border-red-500' : ''
+              className={`w-full border rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+                errors.ort ? 'border-red-500' : 'border-gray-300'
               }`}
             />
             {errors.ort && (
@@ -322,8 +322,8 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           <input
             type="text"
             {...register('bemerkung')}
-            className={`w-full border rounded-lg px-3 py-2 h-[42px] ${
-              errors.bemerkung ? 'border-red-500' : ''
+            className={`w-full border rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+              errors.bemerkung ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="z.B. Erleger, Unfallwild, Drückjagd, etc."
           />
@@ -337,8 +337,8 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           <input
             type="text"
             {...register('wildursprungsschein')}
-            className={`w-full border rounded-lg px-3 py-2 h-[42px] ${
-              errors.wildursprungsschein ? 'border-red-500' : ''
+            className={`w-full border rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+              errors.wildursprungsschein ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="z.B. 124368"
           />
@@ -351,8 +351,8 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           <label className="block text-sm font-medium mb-1">Notizen</label>
           <textarea
             {...register('notizen')}
-            className={`w-full border rounded-lg px-3 py-2 h-20 ${
-              errors.notizen ? 'border-red-500' : ''
+            className={`w-full border rounded-lg px-3 py-2 h-20 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+              errors.notizen ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="Weitere Details zum Abschuss..."
           />
@@ -365,7 +365,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           <button
             type="submit"
             disabled={!isValid || loading}
-            className="w-full sm:w-auto bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300 cursor-pointer"
+            className="w-full sm:w-auto bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-xl transition-colors flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300 cursor-pointer"
           >
             {loading ? <Spinner size={20} /> : null}
             {loading ? (editingEntry ? 'Aktualisiere...' : 'Speichere...') : (editingEntry ? 'Aktualisieren' : 'Speichern')}
@@ -373,7 +373,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           <button
             type="button"
             onClick={onCancel}
-            className="w-full sm:w-auto bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors cursor-pointer"
+            className="w-full sm:w-auto border border-gray-300 hover:border-gray-400 text-gray-600 hover:text-gray-800 hover:bg-gray-50 px-6 py-2 rounded-xl transition-colors cursor-pointer"
             disabled={loading}
           >
             Abbrechen

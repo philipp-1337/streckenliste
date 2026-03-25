@@ -41,9 +41,9 @@ const Login: React.FC<LoginProps> = ({ isLoggingIn, setIsLoggingIn }) => {
   // Zeige Loader, wenn Login erfolgreich war und App noch lädt
   if (isLoggingIn) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-green-50">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-600 mb-4"></div>
-        <p className="text-xl text-gray-700">Daten werden geladen...</p>
+      <div className="flex flex-col items-center justify-center h-screen bg-green-50 gap-4">
+        <Spinner size={40} />
+        <p className="text-base text-green-900">Daten werden geladen...</p>
       </div>
     );
   }
@@ -51,17 +51,31 @@ const Login: React.FC<LoginProps> = ({ isLoggingIn, setIsLoggingIn }) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-green-50 p-4">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-3xl font-bold text-center text-green-800 mb-6">Login</h2>
+        <div className="flex flex-col items-center mb-8">
+          <h1 className="text-3xl font-bold text-green-800 flex items-center gap-1">
+            Streckenliste
+            <svg className="inline w-8 h-8 ml-0.5" viewBox="0 0 24 24">
+              <defs>
+                <linearGradient id="loginLogoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="hsl(148 97% 20%)" />
+                  <stop offset="100%" stopColor="hsl(151 100% 30%)" />
+                </linearGradient>
+              </defs>
+              <path d="M19 3L5 12l4 1.5L7 21l3-4 4 2 5-16z" stroke="url(#loginLogoGradient)" strokeWidth={2} fill="none" strokeLinejoin="round" strokeLinecap="round" />
+            </svg>
+          </h1>
+          <p className="text-sm text-green-900/60 mt-1">Digitale Jagdstrecke</p>
+        </div>
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label htmlFor="email" className="block text-sm font-medium text-green-900 mb-1">Email</label>
             <input
               type="email"
               id="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-green-500 focus:border-green-500"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
               required
               disabled={loading}
               onKeyDown={(e) => {
@@ -74,21 +88,21 @@ const Login: React.FC<LoginProps> = ({ isLoggingIn, setIsLoggingIn }) => {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Passwort</label>
+            <label htmlFor="password" className="block text-sm font-medium text-green-900 mb-1">Passwort</label>
             <input
               type="password"
               id="password"
               placeholder="Passwort"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-green-500 focus:border-green-500"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
               required
               disabled={loading}
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer min-h-[48px]"
             disabled={loading}
           >
             {loading ? <Spinner size={24} /> : null}
