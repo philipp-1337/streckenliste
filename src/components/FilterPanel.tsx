@@ -13,7 +13,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
   const [kategorieInput, setKategorieInput] = useState(filter.kategorie);
   const [jaegerInput, setJaegerInput] = useState(filter.jaeger);
   const filterRef = useRef(filter);
-  filterRef.current = filter;
+  useEffect(() => { filterRef.current = filter; });
 
   // Sync local text state when parent resets filters
   useEffect(() => { setKategorieInput(filter.kategorie); }, [filter.kategorie]);
