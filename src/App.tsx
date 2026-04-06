@@ -44,15 +44,6 @@ const App = () => {
   const { currentUser, loading: userLoading } = useAuth();
   const location = useLocation();
 
-  // Auth action handler (password reset etc.) — accessible without login
-  if (location.pathname === '/auth/action') {
-    return (
-      <>
-        <Toaster richColors position="top-right" offset={32} />
-        <ActionHandler />
-      </>
-    );
-  }
   const [editingEntry, setEditingEntry] = useState<Eintrag | null>(null);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showNewEntryForm, setShowNewEntryForm] = useState(false);
@@ -204,6 +195,16 @@ const App = () => {
   const handleImport = useCallback(async (eintraege: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>[]) => {
     await currentData.importEintraege(eintraege);
   }, [currentData]);
+
+  // Auth action handler (password reset etc.) — accessible without login
+  if (location.pathname === '/auth/action') {
+    return (
+      <>
+        <Toaster richColors position="top-right" offset={32} />
+        <ActionHandler />
+      </>
+    );
+  }
 
   // Setze isLoggingIn zurück, sobald User und Daten geladen sind
   if (isLoggingIn && currentUser && !currentData.loading) {

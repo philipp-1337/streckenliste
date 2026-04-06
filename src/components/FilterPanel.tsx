@@ -12,12 +12,20 @@ interface FilterPanelProps {
 export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterChange, onResetFilters }) => {
   const [kategorieInput, setKategorieInput] = useState(filter.kategorie);
   const [jaegerInput, setJaegerInput] = useState(filter.jaeger);
+  const [prevKategorie, setPrevKategorie] = useState(filter.kategorie);
+  const [prevJaeger, setPrevJaeger] = useState(filter.jaeger);
   const filterRef = useRef(filter);
   useEffect(() => { filterRef.current = filter; });
 
-  // Sync local text state when parent resets filters
-  useEffect(() => { setKategorieInput(filter.kategorie); }, [filter.kategorie]);
-  useEffect(() => { setJaegerInput(filter.jaeger); }, [filter.jaeger]);
+  // Sync local text state when parent resets filters (adjusting state on prop changes)
+  if (prevKategorie !== filter.kategorie) {
+    setPrevKategorie(filter.kategorie);
+    setKategorieInput(filter.kategorie);
+  }
+  if (prevJaeger !== filter.jaeger) {
+    setPrevJaeger(filter.jaeger);
+    setJaegerInput(filter.jaeger);
+  }
 
   // Debounce kategorie → only refilter 300ms after typing stops
   useEffect(() => {
