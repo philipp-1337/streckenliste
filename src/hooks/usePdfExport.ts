@@ -13,11 +13,7 @@ const usePdfExport = () => {
   const exportPdf = async (eintraege: Eintrag[], jagdjahr: string, jagdbezirk: string) => {
     setIsExporting(true);
 
-    // On iOS Safari, window.open() after an await is blocked by the popup blocker silently.
-    // Pre-open a blank window synchronously here (directly in the event handler) before any
-    // async work, then navigate it to the blob URL once the PDF is ready.
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    const iosWindow = isIOS ? window.open('', '_blank') : null;
 
     // Mount PrintContent into an off-screen container so html-to-image can render it
     const exportClass = `pdf-export-${Date.now()}`;
@@ -118,12 +114,7 @@ const usePdfExport = () => {
       if (isIOS) {
         const blob = pdf.output('blob');
         const url = URL.createObjectURL(blob);
-        if (iosWindow) {
-          iosWindow.location.href = url;
-        } else {
-          // Fallback if pre-open was blocked (e.g. popup blocker on all tabs)
-          window.open(url, '_blank');
-        }
+        window.open(url, '_blank');
         setTimeout(() => URL.revokeObjectURL(url), 10000);
       } else {
         pdf.save(filename);
