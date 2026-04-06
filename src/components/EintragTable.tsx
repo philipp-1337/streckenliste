@@ -59,8 +59,8 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
     const sortedEintraege = useMemo(() => {
       if (!sortColumn) return eintraege;
       return [...eintraege].sort((a, b) => {
-        let aValue: string | number | undefined = a[sortColumn as keyof Eintrag];
-        let bValue: string | number | undefined = b[sortColumn as keyof Eintrag];
+        let aValue: string | number | undefined = a[sortColumn as keyof Eintrag] as string | number | undefined;
+        let bValue: string | number | undefined = b[sortColumn as keyof Eintrag] as string | number | undefined;
 
         // Spezialbehandlung für bestimmte Felder
         if (sortColumn === 'datum') {
