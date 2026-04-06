@@ -12,7 +12,6 @@ const usePdfExport = () => {
   const [iosDownloadUrl, setIosDownloadUrl] = useState<string | null>(null);
 
   const clearIosDownload = () => {
-    if (iosDownloadUrl) URL.revokeObjectURL(iosDownloadUrl);
     setIosDownloadUrl(null);
   };
 
@@ -118,9 +117,10 @@ const usePdfExport = () => {
 
       const filename = `Streckenliste_${(jagdjahr || 'Alle').replace('/', '-')}.pdf`;
       if (isIOS) {
-        const blob = pdf.output('blob');
-        const url = URL.createObjectURL(blob);
-        setIosDownloadUrl(url);
+        // blob: URLs are intercepted by the PWA service worker and fail with
+        // WebKitBlobResource error 1. A self-contained data URI bypasses the SW entirely.
+        const dataUri = pdf.output('datauristring');
+        setIosDownloadUrl(dataUri);
       } else {
         pdf.save(filename);
       }
