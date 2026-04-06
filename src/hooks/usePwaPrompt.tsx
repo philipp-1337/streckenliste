@@ -37,7 +37,7 @@ const renderIosInstallToast = (onClose: () => void) => {
     <div className="relative bg-white text-gray-900 rounded-lg shadow-lg p-4 max-w-sm">
       <button
         onClick={onClose}
-        className="absolute -top-3 -left-3 p-1 text-gray-400 hover:text-gray-600 rounded transition cursor-pointer"
+        className="absolute top-2 right-2 p-1 text-gray-500 hover:text-gray-800 rounded transition cursor-pointer"
         aria-label="Schließen"
       >
         <XIcon size={16} />
