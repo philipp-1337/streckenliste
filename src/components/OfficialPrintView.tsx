@@ -6,6 +6,7 @@ import type { Eintrag } from '@types';
 import useAuth from '@hooks/useAuth';
 import usePdfExport from '@hooks/usePdfExport';
 import PrintContent from '@components/PrintContent';
+import PdfDownloadDialog from '@components/PdfDownloadDialog';
 
 interface OfficialPrintViewProps {
   eintraege: Eintrag[];
@@ -17,7 +18,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
   const jagdbezirk = currentUser?.jagdbezirk?.name || currentUser?.jagdbezirkId || 'Unbekannt';
   const navigate = useNavigate();
   const [isPrinting, setIsPrinting] = useState(false);
-  const { exportPdf, isExporting: isExportingPdf } = usePdfExport();
+  const { exportPdf, isExporting: isExportingPdf, iosDownloadUrl, clearIosDownload } = usePdfExport();
 
   useEffect(() => {
     const handleAfterPrint = () => setIsPrinting(false);
@@ -48,6 +49,14 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
           .gewicht-text { position: relative; transform: rotate(180deg); transform-origin: center center; display: inline-block; width: auto; height: auto; }
         }
       `}</style>
+
+      {iosDownloadUrl && (
+        <PdfDownloadDialog
+          url={iosDownloadUrl}
+          filename={`Streckenliste_${(jagdjahr || 'Alle').replace('/', '-')}.pdf`}
+          onClose={clearIosDownload}
+        />
+      )}
 
       {/* PDF Export Loading Overlay */}
       {isExportingPdf && (

@@ -15,6 +15,7 @@ import { EintragForm } from '@components/EintragForm';
 import { EintragTable } from '@components/EintragTable';
 import { FachbegriffeLegende } from '@components/FachbegriffeLegende';
 import { SkeletonTable, SkeletonStatistik } from '@components/SkeletonLoaders';
+import PdfDownloadDialog from '@components/PdfDownloadDialog';
 import useAuth from '@hooks/useAuth';
 import Login from '@auth/Login';
 import ActionHandler from '@auth/ActionHandler';
@@ -65,7 +66,7 @@ const App = () => {
   usePwaPrompt();
   usePwaUpdate();
 
-  const { exportPdf, isExporting: isExportingPdf } = usePdfExport();
+  const { exportPdf, isExporting: isExportingPdf, iosDownloadUrl, clearIosDownload } = usePdfExport();
 
   // Hook für Live Daten
   const firestore = useFirestore();
@@ -261,6 +262,13 @@ const App = () => {
                 <p className="text-gray-600 text-sm">Einen Moment bitte.</p>
               </div>
             </div>
+          )}
+          {iosDownloadUrl && (
+            <PdfDownloadDialog
+              url={iosDownloadUrl}
+              filename={`Streckenliste_${(filter.jagdjahr || 'Alle').replace('/', '-')}.pdf`}
+              onClose={clearIosDownload}
+            />
           )}
           <div className="min-h-screen bg-green-50 p-4">
             <div className="max-w-7xl mx-auto pb-16">

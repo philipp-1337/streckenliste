@@ -9,6 +9,12 @@ const A4_LANDSCAPE_PX = 1122;
 
 const usePdfExport = () => {
   const [isExporting, setIsExporting] = useState(false);
+  const [iosDownloadUrl, setIosDownloadUrl] = useState<string | null>(null);
+
+  const clearIosDownload = () => {
+    if (iosDownloadUrl) URL.revokeObjectURL(iosDownloadUrl);
+    setIosDownloadUrl(null);
+  };
 
   const exportPdf = async (eintraege: Eintrag[], jagdjahr: string, jagdbezirk: string) => {
     setIsExporting(true);
@@ -114,8 +120,7 @@ const usePdfExport = () => {
       if (isIOS) {
         const blob = pdf.output('blob');
         const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
-        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        setIosDownloadUrl(url);
       } else {
         pdf.save(filename);
       }
@@ -129,7 +134,7 @@ const usePdfExport = () => {
     }
   };
 
-  return { exportPdf, isExporting };
+  return { exportPdf, isExporting, iosDownloadUrl, clearIosDownload };
 };
 
 export default usePdfExport;
