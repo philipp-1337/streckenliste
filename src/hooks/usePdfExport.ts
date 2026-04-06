@@ -13,10 +13,29 @@ const usePdfExport = () => {
   const exportPdf = async (eintraege: Eintrag[], jagdjahr: string, jagdbezirk: string) => {
     setIsExporting(true);
 
+    // On iOS Safari, window.open() after an await is blocked by the popup blocker silently.
+    // Pre-open a blank window synchronously here (directly in the event handler) before any
+    // async work, then navigate it to the blob URL once the PDF is ready.
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const iosWindow = isIOS ? window.open('', '_blank') : null;
+
     // Mount PrintContent into an off-screen container so html-to-image can render it
+    const exportClass = `pdf-export-${Date.now()}`;
     const container = document.createElement('div');
+    container.className = exportClass;
     container.style.cssText = `position:fixed;left:-9999px;top:0;width:${A4_LANDSCAPE_PX}px;background:#fff;overflow:visible;z-index:-1;`;
     document.body.appendChild(container);
+
+    // Inject print-equivalent styles scoped to this container so row height matches the @media print output.
+    // Critically: also reset line-height — Tailwind's text-xs sets line-height:1rem (16px) which inflates
+    // row height vs the browser print engine which uses line-height:normal (~1.2×7pt ≈ 11px).
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+      .${exportClass} table { font-size: 7pt !important; line-height: normal !important; }
+      .${exportClass} th, .${exportClass} td { font-size: 7pt !important; padding: 1px !important; line-height: normal !important; }
+      .${exportClass} * { line-height: normal !important; }
+    `;
+    document.head.appendChild(styleEl);
 
     const root = createRoot(container);
     root.render(createElement(PrintContent, { eintraege, jagdjahr, jagdbezirk }));
@@ -96,11 +115,15 @@ const usePdfExport = () => {
       }
 
       const filename = `Streckenliste_${(jagdjahr || 'Alle').replace('/', '-')}.pdf`;
-      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
       if (isIOS) {
         const blob = pdf.output('blob');
         const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
+        if (iosWindow) {
+          iosWindow.location.href = url;
+        } else {
+          // Fallback if pre-open was blocked (e.g. popup blocker on all tabs)
+          window.open(url, '_blank');
+        }
         setTimeout(() => URL.revokeObjectURL(url), 10000);
       } else {
         pdf.save(filename);
@@ -110,6 +133,7 @@ const usePdfExport = () => {
     } finally {
       root.unmount();
       document.body.removeChild(container);
+      document.head.removeChild(styleEl);
       setIsExporting(false);
     }
   };
