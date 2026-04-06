@@ -117,7 +117,18 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
       }
 
       const filename = `Streckenliste_${(jagdjahr || 'Alle').replace('/', '-')}.pdf`;
-      pdf.save(filename);
+
+      // iOS Safari doesn't support programmatic file downloads.
+      // Open the PDF as a blob URL in a new tab instead — the user can save via the share sheet.
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      if (isIOS) {
+        const blob = pdf.output('blob');
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      } else {
+        pdf.save(filename);
+      }
     } catch (err) {
       console.error('PDF Export fehlgeschlagen:', err);
       el.style.overflow = prevOverflow;
