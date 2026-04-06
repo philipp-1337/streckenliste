@@ -1,7 +1,7 @@
 // tsconfig.app.json
 {
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2022",
     "useDefineForClassFields": true,
@@ -26,17 +26,16 @@
     "noUncheckedSideEffectImports": true,
 
     /* --- Aliase hierhin --- */
-    "baseUrl": "src",
     "paths": {
-      "@utils/*": ["utils/*"],
-      "@components/*": ["components/*"],
-      "@hooks/*": ["hooks/*"],
-      "@data/*": ["data/*"],
-      "@types": ["types/index.ts"],
-      "@types/*": ["types/*"],
-      "@auth/*": ["auth/*"],
-      "@constants": ["constants/index.ts"],
-      "@constants/*": ["constants/*"]
+      "@utils/*": ["./src/utils/*"],
+      "@components/*": ["./src/components/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@data/*": ["./src/data/*"],
+      "@types": ["./src/types/index.ts"],
+      "@types/*": ["./src/types/*"],
+      "@auth/*": ["./src/auth/*"],
+      "@constants": ["./src/constants/index.ts"],
+      "@constants/*": ["./src/constants/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "src/types/index.ts"]
