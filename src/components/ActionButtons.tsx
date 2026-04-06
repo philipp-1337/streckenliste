@@ -5,6 +5,7 @@ import {
   Printer,
   FileDown,
   FunnelXIcon,
+  BookOpen,
   // Upload,
   // RefreshCw
 } from 'lucide-react';
@@ -21,6 +22,8 @@ interface ActionButtonsProps {
   onToggleFixDialog?: () => void;
   onExportPdf?: () => void;
   isExportingPdf?: boolean;
+  onToggleLegende?: () => void;
+  showLegende?: boolean;
   currentUser: UserData | null;
   activeFilterCount: number;
   filteredCount: number;
@@ -37,6 +40,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
   // currentUser
   onExportPdf,
   isExportingPdf,
+  onToggleLegende,
+  showLegende,
   activeFilterCount,
   filteredCount,
   totalCount
@@ -110,6 +115,17 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
       activeColors: '',
       iconClass: '',
       disabled: !!isExportingPdf,
+      show: true,
+    },
+    {
+      id: 'legende',
+      icon: BookOpen,
+      title: 'Fachbegriffe & Legende',
+      onClick: onToggleLegende,
+      isActive: !!showLegende,
+      activeColors: 'text-green-700 shadow-green-500/20',
+      iconClass: '',
+      disabled: false,
       show: true,
     },
   ];

@@ -57,6 +57,7 @@ const App = () => {
   const [showNewEntryForm, setShowNewEntryForm] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showFixDialog, setShowFixDialog] = useState(false);
+  const [showLegende, setShowLegende] = useState(false);
   // Login-Flow Flag
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -116,6 +117,7 @@ const App = () => {
   const handleToggleNewEntryForm = useCallback(() => setShowNewEntryForm((v) => !v), []);
   const handleToggleFixDialog = useCallback(() => setShowFixDialog((v) => !v), []);
   const handleToggleImportDialog = useCallback(() => setShowImportDialog((v) => !v), []);
+  const handleToggleLegende = useCallback(() => setShowLegende((v) => !v), []);
 
   const handleLogout = useCallback(async () => {
     try {
@@ -282,6 +284,8 @@ const App = () => {
                         exportPdf(filteredEintraege, filter.jagdjahr, jagdbezirk);
                       }}
                       isExportingPdf={isExportingPdf}
+                      onToggleLegende={handleToggleLegende}
+                      showLegende={showLegende}
                       currentUser={currentUser}
                       activeFilterCount={activeFilterCount}
                       filteredCount={filteredEintraege.length}
@@ -316,6 +320,7 @@ const App = () => {
                       currentUser={currentUser}
                     />
                     )}
+                    {showLegende && <FachbegriffeLegende />}
                   </>
                 } />
                 <Route path="/form" element={
