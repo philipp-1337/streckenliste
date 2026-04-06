@@ -84,7 +84,7 @@ export const JagdjahrSelect: React.FC<JagdjahrSelectProps> = ({
 
   // Desktop variant für Header
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="ml-4 relative" ref={dropdownRef}>
       <label className="block text-sm font-semibold text-green-900 mb-1 text-right">
         Jagdjahr
       </label>

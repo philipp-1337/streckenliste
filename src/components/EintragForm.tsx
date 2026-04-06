@@ -214,7 +214,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             <select
               {...register('wildart')}
               onChange={(e) => handleWildartChange(e.target.value)}
-              className={`w-full border rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+              className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
                 errors.wildart ? 'border-red-500' : 'border-gray-300'
               }`}
             >
@@ -235,7 +235,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               {...register('kategorie')}
               onChange={(e) => handleKategorieChange(e.target.value)}
               disabled={!watchedWildart}
-              className={`w-full border rounded-lg px-3 py-2 disabled:bg-gray-100 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+              className={`w-full border rounded-lg px-3 py-2 disabled:bg-gray-100 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
                 errors.kategorie ? 'border-red-500' : 'border-gray-300'
               }`}
             >
@@ -301,7 +301,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               type="number"
               step="0.1"
               {...register('gewicht')}
-              className={`w-full border rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+              className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
                 errors.gewicht ? 'border-red-500' : 'border-gray-300'
               }`}
             />
@@ -316,7 +316,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
                 type="number"
                 step="0.01"
                 {...register('einnahmen')}
-                className={`w-full border rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+                className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
                   errors.einnahmen ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
@@ -330,7 +330,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             <input
               type="text"
               {...register('jaeger')}
-              className={`w-full border rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+              className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
                 errors.jaeger ? 'border-red-500' : 'border-gray-300'
               }`}
             />
@@ -343,7 +343,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             <input
               type="text"
               {...register('ort')}
-              className={`w-full border rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+              className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
                 errors.ort ? 'border-red-500' : 'border-gray-300'
               }`}
             />
@@ -393,7 +393,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           <input
             type="text"
             {...register('bemerkung')}
-            className={`w-full border rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+            className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
               errors.bemerkung ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="z.B. Erleger, Unfallwild, Drückjagd, etc."
@@ -408,7 +408,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           <input
             type="text"
             {...register('wildursprungsschein')}
-            className={`w-full border rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+            className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
               errors.wildursprungsschein ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="z.B. 124368"
@@ -422,7 +422,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           <label className="block text-sm font-medium mb-1">Notizen</label>
           <textarea
             {...register('notizen')}
-            className={`w-full border rounded-lg px-3 py-2 h-20 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+            className={`w-full border rounded-lg px-3 py-2 h-20 text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
               errors.notizen ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="Weitere Details zum Abschuss..."

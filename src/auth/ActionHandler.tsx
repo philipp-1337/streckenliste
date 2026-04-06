@@ -139,7 +139,7 @@ const ActionHandler: React.FC = () => {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 placeholder="Mindestens 6 Zeichen"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
                 disabled={submitting}
               />
             </div>
@@ -151,7 +151,7 @@ const ActionHandler: React.FC = () => {
                 value={passwordConfirm}
                 onChange={e => setPasswordConfirm(e.target.value)}
                 placeholder="Passwort wiederholen"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
                 disabled={submitting}
               />
             </div>

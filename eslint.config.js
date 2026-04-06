@@ -4,6 +4,7 @@ import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 import buttonRequiresCursorPointer from "./eslint-rules/button-requires-cursor-pointer.js";
+import inputRequiresTextBase from "./eslint-rules/input-requires-text-base.js";
 
 export default tseslint.config(
   { ignores: ["dist"] },
@@ -20,6 +21,7 @@ export default tseslint.config(
       local: {
         rules: {
           "button-requires-cursor-pointer": buttonRequiresCursorPointer,
+          "input-requires-text-base": inputRequiresTextBase,
         },
       },
     },
@@ -30,6 +32,7 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       "local/button-requires-cursor-pointer": "error",
+      "local/input-requires-text-base": "error",
     },
   },
 );

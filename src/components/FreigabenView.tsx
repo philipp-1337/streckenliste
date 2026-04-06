@@ -6,7 +6,6 @@ import type { Eintrag, UserData } from '@types';
 interface FreigabenViewProps {
   eintraege: Eintrag[];
   currentUser: UserData | null;
-  onEdit: (eintrag: Eintrag) => void;
   onDelete: (id: string) => void;
   onApprove: (id: string) => Promise<void>;
 }
@@ -14,7 +13,6 @@ interface FreigabenViewProps {
 export const FreigabenView: React.FC<FreigabenViewProps> = memo(({
   eintraege,
   currentUser,
-  onEdit,
   onDelete,
   onApprove,
 }) => {
@@ -45,7 +43,6 @@ export const FreigabenView: React.FC<FreigabenViewProps> = memo(({
       <EintragTable
         eintraege={pendingEintraege}
         currentUser={currentUser}
-        onEdit={onEdit}
         onDelete={onDelete}
         onApprove={onApprove}
       />

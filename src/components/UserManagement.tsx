@@ -112,7 +112,7 @@ export const UserManagement: React.FC = () => {
                 required
                 value={formEmail}
                 onChange={e => setFormEmail(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
                 placeholder="benutzer@beispiel.de"
                 disabled={submitting}
               />
@@ -124,7 +124,7 @@ export const UserManagement: React.FC = () => {
                 required
                 value={formName}
                 onChange={e => setFormName(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
                 placeholder="Max Mustermann"
                 disabled={submitting}
               />
@@ -134,7 +134,7 @@ export const UserManagement: React.FC = () => {
               <select
                 value={formRole}
                 onChange={e => setFormRole(e.target.value as Role)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
                 disabled={submitting}
               >
                 <option value="user">Benutzer</option>
@@ -193,7 +193,7 @@ export const UserManagement: React.FC = () => {
                       value={user.role}
                       onChange={e => updateUserRole(user.uid, e.target.value as Role)}
                       disabled={user.uid === currentUser?.uid}
-                      className="border border-gray-300 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="border border-gray-300 rounded-lg px-2 py-1 text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <option value="user">Benutzer</option>
                       <option value="admin">Administrator</option>

@@ -277,10 +277,10 @@ const App = () => {
           )}
           <div className="min-h-screen bg-green-50 p-4">
             <div className="max-w-7xl mx-auto pb-16">
-              <Header 
-                jagdjahr={filter.jagdjahr}
-                availableJagdjahre={availableJagdjahre}
-                onJagdjahrChange={handleJagdjahrChange}
+              <Header
+                jagdjahr={location.pathname === '/users' ? undefined : filter.jagdjahr}
+                availableJagdjahre={location.pathname === '/users' ? undefined : availableJagdjahre}
+                onJagdjahrChange={location.pathname === '/users' ? undefined : handleJagdjahrChange}
               />
               <Routes>
                 <Route path="/" element={
@@ -370,7 +370,6 @@ const App = () => {
                     <FreigabenView
                       eintraege={currentData.eintraege}
                       currentUser={currentUser}
-                      onEdit={handleEdit}
                       onDelete={handleDelete}
                       onApprove={handleApprove}
                     />

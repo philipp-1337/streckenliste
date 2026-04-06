@@ -63,7 +63,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
           value={filter.wildart}
           onChange={(e) => onFilterChange({...filter, wildart: e.target.value})}
           aria-label="Wildart filtern"
-          className="border border-gray-300 rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+          className="border border-gray-300 rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
         >
           <option value="">Alle Wildarten</option>
           {Object.keys(wildarten).map(wildart => (
@@ -76,7 +76,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
           aria-label="Nach Fachbegriff filtern"
           value={kategorieInput}
           onChange={(e) => setKategorieInput(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+          className="border border-gray-300 rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
         />
         <input
           type="text"
@@ -84,13 +84,13 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
           aria-label="Nach Jäger filtern"
           value={jaegerInput}
           onChange={(e) => setJaegerInput(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+          className="border border-gray-300 rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
         />
         <select
           value={filter.jahr}
           onChange={(e) => onFilterChange({...filter, jahr: e.target.value})}
           aria-label="Jahr filtern"
-          className="border border-gray-300 rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+          className="border border-gray-300 rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
         >
           <option value="">Alle Jahre</option>
           <option value="2024">2024</option>

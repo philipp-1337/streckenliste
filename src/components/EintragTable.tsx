@@ -6,7 +6,7 @@ import { sanitizeHtml } from '@utils/sanitization';
 
 interface EintragTableProps {
   eintraege: Eintrag[];
-  onEdit: (eintrag: Eintrag) => void;
+  onEdit?: (eintrag: Eintrag) => void;
   onDelete: (id: string) => void;
   onApprove?: (id: string) => Promise<void>;
   currentUser: UserData | null;
@@ -220,14 +220,16 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                           {loadingId === eintrag.id ? <Spinner size={16} /> : <Check size={16} />}
                         </button>
                       )}
-                      <button
-                        onClick={() => handleEdit(eintrag)}
-                        className="text-blue-600 hover:text-blue-800 transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                        title="Bearbeiten"
-                        disabled={loadingId === eintrag.id}
-                      >
-                        {loadingId === eintrag.id ? <Spinner size={16} /> : <Edit size={16} />}
-                      </button>
+                      {onEdit && (
+                        <button
+                          onClick={() => handleEdit(eintrag)}
+                          className="text-blue-600 hover:text-blue-800 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                          title="Bearbeiten"
+                          disabled={loadingId === eintrag.id}
+                        >
+                          {loadingId === eintrag.id ? <Spinner size={16} /> : <Edit size={16} />}
+                        </button>
+                      )}
                       <button
                         onClick={() => handleDelete(eintrag.id)}
                         className="text-red-600 hover:text-red-800 transition-colors flex items-center justify-center gap-1 cursor-pointer"
