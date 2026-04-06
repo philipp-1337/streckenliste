@@ -17,24 +17,16 @@ const PdfDownloadDialog: React.FC<PdfDownloadDialogProps> = ({ blob, filename, o
     setError(null);
     try {
       const file = new File([blob], filename, { type: 'application/pdf' });
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: filename });
-        onClose();
-      } else {
-        // Fallback: open data URI in current tab
-        const reader = new FileReader();
-        reader.onload = () => {
-          window.location.href = reader.result as string;
-          onClose();
-        };
-        reader.readAsDataURL(blob);
-      }
+      // Call navigator.share directly without canShare() gate —
+      // canShare() returns false on some iOS PWA versions even when share works.
+      await navigator.share({ files: [file], title: filename });
+      onClose();
     } catch (err) {
-      // User cancelled the share sheet — not a real error
-      if (err instanceof Error && err.name !== 'AbortError') {
-        setError('PDF konnte nicht geöffnet werden. Bitte versuche es erneut.');
-      } else {
+      if (err instanceof Error && err.name === 'AbortError') {
+        // User dismissed the share sheet — not an error
         onClose();
+      } else {
+        setError('PDF-Teilen wird auf diesem Gerät nicht unterstützt. Bitte öffne die App in Safari und versuche es erneut.');
       }
     } finally {
       setLoading(false);
