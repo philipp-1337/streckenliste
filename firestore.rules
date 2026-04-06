@@ -26,7 +26,8 @@ service cloud.firestore {
         && (!data.keys().hasAny(['altersklasse']) || data.altersklasse is string)
         && (!data.keys().hasAny(['kategorie']) || data.kategorie is string)
         && (!data.keys().hasAny(['notizen']) || (data.notizen is string && data.notizen.size() <= 1000))
-        && (!data.keys().hasAny(['timestamp']) || data.timestamp is timestamp);
+        && (!data.keys().hasAny(['timestamp']) || data.timestamp is timestamp)
+        && (!data.keys().hasAny(['status']) || data.status in ['pending', 'approved']);
     }
 
     // Users can read/update their own profile
@@ -45,22 +46,31 @@ service cloud.firestore {
 
     // Entries within a Jagdbezirk
     match /jagdbezirke/{jagdbezirkId}/eintraege/{eintragId} {
-      // Allow read if user is admin OR owns the entry
-    allow read: if request.auth != null &&
-           getUserData().jagdbezirkId == jagdbezirkId &&
-           (getUserData().role == 'admin' || resource.data.userId == request.auth.uid);
+      // Admins can read all entries in their district
+      allow read: if request.auth != null &&
+             getUserData().jagdbezirkId == jagdbezirkId &&
+             getUserData().role == 'admin';
+      // Users can read their own entries — no getUserData() call needed for query validation
+      allow read: if request.auth != null &&
+             resource.data.userId == request.auth.uid;
 
       // Allow create if user belongs to the district and sets their own userId
+      // Users must set status='pending'; admins may set status='approved'
     allow create: if request.auth != null &&
              getUserData().jagdbezirkId == jagdbezirkId &&
              request.resource.data.userId == request.auth.uid &&
-             isValidEntry();
+             isValidEntry() &&
+             (getUserData().role == 'admin' || request.resource.data.get('status', 'pending') == 'pending');
 
       // Allow update if user is admin OR owns the entry
+      // Only admins may change status to 'approved' (prevent self-approval)
     allow update: if request.auth != null &&
              getUserData().jagdbezirkId == jagdbezirkId &&
              (getUserData().role == 'admin' || resource.data.userId == request.auth.uid) &&
-             isValidEntry();
+             isValidEntry() &&
+             (getUserData().role == 'admin' ||
+              request.resource.data.get('status', 'pending') != 'approved' ||
+              resource.data.get('status', 'approved') == 'approved');
 
       // Allow delete if user is admin OR owns the entry (no data validation needed)
     allow delete: if request.auth != null &&

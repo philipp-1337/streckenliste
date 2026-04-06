@@ -15,6 +15,7 @@ export interface Eintrag {
   notizen: string;
   jagdbezirkId: string;
   userId: string;
+  status?: 'pending' | 'approved';
 }
 
 export interface WildartStats {

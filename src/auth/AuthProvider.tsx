@@ -17,7 +17,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const userDocRef = doc(db, 'users', user.uid);
         const userDocSnap = await getDoc(userDocRef);
         if (userDocSnap.exists()) {
-          const userData = userDocSnap.data() as UserData;
+          // Always use the Firebase Auth UID — never trust the uid field in the Firestore document,
+          // as it may be stale or set incorrectly when the document was created manually.
+          const userData = { ...userDocSnap.data() as UserData, uid: user.uid };
           
           // Lade Jagdbezirk-Daten
           if (userData.jagdbezirkId) {

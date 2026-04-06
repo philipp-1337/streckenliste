@@ -30,7 +30,7 @@ export const useFirestore = () => {
     try {
       let q;
       if (!isAdmin(currentUser)) {
-        q = query(streckenCollectionRef, where("userId", "==", currentUser.uid), orderBy("datum", "asc"));
+        q = query(streckenCollectionRef, where("userId", "==", currentUser.uid));
       } else {
         q = query(streckenCollectionRef, orderBy("datum", "asc"));
       }
@@ -57,8 +57,9 @@ export const useFirestore = () => {
 
     let q;
     // If user is not an admin, only fetch their own entries
+    // No orderBy here — avoids composite index requirement; table sorts client-side
     if (!isAdmin(currentUser)) {
-      q = query(streckenCollectionRef, where("userId", "==", currentUser.uid), orderBy("datum", "asc"));
+      q = query(streckenCollectionRef, where("userId", "==", currentUser.uid));
     } else {
       // Admin gets all entries
       q = query(streckenCollectionRef, orderBy("datum", "asc"));
@@ -113,19 +114,20 @@ export const useFirestore = () => {
     };
   }, [streckenCollectionRef, currentUser, manualFetch]);
 
-  const addEintrag = useCallback(async (eintrag: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>) => {
+  const addEintrag = useCallback(async (eintrag: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId' | 'status'>) => {
     const errorMessage = getAuthErrorMessage(currentUser);
     if (errorMessage || !streckenCollectionRef || !canPerformWriteOperation(currentUser) || !currentUser) {
       setError(errorMessage || "Keine Berechtigung");
       toast.error(errorMessage || "Keine Berechtigung");
       return;
     }
-    
+
     try {
       const newEintrag = {
         ...eintrag,
         userId: currentUser.uid,
         jagdbezirkId: currentUser.jagdbezirkId,
+        status: isAdmin(currentUser) ? 'approved' : 'pending',
       };
       await addDoc(streckenCollectionRef, newEintrag);
       // onSnapshot will automatically update eintraege
@@ -138,7 +140,24 @@ export const useFirestore = () => {
     }
   }, [streckenCollectionRef, currentUser]);
 
-  const updateEintrag = useCallback(async (id: string, eintrag: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>) => {
+  const approveEintrag = useCallback(async (id: string) => {
+    if (!streckenCollectionRef || !isAdmin(currentUser)) {
+      toast.error("Keine Berechtigung");
+      return;
+    }
+    try {
+      const eintragDoc = doc(streckenCollectionRef, id);
+      await updateDoc(eintragDoc, { status: 'approved' });
+    } catch (err) {
+      const errorMsg = "Fehler beim Freigeben";
+      setError(errorMsg);
+      toast.error(errorMsg);
+      console.error('Error approving entry:', err);
+      throw err;
+    }
+  }, [streckenCollectionRef, currentUser]);
+
+  const updateEintrag = useCallback(async (id: string, eintrag: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId' | 'status'>) => {
     const errorMessage = getAuthErrorMessage(currentUser);
     if (errorMessage || !streckenCollectionRef || !canPerformWriteOperation(currentUser) || !currentUser) {
       setError(errorMessage || "Keine Berechtigung");
@@ -265,6 +284,7 @@ export const useFirestore = () => {
     loading,
     error,
     addEintrag,
+    approveEintrag,
     updateEintrag,
     deleteEintrag,
     importEintraege

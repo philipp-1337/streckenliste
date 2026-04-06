@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "eintraege",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "datum", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

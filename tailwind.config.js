@@ -6,8 +6,8 @@ export const theme = {
   extend: {
     // Custom widths für clamp() Werte
     width: {
-      'tab-menu': 'clamp(280px, 85vw, 400px)',
-      'tab-menu-sm': 'clamp(260px, 90vw, 300px)',
+      'tab-menu': 'clamp(320px, 92vw, 500px)',
+      'tab-menu-sm': 'clamp(380px, 80vw, 460px)',
     },
 
     // Custom border radius

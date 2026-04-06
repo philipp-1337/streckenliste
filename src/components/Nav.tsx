@@ -1,13 +1,17 @@
-import { BarChart3, BookIcon, HomeIcon, LogOutIcon } from 'lucide-react';
+import { BarChart3, BookIcon, HomeIcon, LogOutIcon, ClipboardCheck } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import type { UserData } from '@types';
 
 interface NavProps {
   onLogout: () => void;
+  currentUser: UserData | null;
+  pendingCount: number;
 }
 
-export const Nav: React.FC<NavProps> = ({ onLogout }) => {
+export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const isAdmin = currentUser?.role === 'admin';
 
   const tabs = [
     {
@@ -22,6 +26,13 @@ export const Nav: React.FC<NavProps> = ({ onLogout }) => {
       icon: BarChart3,
       onClick: () => navigate('/stats'),
     },
+    ...(isAdmin ? [{
+      path: '/freigaben',
+      label: 'Freigaben',
+      icon: ClipboardCheck,
+      onClick: () => navigate('/freigaben'),
+      badge: pendingCount > 0 ? pendingCount : 0,
+    }] : []),
     {
       path: '/legende',
       label: 'Legende',
@@ -37,11 +48,15 @@ export const Nav: React.FC<NavProps> = ({ onLogout }) => {
     },
   ];
 
+  const navWidth = `clamp(${tabs.length * 68}px, 90vw, ${tabs.length * 82}px)`;
+
   return (
     <nav>
-      <div className="
+      <div
+        style={{ width: navWidth }}
+        className="
         fixed left-1/2 -translate-x-1/2 bottom-safe-floating
-        w-tab-menu h-16 sm:w-tab-menu-sm
+        h-16
         glass-bg glass-shadow rounded-pill
         backdrop-blur-xl backdrop-saturate-[180%]
         flex justify-around items-center
@@ -61,7 +76,7 @@ export const Nav: React.FC<NavProps> = ({ onLogout }) => {
                 group flex-1 flex flex-col items-center justify-center
                 p-1.5 sm:p-1 h-full
                 bg-transparent border-none outline-none cursor-pointer
-                font-inherit text-[13px] sm:text-xs
+                font-inherit text-[11px] sm:text-xs
                 transition-colors duration-300
                 relative rounded-3xl
                 ${tab.isLogout
@@ -78,11 +93,18 @@ export const Nav: React.FC<NavProps> = ({ onLogout }) => {
               title={tab.isLogout ? 'Logout' : undefined}
             >
               <span className="relative z-10 flex flex-col items-center gap-1">
-                <Icon
-                  size={20}
-                  strokeWidth={isActive && !tab.isLogout ? 2.5 : 2}
-                  className="transition-transform duration-300 group-hover:scale-105"
-                />
+                <span className="relative">
+                  <Icon
+                    size={20}
+                    strokeWidth={isActive && !tab.isLogout ? 2.5 : 2}
+                    className="transition-transform duration-300 group-hover:scale-105"
+                  />
+                  {'badge' in tab && (tab.badge ?? 0) > 0 && (
+                    <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-0.5 rounded-full bg-red-500 text-white text-[10px] leading-4 font-bold text-center">
+                      {tab.badge}
+                    </span>
+                  )}
+                </span>
                 <span>{tab.label}</span>
               </span>
             </button>

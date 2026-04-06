@@ -35,6 +35,7 @@ const StatistikPanel = lazy(() => import('@components/StatistikPanel'));
 const OfficialPrintView = lazy(() => import('@components/OfficialPrintView'));
 const ImportDialog = lazy(() => import('@components/ImportDialog'));
 const KategorienFixDialog = lazy(() => import('@components/KategorienFixDialog'));
+const FreigabenView = lazy(() => import('@components/FreigabenView').then(m => ({ default: m.FreigabenView })));
 
 const App = () => {  
   const { currentUser, loading: userLoading } = useAuth();
@@ -65,10 +66,19 @@ const App = () => {
   const statistiken = useStatistiken(filteredEintraege);
 
   // Calculate available hunting years from all entries
-  const availableJagdjahre = useMemo(() => 
+  const availableJagdjahre = useMemo(() =>
     getAvailableJagdjahre(currentData.eintraege),
     [currentData.eintraege]
   );
+
+  const pendingCount = useMemo(() =>
+    currentData.eintraege.filter(e => e.status === 'pending').length,
+    [currentData.eintraege]
+  );
+
+  const handleApprove = useCallback(async (id: string) => {
+    await currentData.approveEintrag(id);
+  }, [currentData]);
 
   // Handler for hunting year change
   const handleJagdjahrChange = useCallback((jagdjahr: string) => {
@@ -289,6 +299,7 @@ const App = () => {
                       eintraege={filteredEintraege}
                       onEdit={handleEdit}
                       onDelete={handleDelete}
+                      onApprove={handleApprove}
                       currentUser={currentUser}
                     />
                     )}
@@ -307,6 +318,17 @@ const App = () => {
                   </Suspense>
                 } />
                 <Route path="/legende" element={<FachbegriffeLegende />} />
+                <Route path="/freigaben" element={
+                  <Suspense fallback={<div className="p-4">Wird geladen...</div>}>
+                    <FreigabenView
+                      eintraege={currentData.eintraege}
+                      currentUser={currentUser}
+                      onEdit={handleEdit}
+                      onDelete={handleDelete}
+                      onApprove={handleApprove}
+                    />
+                  </Suspense>
+                } />
                 <Route path="/print" element={
                   <Suspense fallback={<div className="p-4">Wird geladen...</div>}>
                     <OfficialPrintView eintraege={filteredEintraege} jagdjahr={filter.jagdjahr} />
@@ -315,7 +337,7 @@ const App = () => {
               </Routes>
             </div>
           </div>
-          <Nav onLogout={handleLogout} />
+          <Nav onLogout={handleLogout} currentUser={currentUser} pendingCount={pendingCount} />
           <Suspense fallback={null}>
             <ImportDialog
               isOpen={showImportDialog}

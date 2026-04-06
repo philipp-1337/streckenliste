@@ -1,6 +1,6 @@
 import { memo, useMemo, useState } from 'react';
 import Spinner from '@components/Spinner';
-import { Edit, Trash2, Mars, Venus, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { Edit, Trash2, Mars, Venus, ChevronUp, ChevronDown, ChevronsUpDown, Check } from 'lucide-react';
 import type { Eintrag, UserData } from '@types';
 import { sanitizeHtml } from '@utils/sanitization';
 
@@ -8,6 +8,7 @@ interface EintragTableProps {
   eintraege: Eintrag[];
   onEdit: (eintrag: Eintrag) => void;
   onDelete: (id: string) => void;
+  onApprove?: (id: string) => Promise<void>;
   currentUser: UserData | null;
 }
 
@@ -15,6 +16,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
   eintraege,
   onEdit,
   onDelete,
+  onApprove,
   currentUser,
 }) => {
 
@@ -31,6 +33,13 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
     const handleDelete = async (id: string) => {
       setLoadingId(id);
       await Promise.resolve(onDelete(id));
+      setLoadingId(null);
+    };
+
+    const handleApprove = async (id: string) => {
+      if (!onApprove) return;
+      setLoadingId(id);
+      await onApprove(id);
       setLoadingId(null);
     };
 
@@ -169,10 +178,21 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {sortedEintraege.map((eintrag, index) => (
-              <tr key={eintrag.id} className="hover:bg-gray-50">
+            {sortedEintraege.map((eintrag, index) => {
+              const isPending = eintrag.status === 'pending';
+              return (
+              <tr key={eintrag.id} className={`hover:bg-gray-50 ${isPending ? 'bg-amber-50' : ''}`}>
                 <td className="px-4 py-3 text-sm">{index + 1}</td>
-                <td className="px-4 py-3 text-sm">{new Date(eintrag.datum).toLocaleDateString('de-DE')}</td>
+                <td className="px-4 py-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    {new Date(eintrag.datum).toLocaleDateString('de-DE')}
+                    {isPending && (
+                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-300 whitespace-nowrap">
+                        Ausstehend
+                      </span>
+                    )}
+                  </div>
+                </td>
                 <td className="px-4 py-3 text-sm font-medium">{eintrag.wildart}</td>
                 <td className="px-4 py-3 text-sm font-medium text-green-700 whitespace-nowrap">{eintrag.fachbegriff}</td>
                 <td className="px-4 py-3 text-center text-sm whitespace-nowrap">{eintrag.altersklasse}</td>
@@ -190,6 +210,16 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                 <td className="px-4 py-3 text-center">
                   {(currentUser?.role === 'admin' || currentUser?.uid === eintrag.userId) && (
                     <div className="flex justify-center gap-2">
+                      {currentUser?.role === 'admin' && isPending && onApprove && (
+                        <button
+                          onClick={() => handleApprove(eintrag.id)}
+                          className="text-green-600 hover:text-green-800 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                          title="Freigeben"
+                          disabled={loadingId === eintrag.id}
+                        >
+                          {loadingId === eintrag.id ? <Spinner size={16} /> : <Check size={16} />}
+                        </button>
+                      )}
                       <button
                         onClick={() => handleEdit(eintrag)}
                         className="text-blue-600 hover:text-blue-800 transition-colors flex items-center justify-center gap-1 cursor-pointer"
@@ -210,7 +240,8 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                   )}
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
