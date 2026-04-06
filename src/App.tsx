@@ -266,7 +266,7 @@ const App = () => {
           {iosDownloadUrl && (
             <PdfDownloadDialog
               url={iosDownloadUrl}
-              filename={`Streckenliste_${(filter.jagdjahr || 'Alle').replace('/', '-')}.pdf`}
+
               onClose={clearIosDownload}
             />
           )}

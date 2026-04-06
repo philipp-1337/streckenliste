@@ -53,7 +53,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
       {iosDownloadUrl && (
         <PdfDownloadDialog
           url={iosDownloadUrl}
-          filename={`Streckenliste_${(jagdjahr || 'Alle').replace('/', '-')}.pdf`}
+
           onClose={clearIosDownload}
         />
       )}
