@@ -1,11 +1,46 @@
+import { useState } from 'react';
 import { FileDown, X } from 'lucide-react';
+import Spinner from '@components/Spinner';
 
 interface PdfDownloadDialogProps {
-  url: string;
+  blob: Blob;
+  filename: string;
   onClose: () => void;
 }
 
-const PdfDownloadDialog: React.FC<PdfDownloadDialogProps> = ({ url, onClose }) => {
+const PdfDownloadDialog: React.FC<PdfDownloadDialogProps> = ({ blob, filename, onClose }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleOpen = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const file = new File([blob], filename, { type: 'application/pdf' });
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: filename });
+        onClose();
+      } else {
+        // Fallback: open data URI in current tab
+        const reader = new FileReader();
+        reader.onload = () => {
+          window.location.href = reader.result as string;
+          onClose();
+        };
+        reader.readAsDataURL(blob);
+      }
+    } catch (err) {
+      // User cancelled the share sheet — not a real error
+      if (err instanceof Error && err.name !== 'AbortError') {
+        setError('PDF konnte nicht geöffnet werden. Bitte versuche es erneut.');
+      } else {
+        onClose();
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full text-center">
@@ -14,18 +49,19 @@ const PdfDownloadDialog: React.FC<PdfDownloadDialogProps> = ({ url, onClose }) =
         </div>
         <h3 className="text-lg font-semibold text-gray-900 mb-1">PDF ist fertig</h3>
         <p className="text-sm text-gray-500 mb-6">
-          Tippe auf den Button um das PDF zu öffnen.
+          Tippe auf den Button um das PDF zu speichern oder zu teilen.
         </p>
-        <a
-          href={url}
-          onClick={onClose}
-          className="block w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-3 px-4 rounded-xl transition-colors mb-3"
+        {error && (
+          <p className="text-sm text-red-600 mb-4">{error}</p>
+        )}
+        <button
+          onClick={handleOpen}
+          disabled={loading}
+          className="flex items-center justify-center gap-2 w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-3 px-4 rounded-xl transition-colors mb-3 disabled:opacity-50 cursor-pointer"
         >
-          PDF öffnen
-        </a>
-        <p className="text-xs text-gray-400 mb-3">
-          Das PDF öffnet sich in diesem Tab. Mit dem Zurück-Button kommst du zur App zurück.
-        </p>
+          {loading ? <Spinner size={20} /> : <FileDown size={20} />}
+          {loading ? 'Wird vorbereitet...' : 'PDF speichern / teilen'}
+        </button>
         <button
           onClick={onClose}
           className="flex items-center justify-center gap-1.5 w-full text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer py-1"

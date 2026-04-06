@@ -18,7 +18,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
   const jagdbezirk = currentUser?.jagdbezirk?.name || currentUser?.jagdbezirkId || 'Unbekannt';
   const navigate = useNavigate();
   const [isPrinting, setIsPrinting] = useState(false);
-  const { exportPdf, isExporting: isExportingPdf, iosDownloadUrl, clearIosDownload } = usePdfExport();
+  const { exportPdf, isExporting: isExportingPdf, iosPdfBlob, clearIosPdf } = usePdfExport();
 
   useEffect(() => {
     const handleAfterPrint = () => setIsPrinting(false);
@@ -50,11 +50,11 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
         }
       `}</style>
 
-      {iosDownloadUrl && (
+      {iosPdfBlob && (
         <PdfDownloadDialog
-          url={iosDownloadUrl}
-
-          onClose={clearIosDownload}
+          blob={iosPdfBlob}
+          filename={`Streckenliste_${(jagdjahr || 'Alle').replace('/', '-')}.pdf`}
+          onClose={clearIosPdf}
         />
       )}
 

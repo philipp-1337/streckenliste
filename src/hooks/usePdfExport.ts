@@ -9,11 +9,9 @@ const A4_LANDSCAPE_PX = 1122;
 
 const usePdfExport = () => {
   const [isExporting, setIsExporting] = useState(false);
-  const [iosDownloadUrl, setIosDownloadUrl] = useState<string | null>(null);
+  const [iosPdfBlob, setIosPdfBlob] = useState<Blob | null>(null);
 
-  const clearIosDownload = () => {
-    setIosDownloadUrl(null);
-  };
+  const clearIosPdf = () => setIosPdfBlob(null);
 
   const exportPdf = async (eintraege: Eintrag[], jagdjahr: string, jagdbezirk: string) => {
     setIsExporting(true);
@@ -117,10 +115,8 @@ const usePdfExport = () => {
 
       const filename = `Streckenliste_${(jagdjahr || 'Alle').replace('/', '-')}.pdf`;
       if (isIOS) {
-        // blob: URLs are intercepted by the PWA service worker and fail with
-        // WebKitBlobResource error 1. A self-contained data URI bypasses the SW entirely.
-        const dataUri = pdf.output('datauristring');
-        setIosDownloadUrl(dataUri);
+        const blob = pdf.output('blob');
+        setIosPdfBlob(blob);
       } else {
         pdf.save(filename);
       }
@@ -134,7 +130,7 @@ const usePdfExport = () => {
     }
   };
 
-  return { exportPdf, isExporting, iosDownloadUrl, clearIosDownload };
+  return { exportPdf, isExporting, iosPdfBlob, clearIosPdf };
 };
 
 export default usePdfExport;

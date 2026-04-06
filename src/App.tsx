@@ -66,7 +66,7 @@ const App = () => {
   usePwaPrompt();
   usePwaUpdate();
 
-  const { exportPdf, isExporting: isExportingPdf, iosDownloadUrl, clearIosDownload } = usePdfExport();
+  const { exportPdf, isExporting: isExportingPdf, iosPdfBlob, clearIosPdf } = usePdfExport();
 
   // Hook für Live Daten
   const firestore = useFirestore();
@@ -263,11 +263,11 @@ const App = () => {
               </div>
             </div>
           )}
-          {iosDownloadUrl && (
+          {iosPdfBlob && (
             <PdfDownloadDialog
-              url={iosDownloadUrl}
-
-              onClose={clearIosDownload}
+              blob={iosPdfBlob}
+              filename={`Streckenliste_${(filter.jagdjahr || 'Alle').replace('/', '-')}.pdf`}
+              onClose={clearIosPdf}
             />
           )}
           <div className="min-h-screen bg-green-50 p-4">
