@@ -9,7 +9,7 @@ import { getAnalytics, isSupported, type Analytics } from "firebase/analytics";
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyBvGG6llfnliIgjQsYLjuF4rocMRqoYeVM",
   authDomain: "streckenliste-jagd.firebaseapp.com",
   projectId: "streckenliste-jagd",

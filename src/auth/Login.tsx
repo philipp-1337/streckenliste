@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../firebase';
 import { FirebaseError } from 'firebase/app';
 import Spinner from '@components/Spinner';
@@ -16,6 +16,9 @@ const Login: React.FC<LoginProps> = ({ isLoggingIn, setIsLoggingIn }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showReset, setShowReset] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +37,26 @@ const Login: React.FC<LoginProps> = ({ isLoggingIn, setIsLoggingIn }) => {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, resetEmail.trim());
+      toast.success(`Passwort-Reset-Link wurde an ${resetEmail.trim()} gesendet.`);
+      setShowReset(false);
+      setResetEmail('');
+    } catch (err: unknown) {
+      const error = err as FirebaseError;
+      if (error.code === 'auth/user-not-found') {
+        toast.error('Keine Account mit dieser E-Mail-Adresse gefunden.');
+      } else {
+        toast.error('Fehler beim Senden. Bitte versuche es später erneut.');
+      }
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -114,7 +137,39 @@ const Login: React.FC<LoginProps> = ({ isLoggingIn, setIsLoggingIn }) => {
             {loading ? <Spinner size={24} /> : null}
             {loading ? 'Wird geprüft...' : 'Login'}
           </button>
+          <div className="text-center pt-1">
+            <button
+              type="button"
+              onClick={() => setShowReset(v => !v)}
+              className="text-sm text-green-700 hover:text-green-900 underline cursor-pointer bg-transparent border-none"
+            >
+              Passwort vergessen?
+            </button>
+          </div>
         </form>
+
+        {showReset && (
+          <form onSubmit={handleResetPassword} className="mt-6 pt-6 border-t border-gray-200 space-y-4">
+            <p className="text-sm text-gray-600">Gib deine E-Mail-Adresse ein. Wir senden dir einen Link zum Zurücksetzen deines Passworts.</p>
+            <input
+              type="email"
+              required
+              value={resetEmail}
+              onChange={e => setResetEmail(e.target.value)}
+              placeholder="deine@email.de"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+              disabled={resetLoading}
+            />
+            <button
+              type="submit"
+              disabled={resetLoading}
+              className="w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 min-h-[44px]"
+            >
+              {resetLoading ? <Spinner size={20} /> : null}
+              {resetLoading ? 'Wird gesendet...' : 'Link senden'}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   );

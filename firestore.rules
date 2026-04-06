@@ -31,9 +31,24 @@ service cloud.firestore {
     }
 
     // Users can read/update their own profile
+    // Admins can manage users in their own Jagdbezirk
     match /users/{userId} {
-    allow read: if request.auth.uid == userId;
-    allow update: if request.auth.uid == userId;
+      allow read: if request.auth.uid == userId;
+      allow update: if request.auth.uid == userId;
+      // Admin: read all users (filtered by jagdbezirkId in app)
+      allow read: if request.auth != null && getUserData().role == 'admin';
+      // Admin: create user profile for their own jagdbezirk
+      allow create: if request.auth != null &&
+                    getUserData().role == 'admin' &&
+                    getUserData().jagdbezirkId == request.resource.data.jagdbezirkId;
+      // Admin: update role of users in their own jagdbezirk
+      allow update: if request.auth != null &&
+                    getUserData().role == 'admin' &&
+                    getUserData().jagdbezirkId == resource.data.jagdbezirkId;
+      // Admin: deactivate (delete) users in their own jagdbezirk
+      allow delete: if request.auth != null &&
+                    getUserData().role == 'admin' &&
+                    getUserData().jagdbezirkId == resource.data.jagdbezirkId;
     }
 
     // Jagdbezirk document itself (for metadata)

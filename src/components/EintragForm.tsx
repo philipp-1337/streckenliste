@@ -6,6 +6,7 @@ import { Mars, Venus } from 'lucide-react';
 import type { Eintrag } from '@types';
 import { wildarten } from '@data/wildarten';
 import { eintragFormSchema } from '@utils/validation';
+import useAuth from '@hooks/useAuth';
 
 interface EintragFormProps {
   editingEntry: Eintrag | null;
@@ -18,6 +19,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
   onSubmit,
   onCancel
 }) => {
+  const { currentUser } = useAuth();
   // Local loading state for save/update
   const [loading, setLoading] = useState(false);
 
@@ -61,7 +63,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           gewicht: '',
           bemerkung: '',
           wildursprungsschein: '',
-          jaeger: '',
+          jaeger: currentUser?.role === 'user' ? (currentUser?.displayName ?? '') : '',
           ort: '',
           einnahmen: '',
           notizen: '',

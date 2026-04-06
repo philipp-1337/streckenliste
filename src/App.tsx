@@ -17,9 +17,10 @@ import { FachbegriffeLegende } from '@components/FachbegriffeLegende';
 import { SkeletonTable, SkeletonStatistik } from '@components/SkeletonLoaders';
 import useAuth from '@hooks/useAuth';
 import Login from '@auth/Login';
+import ActionHandler from '@auth/ActionHandler';
 import { auth } from './firebase';
 import { signOut } from 'firebase/auth';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { getAvailableJagdjahre, getCurrentJagdjahr } from '@utils/jagdjahrUtils';
 
 const getDefaultFilterState = () => ({
@@ -36,9 +37,21 @@ const OfficialPrintView = lazy(() => import('@components/OfficialPrintView'));
 const ImportDialog = lazy(() => import('@components/ImportDialog'));
 const KategorienFixDialog = lazy(() => import('@components/KategorienFixDialog'));
 const FreigabenView = lazy(() => import('@components/FreigabenView').then(m => ({ default: m.FreigabenView })));
+const UserManagement = lazy(() => import('@components/UserManagement').then(m => ({ default: m.UserManagement })));
 
-const App = () => {  
+const App = () => {
   const { currentUser, loading: userLoading } = useAuth();
+  const location = useLocation();
+
+  // Auth action handler (password reset etc.) — accessible without login
+  if (location.pathname === '/auth/action') {
+    return (
+      <>
+        <Toaster richColors position="top-right" offset={32} />
+        <ActionHandler />
+      </>
+    );
+  }
   const [editingEntry, setEditingEntry] = useState<Eintrag | null>(null);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showNewEntryForm, setShowNewEntryForm] = useState(false);
@@ -318,6 +331,11 @@ const App = () => {
                   </Suspense>
                 } />
                 <Route path="/legende" element={<FachbegriffeLegende />} />
+                <Route path="/users" element={
+                  <Suspense fallback={<div className="p-4">Wird geladen...</div>}>
+                    <UserManagement />
+                  </Suspense>
+                } />
                 <Route path="/freigaben" element={
                   <Suspense fallback={<div className="p-4">Wird geladen...</div>}>
                     <FreigabenView

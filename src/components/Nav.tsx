@@ -1,4 +1,4 @@
-import { BarChart3, BookIcon, HomeIcon, LogOutIcon, ClipboardCheck } from 'lucide-react';
+import { BarChart3, BookIcon, HomeIcon, LogOutIcon, ClipboardCheck, Users } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { UserData } from '@types';
 
@@ -26,13 +26,21 @@ export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount })
       icon: BarChart3,
       onClick: () => navigate('/stats'),
     },
-    ...(isAdmin ? [{
-      path: '/freigaben',
-      label: 'Freigaben',
-      icon: ClipboardCheck,
-      onClick: () => navigate('/freigaben'),
-      badge: pendingCount > 0 ? pendingCount : 0,
-    }] : []),
+    ...(isAdmin ? [
+      {
+        path: '/freigaben',
+        label: 'Freigaben',
+        icon: ClipboardCheck,
+        onClick: () => navigate('/freigaben'),
+        badge: pendingCount > 0 ? pendingCount : 0,
+      },
+      {
+        path: '/users',
+        label: 'Benutzer',
+        icon: Users,
+        onClick: () => navigate('/users'),
+      },
+    ] : []),
     {
       path: '/legende',
       label: 'Legende',
@@ -48,7 +56,7 @@ export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount })
     },
   ];
 
-  const navWidth = `clamp(${tabs.length * 68}px, 90vw, ${tabs.length * 82}px)`;
+  const navWidth = `clamp(280px, 90vw, ${tabs.length * 82}px)`;
 
   return (
     <nav>
