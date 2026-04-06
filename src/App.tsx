@@ -1,5 +1,6 @@
 import { useState, useCallback, lazy, Suspense, useMemo } from 'react';
 import { Toaster, toast } from 'sonner';
+import usePdfExport from '@hooks/usePdfExport';
 import type { Eintrag } from '@types';
 import { useFirestore } from '@hooks/useFirestore';
 import { useStatistiken } from '@hooks/useStatistiken';
@@ -48,6 +49,8 @@ const App = () => {
   // PWA Hooks - sie zeigen die Toasts selbst an
   usePwaPrompt();
   usePwaUpdate();
+
+  const { exportPdf, isExporting: isExportingPdf } = usePdfExport();
 
   // Hook für Live Daten
   const firestore = useFirestore();
@@ -225,6 +228,15 @@ const App = () => {
         </div>
       ) : (
         <>
+          {isExportingPdf && (
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
+              <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-md mx-4 text-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">PDF wird erstellt...</h3>
+                <p className="text-gray-600 text-sm">Einen Moment bitte.</p>
+              </div>
+            </div>
+          )}
           <div className="min-h-screen bg-green-50 p-4">
             <div className="max-w-7xl mx-auto pb-16">
               <Header 
@@ -242,6 +254,11 @@ const App = () => {
                       onToggleNewEntryForm={handleToggleNewEntryForm}
                       onToggleImportDialog={handleToggleImportDialog}
                       onToggleFixDialog={handleToggleFixDialog}
+                      onExportPdf={() => {
+                        const jagdbezirk = currentUser?.jagdbezirk?.name || currentUser?.jagdbezirkId || 'Unbekannt';
+                        exportPdf(filteredEintraege, filter.jagdjahr, jagdbezirk);
+                      }}
+                      isExportingPdf={isExportingPdf}
                       currentUser={currentUser}
                       activeFilterCount={activeFilterCount}
                       filteredCount={filteredEintraege.length}

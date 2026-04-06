@@ -1,8 +1,9 @@
 import { memo } from 'react';
-import { 
-  Plus, 
-  Filter, 
-  Printer, 
+import {
+  Plus,
+  Filter,
+  Printer,
+  FileDown,
   FunnelXIcon,
   // Upload,
   // RefreshCw
@@ -18,6 +19,8 @@ interface ActionButtonsProps {
   onToggleNewEntryForm?: () => void;
   onToggleImportDialog?: () => void;
   onToggleFixDialog?: () => void;
+  onExportPdf?: () => void;
+  isExportingPdf?: boolean;
   currentUser: UserData | null;
   activeFilterCount: number;
   filteredCount: number;
@@ -32,6 +35,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
   // onToggleFixDialog,
   // onToggleImportDialog,
   // currentUser
+  onExportPdf,
+  isExportingPdf,
   activeFilterCount,
   filteredCount,
   totalCount
@@ -88,12 +93,23 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
     {
       id: 'print',
       icon: Printer,
-      title: 'Drucken',
+      title: 'Druckvorschau',
       onClick: () => navigate('/print'),
       isActive: false,
       activeColors: '',
       iconClass: '',
       disabled: false,
+      show: true,
+    },
+    {
+      id: 'pdf-export',
+      icon: isExportingPdf ? FileDown : FileDown,
+      title: 'PDF exportieren',
+      onClick: onExportPdf,
+      isActive: false,
+      activeColors: '',
+      iconClass: '',
+      disabled: !!isExportingPdf,
       show: true,
     },
   ];
