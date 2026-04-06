@@ -18,11 +18,25 @@ export interface Eintrag {
   status?: 'pending' | 'approved';
 }
 
+export interface GeschlechtStats {
+  gesamt: number;
+  fallwild: number;
+}
+
+export interface AltersklasseStats {
+  gesamt: number;
+  fallwild: number;
+  männlich: GeschlechtStats;
+  weiblich: GeschlechtStats;
+  unbekannt: GeschlechtStats;
+}
+
 export interface WildartStats {
   anzahl: number;
   gewicht: number;
   einnahmen: number;
-  altersklassen: { [key: string]: number };
+  altersklassen: { [key: string]: AltersklasseStats };
+  sonstigeDetails?: { [type: string]: number };
 }
 
 export interface AllStats {
