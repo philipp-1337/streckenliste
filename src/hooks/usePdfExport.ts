@@ -55,14 +55,15 @@ const usePdfExport = () => {
         return (rect.bottom - elRect.top) * pixelRatio;
       });
 
-      const [{ toPng }, { jsPDF }] = await Promise.all([
+      const [{ toJpeg }, { jsPDF }] = await Promise.all([
         import('html-to-image'),
         import('jspdf'),
       ]);
 
-      const dataUrl = await toPng(el, {
+      const dataUrl = await toJpeg(el, {
         pixelRatio,
         backgroundColor: '#ffffff',
+        quality: 0.92,
         width: el.scrollWidth,
         height: el.scrollHeight,
       });
@@ -110,7 +111,7 @@ const usePdfExport = () => {
         sliceCtx.fillStyle = '#ffffff';
         sliceCtx.fillRect(0, 0, sliceCanvas.width, srcH);
         sliceCtx.drawImage(img, 0, start, img.width, srcH, 0, 0, img.width, srcH);
-        pdf.addImage(sliceCanvas.toDataURL('image/png'), 'PNG', margin, margin, printableW, srcH * mmPerPx);
+        pdf.addImage(sliceCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', margin, margin, printableW, srcH * mmPerPx);
       }
 
       const filename = `Streckenliste_${(jagdjahr || 'Alle').replace('/', '-')}.pdf`;
