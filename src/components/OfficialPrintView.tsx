@@ -1,7 +1,7 @@
 
 import { useNavigate } from 'react-router-dom';
-import { X, Printer } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { X, Printer, FileDown } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import type { Eintrag } from '@types';
 import useAuth from '@hooks/useAuth';
 import { sanitizeHtml } from '@utils/sanitization';
@@ -17,6 +17,8 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
   const jagdbezirk = currentUser?.jagdbezirk?.name || currentUser?.jagdbezirkId || 'Unbekannt';
   const navigate = useNavigate();
   const [isPrinting, setIsPrinting] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const printAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleAfterPrint = () => {
@@ -27,6 +29,104 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
     return () => window.removeEventListener('afterprint', handleAfterPrint);
   }, []);
   
+  const handleExportPdf = async () => {
+    if (!printAreaRef.current) return;
+    setIsExportingPdf(true);
+    await new Promise(r => setTimeout(r, 150));
+
+    const el = printAreaRef.current;
+    const pixelRatio = 2;
+
+    const prevOverflow = el.style.overflow;
+    const prevPadding = el.style.padding;
+    el.style.overflow = 'visible';
+    el.style.padding = '0';
+
+    // Capture row positions AFTER applying style changes so they match the rendered image.
+    const elRect = el.getBoundingClientRect();
+    const rowBottomsPx = Array.from(el.querySelectorAll('tr')).map(row => {
+      const rect = row.getBoundingClientRect();
+      return (rect.bottom - elRect.top + el.scrollTop) * pixelRatio;
+    });
+
+    try {
+      const [{ toPng }, { jsPDF }] = await Promise.all([
+        import('html-to-image'),
+        import('jspdf'),
+      ]);
+
+      const dataUrl = await toPng(el, {
+        pixelRatio,
+        backgroundColor: '#ffffff',
+        width: el.scrollWidth,
+        height: el.scrollHeight,
+      });
+
+      el.style.overflow = prevOverflow;
+      el.style.padding = prevPadding;
+
+      const img = new Image();
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = reject;
+        img.src = dataUrl;
+      });
+
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pageWidthMm = pdf.internal.pageSize.getWidth();
+      const pageHeightMm = pdf.internal.pageSize.getHeight();
+      const margin = 15;
+
+      const printableW = pageWidthMm - margin * 2;
+      const printableH = pageHeightMm - margin * 2;
+      const mmPerPx = printableW / img.width;
+      const pageHeightPx = Math.round(printableH / mmPerPx);
+
+      // Build row-aware slice points: cut only between rows, never mid-row.
+      const slices: Array<{ start: number; end: number }> = [];
+      let sliceStart = 0;
+      while (sliceStart < img.height) {
+        const maxEnd = sliceStart + pageHeightPx;
+        if (maxEnd >= img.height) {
+          slices.push({ start: sliceStart, end: img.height });
+          break;
+        }
+        // Last row bottom that still fits within this page
+        const fitting = rowBottomsPx.filter(b => b > sliceStart && b <= maxEnd);
+        const cutAt = fitting.length > 0 ? fitting[fitting.length - 1] : maxEnd;
+        slices.push({ start: sliceStart, end: Math.round(cutAt) });
+        sliceStart = Math.round(cutAt);
+      }
+
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = img.width;
+      const sliceCtx = sliceCanvas.getContext('2d')!;
+
+      for (let i = 0; i < slices.length; i++) {
+        if (i > 0) pdf.addPage();
+        const { start, end } = slices[i];
+        const srcH = end - start;
+
+        // Set canvas height to exact slice height — prevents stretching on the last page.
+        sliceCanvas.height = srcH;
+        sliceCtx.fillStyle = '#ffffff';
+        sliceCtx.fillRect(0, 0, sliceCanvas.width, srcH);
+        sliceCtx.drawImage(img, 0, start, img.width, srcH, 0, 0, img.width, srcH);
+
+        pdf.addImage(sliceCanvas.toDataURL('image/png'), 'PNG', margin, margin, printableW, srcH * mmPerPx);
+      }
+
+      const filename = `Streckenliste_${(jagdjahr || 'Alle').replace('/', '-')}.pdf`;
+      pdf.save(filename);
+    } catch (err) {
+      console.error('PDF Export fehlgeschlagen:', err);
+      el.style.overflow = prevOverflow;
+      el.style.padding = prevPadding;
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
   // Display text for hunting year - show "Alle" if no specific year selected
   const displayJagdjahr = jagdjahr || 'Alle Jagdjahre';
   
@@ -103,6 +203,19 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
       }
     `}</style>
     
+    {/* PDF Export Loading Overlay */}
+    {isExportingPdf && (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
+        <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-md mx-4 text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">PDF wird erstellt...</h3>
+          <p className="text-gray-600 text-sm">
+            Einen Moment bitte.
+          </p>
+        </div>
+      </div>
+    )}
+
     {/* Full-Screen Loading Overlay */}
     {isPrinting && (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
@@ -116,7 +229,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
       </div>
     )}
     
-    <div className="print-area bg-white overflow-auto p-8">
+    <div ref={printAreaRef} className="print-area bg-white overflow-auto p-8">
       <div className="max-w-full text-xs print-container">
         <div className="text-xs">
             {/* Header */}
@@ -296,50 +409,60 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
             </div> */}
 
             {/* Action Buttons (nicht druckbar) */}
-            <div className="fixed right-6 top-1/2 -translate-y-1/2 print:hidden flex flex-col gap-3 z-[1002]">
-              <button
-                onClick={() => navigate(-1)}
-                className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl shadow-lg border border-gray-200 font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2 cursor-pointer"
-                disabled={isPrinting}
-              >
-                <X size={20} />
-                Schließen
-              </button>
-              <button
-                onClick={() => {
-                  setIsPrinting(true);
-                  // Kurze Verzögerung damit User den Loading-State sieht
-                  setTimeout(() => {
-                    // Safari Workaround: execCommand('print') ist schneller als window.print()
-                    try {
-                      if (!document.execCommand('print', false)) {
-                        // Fallback zu window.print() wenn execCommand nicht funktioniert
+            {!isExportingPdf && (
+              <div className="fixed right-6 top-1/2 -translate-y-1/2 print:hidden flex flex-col gap-3 z-[1002]">
+                <button
+                  onClick={() => navigate(-1)}
+                  className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl shadow-lg border border-gray-200 font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2 cursor-pointer"
+                  disabled={isPrinting}
+                >
+                  <X size={20} />
+                  Schließen
+                </button>
+                <button
+                  onClick={() => {
+                    setIsPrinting(true);
+                    // Kurze Verzögerung damit User den Loading-State sieht
+                    setTimeout(() => {
+                      // Safari Workaround: execCommand('print') ist schneller als window.print()
+                      try {
+                        if (!document.execCommand('print', false)) {
+                          // Fallback zu window.print() wenn execCommand nicht funktioniert
+                          window.print();
+                        }
+                      } catch {
+                        // execCommand ist in manchen Browsern nicht verfügbar
                         window.print();
                       }
-                    } catch {
-                      // execCommand ist in manchen Browsern nicht verfügbar
-                      window.print();
-                    }
-                    // Fallback falls afterprint Event nicht funktioniert (z.B. bei Abbruch)
-                    setTimeout(() => setIsPrinting(false), 3000);
-                  }, 300);
-                }}
-                disabled={isPrinting}
-                className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl shadow-lg font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait cursor-pointer"
-              >
-                {isPrinting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Wird vorbereitet...
-                  </>
-                ) : (
-                  <>
-                    <Printer size={20} />
-                    Drucken
-                  </>
-                )}
-              </button>
-            </div>
+                      // Fallback falls afterprint Event nicht funktioniert (z.B. bei Abbruch)
+                      setTimeout(() => setIsPrinting(false), 3000);
+                    }, 300);
+                  }}
+                  disabled={isPrinting}
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl shadow-lg font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait cursor-pointer"
+                >
+                  {isPrinting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      Wird vorbereitet...
+                    </>
+                  ) : (
+                    <>
+                      <Printer size={20} />
+                      Drucken
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={handleExportPdf}
+                  disabled={isPrinting}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl shadow-lg font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  <FileDown size={20} />
+                  PDF Export
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
