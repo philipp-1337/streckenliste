@@ -1,12 +1,14 @@
 import { memo } from 'react';
 import type { AllStats } from '@types';
 import { BarChart2Icon } from 'lucide-react';
+import useAuth from '@hooks/useAuth';
 
 interface StatistikPanelProps {
   stats: AllStats;
 }
 
 export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ stats }) => {
+  const { currentUser } = useAuth();
   return (
     <div className="bg-white p-6 rounded-lg mb-6 shadow">
     <h3 className="font-semibold mb-3 flex items-center gap-2"><BarChart2Icon className="inline-block align-middle" size={20} /> <span className="align-middle">Statistiken</span></h3>
@@ -27,7 +29,9 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ stats }) =>
             {wildart !== 'Sonstige' && (
               <>
                 <p className="text-sm mb-2">Gewicht: <strong>{stat.gewicht.toFixed(1)}</strong> kg</p>
-                <p className="text-sm mb-3">Einnahmen: <strong>{stat.einnahmen.toFixed(2)}</strong> €</p>
+                {currentUser?.role === 'admin' && (
+                  <p className="text-sm mb-3">Einnahmen: <strong>{stat.einnahmen.toFixed(2)}</strong> €</p>
+                )}
                 <div className="text-xs space-y-2 border-t pt-2">
                   <p className="font-medium">Nach Altersklassen:</p>
                   {Object.entries(stat.altersklassen).map(([ak, akStats]) => (

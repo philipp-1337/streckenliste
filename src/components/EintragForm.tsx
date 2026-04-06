@@ -309,20 +309,22 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               <p className="text-red-500 text-sm mt-1">{errors.gewicht.message}</p>
             )}
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Einnahmen (€)</label>
-            <input
-              type="number"
-              step="0.01"
-              {...register('einnahmen')}
-              className={`w-full border rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
-                errors.einnahmen ? 'border-red-500' : 'border-gray-300'
-              }`}
-            />
-            {errors.einnahmen && (
-              <p className="text-red-500 text-sm mt-1">{errors.einnahmen.message}</p>
-            )}
-          </div>
+          {currentUser?.role === 'admin' && (
+            <div>
+              <label className="block text-sm font-medium mb-1">Einnahmen (€)</label>
+              <input
+                type="number"
+                step="0.01"
+                {...register('einnahmen')}
+                className={`w-full border rounded-lg px-3 py-2 h-[42px] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+                  errors.einnahmen ? 'border-red-500' : 'border-gray-300'
+                }`}
+              />
+              {errors.einnahmen && (
+                <p className="text-red-500 text-sm mt-1">{errors.einnahmen.message}</p>
+              )}
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium mb-1">Jäger</label>
             <input
