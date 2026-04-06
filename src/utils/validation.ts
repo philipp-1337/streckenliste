@@ -34,16 +34,18 @@ export const eintragFormSchema = z.object({
   
   fachbegriff: z.string(),
   
-  gewicht: z
-    .string()
-    .refine(
-      (val) => !val || !isNaN(parseFloat(val)),
-      'Gewicht muss eine gültige Zahl sein'
-    )
-    .refine(
-      (val) => !val || parseFloat(val) >= 0,
-      'Gewicht muss eine positive Zahl sein'
-    ),
+  gewicht: z.preprocess(
+    (val) => { if (val == null) return ''; const s = String(val).trim(); return s === '' || isNaN(parseFloat(s)) ? '' : s; },
+    z.string()
+      .refine(
+        (val) => !val || !isNaN(parseFloat(val)),
+        'Gewicht muss eine gültige Zahl sein'
+      )
+      .refine(
+        (val) => !val || parseFloat(val) >= 0,
+        'Gewicht muss eine positive Zahl sein'
+      )
+  ),
   
   bemerkung: z
     .string()
@@ -61,16 +63,18 @@ export const eintragFormSchema = z.object({
     .string()
     .max(200, 'Ort darf maximal 200 Zeichen lang sein'),
   
-  einnahmen: z
-    .string()
-    .refine(
-      (val) => !val || !isNaN(parseFloat(val)),
-      'Einnahmen müssen eine gültige Zahl sein'
-    )
-    .refine(
-      (val) => !val || parseFloat(val) >= 0,
-      'Einnahmen müssen eine positive Zahl sein'
-    ),
+  einnahmen: z.preprocess(
+    (val) => { if (val == null) return ''; const s = String(val).trim(); return s === '' || isNaN(parseFloat(s)) ? '' : s; },
+    z.string()
+      .refine(
+        (val) => !val || !isNaN(parseFloat(val)),
+        'Einnahmen müssen eine gültige Zahl sein'
+      )
+      .refine(
+        (val) => !val || parseFloat(val) >= 0,
+        'Einnahmen müssen eine positive Zahl sein'
+      )
+  ),
   
   notizen: z
     .string()

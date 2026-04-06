@@ -86,24 +86,25 @@ export const EintragForm: React.FC<EintragFormProps> = ({
         kategorieValue = `${editingEntry.kategorie}|${editingEntry.fachbegriff}`;
       }
       reset({
-        datum: editingEntry.datum,
-        wildart: editingEntry.wildart,
-        kategorie: kategorieValue,
-        altersklasse: editingEntry.altersklasse,
-        geschlecht: editingEntry.geschlecht,
-        fachbegriff: editingEntry.fachbegriff,
-        gewicht: editingEntry.gewicht,
-        bemerkung: editingEntry.bemerkung,
-        wildursprungsschein: editingEntry.wildursprungsschein,
-        jaeger: editingEntry.jaeger,
-        ort: editingEntry.ort,
-        einnahmen: editingEntry.einnahmen,
-        notizen: editingEntry.notizen,
-        jagdbezirkId: editingEntry.jagdbezirkId,
-        userId: editingEntry.userId
+        datum: editingEntry.datum ?? '',
+        wildart: editingEntry.wildart ?? '',
+        kategorie: kategorieValue ?? '',
+        altersklasse: editingEntry.altersklasse ?? '',
+        geschlecht: editingEntry.geschlecht ?? '',
+        fachbegriff: editingEntry.fachbegriff ?? '',
+        gewicht: editingEntry.gewicht != null ? String(editingEntry.gewicht) : '',
+        bemerkung: editingEntry.bemerkung ?? '',
+        wildursprungsschein: editingEntry.wildursprungsschein ?? '',
+        jaeger: editingEntry.jaeger ?? '',
+        ort: editingEntry.ort ?? '',
+        einnahmen: editingEntry.einnahmen != null ? String(editingEntry.einnahmen) : '',
+        notizen: editingEntry.notizen ?? '',
+        jagdbezirkId: editingEntry.jagdbezirkId ?? '',
+        userId: editingEntry.userId ?? ''
       });
+      trigger();
     }
-  }, [editingEntry, reset]);
+  }, [editingEntry, reset, trigger]);
 
   const getKategorienFuerWildart = (wildart: string) => {
     return wildarten[wildart] || [];
