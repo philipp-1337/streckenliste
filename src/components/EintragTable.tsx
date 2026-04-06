@@ -25,6 +25,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     const handleEdit = async (eintrag: Eintrag) => {
+      if (!onEdit) return;
       setLoadingId(eintrag.id);
       await Promise.resolve(onEdit(eintrag));
       setLoadingId(null);
