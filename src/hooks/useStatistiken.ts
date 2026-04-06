@@ -13,8 +13,13 @@ export const useStatistiken = (eintraege: Eintrag[]) => {
         if (!stats[eintrag.wildart].sonstigeDetails) {
           stats[eintrag.wildart].sonstigeDetails = {};
         }
-        const countMatch = (eintrag.bemerkung || '').match(/^(\d+)\s*x/i);
-        const count = countMatch ? parseInt(countMatch[1], 10) : 1;
+        let count: number;
+        if (eintrag.anzahl !== undefined) {
+          count = eintrag.anzahl;
+        } else {
+          const countMatch = (eintrag.bemerkung || '').match(/^(\d+)\s*x/i);
+          count = countMatch ? parseInt(countMatch[1], 10) : 1;
+        }
         const type = eintrag.fachbegriff;
         stats[eintrag.wildart].sonstigeDetails![type] = (stats[eintrag.wildart].sonstigeDetails![type] ?? 0) + count;
         stats[eintrag.wildart].anzahl += count;
@@ -28,7 +33,9 @@ export const useStatistiken = (eintraege: Eintrag[]) => {
       const einnahmen = parseFloat(eintrag.einnahmen || '0');
       stats[eintrag.wildart].einnahmen += isNaN(einnahmen) ? 0 : einnahmen;
 
-      const isFallwild = (eintrag.bemerkung || '').toLowerCase().includes('fallwild');
+      const isFallwild = eintrag.fallwild !== undefined
+        ? eintrag.fallwild
+        : (eintrag.bemerkung || '').toLowerCase().includes('fallwild');
 
       const ak = eintrag.altersklasse;
       if (!stats[eintrag.wildart].altersklassen[ak]) {

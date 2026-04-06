@@ -5,6 +5,7 @@ import { useUserManagement } from '@hooks/useUserManagement';
 import useAuth from '@hooks/useAuth';
 import Spinner from '@components/Spinner';
 import type { Role } from '@types';
+import { migrateFallwildAnzahl } from '@utils/migrateFallwildAnzahl';
 
 export const UserManagement: React.FC = () => {
   const { currentUser } = useAuth();
@@ -14,6 +15,7 @@ export const UserManagement: React.FC = () => {
   const [formName, setFormName] = useState('');
   const [formRole, setFormRole] = useState<Role>('user');
   const [submitting, setSubmitting] = useState(false);
+  const [migrating, setMigrating] = useState(false);
 
   useEffect(() => {
     loadUsers();
@@ -32,6 +34,19 @@ export const UserManagement: React.FC = () => {
       // error already shown via toast in hook
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleMigration = async () => {
+    if (!currentUser?.jagdbezirkId) return;
+    setMigrating(true);
+    try {
+      const result = await migrateFallwildAnzahl(currentUser.jagdbezirkId);
+      toast.success(`Migration abgeschlossen: ${result.migriert} migriert, ${result.uebersprungen} bereits aktuell`);
+    } catch {
+      toast.error('Fehler bei der Migration');
+    } finally {
+      setMigrating(false);
     }
   };
 

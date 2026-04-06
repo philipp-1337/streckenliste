@@ -24,31 +24,34 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ stats }) =>
                   ))}
               </div>
             )}
-            <p className="text-sm mb-2">Gewicht: <strong>{stat.gewicht.toFixed(1)}</strong> kg</p>
-            <p className="text-sm mb-3">Einnahmen: <strong>{stat.einnahmen.toFixed(2)}</strong> €</p>
-
-            <div className="text-xs space-y-2 border-t pt-2">
-              <p className="font-medium">Nach Altersklassen:</p>
-              {Object.entries(stat.altersklassen).map(([ak, akStats]) => (
-                <div key={ak} className="ml-2">
-                  <p className="font-medium text-green-700">
-                    {ak}: {akStats.gesamt} Stück
-                    {akStats.fallwild > 0 && <span className="text-amber-700 ml-1">(davon {akStats.fallwild} Fallwild)</span>}
-                  </p>
-                  <div className="ml-2 space-y-0.5 text-gray-600">
-                    {akStats.männlich.gesamt > 0 && (
-                      <p>♂ männlich: {akStats.männlich.gesamt}{akStats.männlich.fallwild > 0 && <span className="text-amber-700"> ({akStats.männlich.fallwild} Fallwild)</span>}</p>
-                    )}
-                    {akStats.weiblich.gesamt > 0 && (
-                      <p>♀ weiblich: {akStats.weiblich.gesamt}{akStats.weiblich.fallwild > 0 && <span className="text-amber-700"> ({akStats.weiblich.fallwild} Fallwild)</span>}</p>
-                    )}
-                    {akStats.unbekannt.gesamt > 0 && (
-                      <p>— unbekannt: {akStats.unbekannt.gesamt}{akStats.unbekannt.fallwild > 0 && <span className="text-amber-700"> ({akStats.unbekannt.fallwild} Fallwild)</span>}</p>
-                    )}
-                  </div>
+            {wildart !== 'Sonstige' && (
+              <>
+                <p className="text-sm mb-2">Gewicht: <strong>{stat.gewicht.toFixed(1)}</strong> kg</p>
+                <p className="text-sm mb-3">Einnahmen: <strong>{stat.einnahmen.toFixed(2)}</strong> €</p>
+                <div className="text-xs space-y-2 border-t pt-2">
+                  <p className="font-medium">Nach Altersklassen:</p>
+                  {Object.entries(stat.altersklassen).map(([ak, akStats]) => (
+                    <div key={ak} className="ml-2">
+                      <p className="font-medium text-green-700">
+                        {ak}: {akStats.gesamt} Stück
+                        {akStats.fallwild > 0 && <span className="text-amber-700 ml-1">(davon {akStats.fallwild} Fallwild)</span>}
+                      </p>
+                      <div className="ml-2 space-y-0.5 text-gray-600">
+                        {akStats.männlich.gesamt > 0 && (
+                          <p>♂ männlich: {akStats.männlich.gesamt}{akStats.männlich.fallwild > 0 && <span className="text-amber-700"> ({akStats.männlich.fallwild} Fallwild)</span>}</p>
+                        )}
+                        {akStats.weiblich.gesamt > 0 && (
+                          <p>♀ weiblich: {akStats.weiblich.gesamt}{akStats.weiblich.fallwild > 0 && <span className="text-amber-700"> ({akStats.weiblich.fallwild} Fallwild)</span>}</p>
+                        )}
+                        {akStats.unbekannt.gesamt > 0 && (
+                          <p>— unbekannt: {akStats.unbekannt.gesamt}{akStats.unbekannt.fallwild > 0 && <span className="text-amber-700"> ({akStats.unbekannt.fallwild} Fallwild)</span>}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
           </div>
         ))}
       </div>

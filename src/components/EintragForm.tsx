@@ -20,8 +20,9 @@ export const EintragForm: React.FC<EintragFormProps> = ({
   onCancel
 }) => {
   const { currentUser } = useAuth();
-  // Local loading state for save/update
   const [loading, setLoading] = useState(false);
+  const [isFallwild, setIsFallwild] = useState(false);
+  const [sonstigeAnzahl, setSonstigeAnzahl] = useState(1);
 
   // Initialize form with React Hook Form and Zod validation
   const {
@@ -79,6 +80,19 @@ export const EintragForm: React.FC<EintragFormProps> = ({
   const watchedAltersklasse = watch('altersklasse');
   const watchedGeschlecht = watch('geschlecht');
 
+  // Sync Fallwild/Anzahl state when editingEntry changes
+  useEffect(() => {
+    if (editingEntry) {
+      const bem = (editingEntry.bemerkung || '').toLowerCase();
+      setIsFallwild(bem.includes('fallwild'));
+      const countMatch = editingEntry.bemerkung?.match(/^(\d+)\s*x/i);
+      setSonstigeAnzahl(countMatch ? parseInt(countMatch[1], 10) : 1);
+    } else {
+      setIsFallwild(false);
+      setSonstigeAnzahl(1);
+    }
+  }, [editingEntry]);
+
   // Reset form when editingEntry changes
   useEffect(() => {
     if (editingEntry) {
@@ -118,8 +132,23 @@ export const EintragForm: React.FC<EintragFormProps> = ({
     setValue('geschlecht', '', { shouldValidate: true });
     setValue('fachbegriff', '', { shouldValidate: true });
     setValue('kategorie', '', { shouldValidate: true });
-    // Trigger validation to update isValid state
+    setValue('bemerkung', '', { shouldValidate: true });
+    setIsFallwild(false);
+    setSonstigeAnzahl(1);
     trigger();
+  };
+
+  const handleFallwildChange = (checked: boolean) => {
+    setIsFallwild(checked);
+    setValue('bemerkung', checked ? 'sonstiges Fallwild' : '', { shouldValidate: true });
+  };
+
+  const handleSonstigeAnzahlChange = (anzahl: number) => {
+    const safeAnzahl = Math.max(1, anzahl);
+    setSonstigeAnzahl(safeAnzahl);
+    if (watchedFachbegriff) {
+      setValue('bemerkung', safeAnzahl > 1 ? `${safeAnzahl}x ${watchedFachbegriff}` : watchedFachbegriff, { shouldValidate: true });
+    }
   };
 
   const handleKategorieChange = (kategorie: string) => {
@@ -131,7 +160,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
       setValue('altersklasse', '', { shouldValidate: true });
       setValue('geschlecht', '', { shouldValidate: true });
       setValue('fachbegriff', fachbegriff || '', { shouldValidate: true });
-      setValue('bemerkung', fachbegriff || '', { shouldValidate: true });
+      setValue('bemerkung', sonstigeAnzahl > 1 ? `${sonstigeAnzahl}x ${fachbegriff}` : (fachbegriff || ''), { shouldValidate: true });
     } else {
       const wildartData = getKategorienFuerWildart(watchedWildart);
       const selectedKategorie = wildartData.find(k => k.kategorie === kategorie);
@@ -150,7 +179,9 @@ export const EintragForm: React.FC<EintragFormProps> = ({
       await Promise.resolve(onSubmit({
         ...data,
         jagdbezirkId: data.jagdbezirkId || '',
-        userId: data.userId || ''
+        userId: data.userId || '',
+        fallwild: watchedWildart !== 'Sonstige' ? isFallwild : false,
+        anzahl: watchedWildart === 'Sonstige' ? sonstigeAnzahl : 1,
       }));
     } finally {
       setLoading(false);
@@ -319,6 +350,41 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             )}
           </div>
         </div>
+
+        {watchedWildart && watchedWildart !== 'Sonstige' && (
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="fallwild"
+              checked={isFallwild}
+              onChange={(e) => handleFallwildChange(e.target.checked)}
+              className="w-4 h-4 accent-green-700 cursor-pointer"
+            />
+            <label htmlFor="fallwild" className="text-sm font-medium cursor-pointer select-none">
+              Fallwild
+            </label>
+          </div>
+        )}
+
+        {watchedWildart === 'Sonstige' && watchedFachbegriff && (
+          <div className="flex items-center gap-3">
+            <label className="text-sm font-medium">Anzahl</label>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => handleSonstigeAnzahlChange(sonstigeAnzahl - 1)}
+                disabled={sonstigeAnzahl <= 1}
+                className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-lg font-medium hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >−</button>
+              <span className="w-8 text-center font-semibold">{sonstigeAnzahl}</span>
+              <button
+                type="button"
+                onClick={() => handleSonstigeAnzahlChange(sonstigeAnzahl + 1)}
+                className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-lg font-medium hover:bg-gray-100 cursor-pointer"
+              >+</button>
+            </div>
+          </div>
+        )}
 
         <div>
           <label className="block text-sm font-medium mb-1">Bemerkung</label>

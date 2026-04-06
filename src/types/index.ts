@@ -16,6 +16,8 @@ export interface Eintrag {
   jagdbezirkId: string;
   userId: string;
   status?: 'pending' | 'approved';
+  fallwild?: boolean;
+  anzahl?: number;
 }
 
 export interface GeschlechtStats {
