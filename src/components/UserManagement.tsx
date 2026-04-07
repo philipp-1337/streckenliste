@@ -168,6 +168,7 @@ export const UserManagement: React.FC = () => {
         ) : users.length === 0 ? (
           <div className="text-center py-12 text-gray-500">Keine Benutzer gefunden.</div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="min-w-full">
             <thead className="bg-green-800 text-white">
               <tr>
@@ -213,6 +214,7 @@ export const UserManagement: React.FC = () => {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>
