@@ -103,7 +103,7 @@ export const UserManagement: React.FC = () => {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow p-5 space-y-4">
-          <h3 className="font-medium text-gray-900">Neuen Benutzer anlegen</h3>
+          <h3 className="text-base font-semibold text-green-800">Neuen Benutzer anlegen</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>

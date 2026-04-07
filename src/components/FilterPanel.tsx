@@ -48,7 +48,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2">
           <Filter size={20} />
-          <h3 className="font-semibold">Filter</h3>
+          <h3 className="text-base font-semibold text-green-800">Filter</h3>
         </div>
         <button
           type="button"

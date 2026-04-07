@@ -3,6 +3,9 @@ import { wildarten } from '@data/wildarten';
 export const FachbegriffeLegende: React.FC = () => {
   return (
     <div className="bg-white/70 backdrop-blur-sm rounded-xl border border-green-200/50 mb-4 overflow-hidden">
+      <div className="px-3 py-2.5 border-b border-green-100">
+        <h3 className="text-base font-semibold text-green-800">Fachbegriffe & Legende</h3>
+      </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 divide-x divide-green-100">
         {Object.entries(wildarten).map(([wildart, kategorien]) => (
           <div key={wildart} className="px-3 py-2.5">

@@ -190,7 +190,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
 
   return (
     <div className="bg-white p-6 rounded-lg mb-6 shadow">
-      <h3 className="text-xl font-bold mb-4">
+      <h3 className="text-base font-semibold text-green-800 mb-4">
         {editingEntry ? 'Eintrag bearbeiten' : 'Neuer Eintrag'}
       </h3>
       <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
