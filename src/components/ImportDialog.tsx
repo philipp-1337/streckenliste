@@ -168,8 +168,8 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({ isOpen, onClose, onI
               </div>
               
               {/* Info Text */}
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800">
+              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-sm text-green-800">
                   <strong>Hinweis:</strong> Die Einträge werden mit Ihrem Benutzerkonto verknüpft und in Ihren Jagdbezirk importiert.
                 </p>
               </div>

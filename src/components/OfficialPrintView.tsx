@@ -7,6 +7,7 @@ import useAuth from '@hooks/useAuth';
 import usePdfExport from '@hooks/usePdfExport';
 import PrintContent from '@components/PrintContent';
 import PdfDownloadDialog from '@components/PdfDownloadDialog';
+import Spinner from '@components/Spinner';
 
 interface OfficialPrintViewProps {
   eintraege: Eintrag[];
@@ -62,7 +63,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
       {isExportingPdf && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
           <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-md mx-4 text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+            <Spinner size={64} className="mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">PDF wird erstellt...</h3>
             <p className="text-gray-600 text-sm">Einen Moment bitte.</p>
           </div>
@@ -73,7 +74,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
       {isPrinting && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
           <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-md mx-4 text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-green-600 border-t-transparent mx-auto mb-4"></div>
+            <Spinner size={64} className="mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Druckvorschau wird vorbereitet...</h3>
             <p className="text-gray-600 text-sm">
               Dies kann auf mobilen Geräten bis zu einer Minute dauern. Bitte haben Sie einen Moment Geduld.
@@ -116,7 +117,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
           >
             {isPrinting ? (
               <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                <Spinner size={20} />
                 Wird vorbereitet...
               </>
             ) : (
@@ -129,7 +130,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
           <button
             onClick={() => exportPdf(eintraege, jagdjahr || '', jagdbezirk)}
             disabled={isPrinting}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl shadow-lg font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-xl shadow-lg font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             <FileDown size={20} />
             PDF Export

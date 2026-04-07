@@ -31,7 +31,7 @@ export const JagdjahrSelect: React.FC<JagdjahrSelectProps> = ({
           onClick={toggle}
           className="
             relative
-            w-12 h-12 rounded-lg
+            w-12 h-12 rounded-xl
             flex items-center justify-center
             bg-white/80 border-2 border-green-600
             transition-all duration-200
@@ -85,7 +85,7 @@ export const JagdjahrSelect: React.FC<JagdjahrSelectProps> = ({
   // Desktop variant für Header
   return (
     <div className="mx-4 relative" ref={dropdownRef}>
-      <label className="block text-sm font-semibold text-green-900 mb-1">
+      <label className="block text-sm font-semibold text-green-900 mb-1 text-right">
         Jagdjahr
       </label>
       <button

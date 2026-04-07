@@ -1,21 +1,21 @@
 import { wildarten } from '@data/wildarten';
-import { BookIcon } from 'lucide-react';
 
 export const FachbegriffeLegende: React.FC = () => {
   return (
-    <div className="mt-6 bg-white p-4 rounded-lg shadow">
-    <h3 className="font-semibold mb-3 flex items-center gap-2"><BookIcon className="inline-block align-middle" size={20} /> <span className="align-middle">Fachbegriffe und Altersklassen</span></h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+    <div className="bg-white/70 backdrop-blur-sm rounded-xl border border-green-200/50 mb-4 overflow-hidden">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 divide-x divide-green-100">
         {Object.entries(wildarten).map(([wildart, kategorien]) => (
-          <div key={wildart} className="bg-gray-50 p-3 rounded">
-            <h4 className="font-medium text-green-800 mb-2">{wildart}</h4>
-            <div className="space-y-1">
+          <div key={wildart} className="px-3 py-2.5">
+            <p className="text-[10px] font-bold text-green-800 uppercase tracking-wider mb-2">
+              {wildart}
+            </p>
+            <div className="space-y-0.5">
               {kategorien.map((kat, idx) => (
-                <div key={idx} className="text-xs">
-                  <span className="font-medium">{kat.fachbegriff}</span>
-                  <span className="text-gray-600 ml-1">
-                    ({kat.altersklasse || kat.kategorie})
-                  </span>
+                <div key={idx} className="flex items-baseline justify-between gap-1 text-xs">
+                  <span className="text-green-900/80 font-medium leading-relaxed">{kat.fachbegriff}</span>
+                  {kat.altersklasse && (
+                    <span className="text-green-900/35 shrink-0 tabular-nums text-[10px]">{kat.altersklasse}</span>
+                  )}
                 </div>
               ))}
             </div>

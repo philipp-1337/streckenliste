@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { ClipboardCheck } from 'lucide-react';
 import { EintragTable } from '@components/EintragTable';
 import type { Eintrag, UserData } from '@types';
 
@@ -21,17 +22,25 @@ export const FreigabenView: React.FC<FreigabenViewProps> = memo(({
 
   if (pendingEintraege.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow p-12 text-center text-gray-500">
-        <p className="text-lg font-medium">Keine ausstehenden Einträge</p>
-        <p className="text-sm mt-1">Alle Einträge wurden freigegeben.</p>
-      </div>
+      <>
+        <h2 className="text-xl font-bold text-green-800 flex items-center gap-2.5 mb-4">
+          <ClipboardCheck size={20} strokeWidth={2} />
+          Freigaben
+        </h2>
+        <div className="bg-white rounded-xl shadow p-12 text-center text-green-900/50">
+          <p className="text-lg font-medium">Keine ausstehenden Einträge</p>
+          <p className="text-sm mt-1">Alle Einträge wurden freigegeben.</p>
+        </div>
+      </>
     );
   }
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-green-900 mb-4">
-        Ausstehende Freigaben ({pendingEintraege.length})
+      <h2 className="text-xl font-bold text-green-800 flex items-center gap-2.5 mb-4">
+        <ClipboardCheck size={20} strokeWidth={2} />
+        Freigaben
+        <span className="ml-1 text-sm font-medium text-green-900/50">({pendingEintraege.length})</span>
       </h2>
       <EintragTable
         eintraege={pendingEintraege}

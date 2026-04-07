@@ -1,5 +1,6 @@
 import { useState, useCallback, lazy, Suspense, useMemo } from 'react';
 import { Toaster, toast } from 'sonner';
+import { HomeIcon } from 'lucide-react';
 import usePdfExport from '@hooks/usePdfExport';
 import type { Eintrag } from '@types';
 import { useFirestore } from '@hooks/useFirestore';
@@ -15,13 +16,14 @@ import { EintragForm } from '@components/EintragForm';
 import { EintragTable } from '@components/EintragTable';
 import { FachbegriffeLegende } from '@components/FachbegriffeLegende';
 import { SkeletonTable, SkeletonStatistik } from '@components/SkeletonLoaders';
+import Spinner from '@components/Spinner';
 import PdfDownloadDialog from '@components/PdfDownloadDialog';
 import useAuth from '@hooks/useAuth';
 import Login from '@auth/Login';
 import ActionHandler from '@auth/ActionHandler';
 import { auth } from './firebase';
 import { signOut } from 'firebase/auth';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { getAvailableJagdjahre, getCurrentJagdjahr } from '@utils/jagdjahrUtils';
 
 const getDefaultFilterState = () => ({
@@ -43,6 +45,7 @@ const UserManagement = lazy(() => import('@components/UserManagement').then(m =>
 const App = () => {
   const { currentUser, loading: userLoading } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [editingEntry, setEditingEntry] = useState<Eintrag | null>(null);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -231,8 +234,8 @@ const App = () => {
       {/* Early returns nach Toaster! */}
       {userLoading ? (
         <div className="flex flex-col items-center justify-center h-screen bg-green-50">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-600 mb-4"></div>
-          <p className="text-xl text-gray-700">Benutzerdaten werden geladen...</p>
+          <Spinner size={64} className="mb-4" />
+          <p className="text-xl text-green-900/70">Benutzerdaten werden geladen...</p>
         </div>
       ) : !currentUser ? (
         <Login isLoggingIn={isLoggingIn} setIsLoggingIn={setIsLoggingIn} />
@@ -258,7 +261,7 @@ const App = () => {
           {isExportingPdf && (
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center">
               <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-md mx-4 text-center">
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+                <Spinner size={64} className="mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">PDF wird erstellt...</h3>
                 <p className="text-gray-600 text-sm">Einen Moment bitte.</p>
               </div>
@@ -269,6 +272,7 @@ const App = () => {
               blob={iosPdfBlob}
               filename={`Streckenliste_${(filter.jagdjahr || 'Alle').replace('/', '-')}.pdf`}
               onClose={clearIosPdf}
+              onPrint={() => { clearIosPdf(); navigate('/print'); }}
             />
           )}
           <div className="min-h-screen bg-green-50 p-4">
@@ -281,25 +285,29 @@ const App = () => {
               <Routes>
                 <Route path="/" element={
                   <>
-                    <ActionButtons
-                      showFilter={showFilterPanel}
-                      showNewEntryForm={showNewEntryForm}
-                      onToggleFilterPanel={handleToggleFilterPanel}
-                      onToggleNewEntryForm={handleToggleNewEntryForm}
-                      onToggleImportDialog={handleToggleImportDialog}
-                      onToggleFixDialog={handleToggleFixDialog}
-                      onExportPdf={() => {
-                        const jagdbezirk = currentUser?.jagdbezirk?.name || currentUser?.jagdbezirkId || 'Unbekannt';
-                        exportPdf(filteredEintraege, filter.jagdjahr, jagdbezirk);
-                      }}
-                      isExportingPdf={isExportingPdf}
-                      onToggleLegende={handleToggleLegende}
-                      showLegende={showLegende}
-                      currentUser={currentUser}
-                      activeFilterCount={activeFilterCount}
-                      filteredCount={filteredEintraege.length}
-                      totalCount={currentData.eintraege.length}
-                    />
+                    <div className="flex items-center justify-between gap-4 mb-6">
+                      <h2 className="text-xl font-bold text-green-800 flex items-center gap-2.5 shrink-0">
+                        <HomeIcon size={20} strokeWidth={2} />
+                        Übersicht
+                      </h2>
+                      <ActionButtons
+                        showFilter={showFilterPanel}
+                        showNewEntryForm={showNewEntryForm}
+                        onToggleFilterPanel={handleToggleFilterPanel}
+                        onToggleNewEntryForm={handleToggleNewEntryForm}
+                        onToggleImportDialog={handleToggleImportDialog}
+                        onToggleFixDialog={handleToggleFixDialog}
+                        onExportPdf={() => {
+                          const jagdbezirk = currentUser?.jagdbezirk?.name || currentUser?.jagdbezirkId || 'Unbekannt';
+                          exportPdf(filteredEintraege, filter.jagdjahr, jagdbezirk);
+                        }}
+                        isExportingPdf={isExportingPdf}
+                        onToggleLegende={handleToggleLegende}
+                        showLegende={showLegende}
+                        currentUser={currentUser}
+                        activeFilterCount={activeFilterCount}
+                      />
+                    </div>
                     {/* Inline Formular über der Tabelle */}
                     {(showNewEntryForm || editingEntry) && (
                       <div className="mx-auto mb-6">
@@ -320,16 +328,23 @@ const App = () => {
                         onResetFilters={handleResetFilters}
                       />
                     )}
-                    {!(showNewEntryForm || editingEntry) && (
-                    <EintragTable
-                      eintraege={filteredEintraege}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                      onApprove={handleApprove}
-                      currentUser={currentUser}
-                    />
-                    )}
                     {showLegende && <FachbegriffeLegende />}
+                    {!(showNewEntryForm || editingEntry) && (
+                      <>
+                        <div className="flex justify-end mb-2">
+                          <span className="text-xs text-green-900/40 tabular-nums">
+                            {filteredEintraege.length} von {currentData.eintraege.length} Einträge
+                          </span>
+                        </div>
+                        <EintragTable
+                          eintraege={filteredEintraege}
+                          onEdit={handleEdit}
+                          onDelete={handleDelete}
+                          onApprove={handleApprove}
+                          currentUser={currentUser}
+                        />
+                      </>
+                    )}
                   </>
                 } />
                 <Route path="/form" element={

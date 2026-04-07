@@ -79,17 +79,17 @@ export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount })
                 p-1.5 sm:p-1 h-full
                 bg-transparent border-none outline-none cursor-pointer
                 font-inherit text-[11px] sm:text-xs
-                transition-colors duration-300
+                transition-all duration-300
                 relative rounded-3xl
                 ${tab.isLogout
-                  ? 'text-gray-400 hover:text-red-400'
+                  ? 'text-green-900/35 hover:text-red-500'
                   : isActive
                     ? 'text-green-800'
-                    : 'text-black/70 hover:text-black/90'
+                    : 'text-green-900/60 hover:text-green-900/90 hover:bg-white/10'
                 }
                 ${isActive
                   ? 'before:absolute before:inset-0 before:rounded-3xl before:bg-gradient-active before:opacity-100'
-                  : 'before:absolute before:inset-0 before:rounded-3xl before:bg-gradient-active before:opacity-0 before:transition-opacity before:duration-300'
+                  : 'before:absolute before:inset-0 before:rounded-3xl before:bg-gradient-active before:opacity-0 hover:before:opacity-50 before:transition-opacity before:duration-300'
                 }
               `}
               title={tab.isLogout ? 'Logout' : undefined}

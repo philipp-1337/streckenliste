@@ -16,8 +16,6 @@ const usePdfExport = () => {
   const exportPdf = async (eintraege: Eintrag[], jagdjahr: string, jagdbezirk: string) => {
     setIsExporting(true);
 
-    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-
     // Mount PrintContent into an off-screen container so html-to-image can render it
     const exportClass = `pdf-export-${Date.now()}`;
     const container = document.createElement('div');
@@ -114,13 +112,7 @@ const usePdfExport = () => {
         pdf.addImage(sliceCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', margin, margin, printableW, srcH * mmPerPx);
       }
 
-      const filename = `Streckenliste_${(jagdjahr || 'Alle').replace('/', '-')}.pdf`;
-      if (isIOS) {
-        const blob = pdf.output('blob');
-        setIosPdfBlob(blob);
-      } else {
-        pdf.save(filename);
-      }
+      setIosPdfBlob(pdf.output('blob'));
     } catch (err) {
       console.error('PDF Export fehlgeschlagen:', err);
     } finally {

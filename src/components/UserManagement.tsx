@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { UserPlus, Trash2 } from 'lucide-react';
+import { UserPlus, Trash2, Users, X } from 'lucide-react';
 import { useUserManagement } from '@hooks/useUserManagement';
 import useAuth from '@hooks/useAuth';
 import Spinner from '@components/Spinner';
@@ -66,13 +66,38 @@ export const UserManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-green-900">Benutzerverwaltung</h2>
+        <h2 className="text-xl font-bold text-green-800 flex items-center gap-2.5">
+          <Users size={20} strokeWidth={2} />
+          Benutzer
+        </h2>
         <button
           onClick={() => setShowForm(v => !v)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-700 hover:bg-green-800 text-white text-sm font-medium transition cursor-pointer"
+          title={showForm ? 'Abbrechen' : 'Neuer Benutzer'}
+          className={`
+            group relative
+            w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl
+            flex items-center justify-center
+            glass-bg backdrop-blur-xl backdrop-saturate-[180%]
+            transition-all duration-300 ease-bounce
+            hover:scale-105 active:scale-95
+            focus:outline-none focus:ring-2 focus:ring-green-500/30
+            cursor-pointer
+            ${showForm
+              ? 'glass-shadow-active text-green-700'
+              : 'text-green-900/70 hover:text-green-900/90 glass-shadow'
+            }
+          `}
         >
-          <UserPlus size={16} />
-          {showForm ? 'Abbrechen' : 'Neuer Benutzer'}
+          <div className={`
+            absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-active opacity-0
+            transition-opacity duration-300
+            ${showForm ? 'opacity-100' : 'group-hover:opacity-50'}
+          `} />
+          {showForm
+            ? <X size={20} className="relative z-10 transition-all duration-300 ease-bounce group-hover:scale-110" />
+            : <UserPlus size={20} className="relative z-10 transition-all duration-300 ease-bounce group-hover:scale-110" />
+          }
+          <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-white/20 opacity-0 scale-0 group-active:opacity-100 group-active:scale-100 transition-all duration-150" />
         </button>
       </div>
 
@@ -130,6 +155,11 @@ export const UserManagement: React.FC = () => {
         </form>
       )}
 
+      <div className="flex justify-end mb-2">
+        <span className="text-xs text-green-900/40 tabular-nums">
+          {users.length} Benutzer
+        </span>
+      </div>
       <div className="bg-white rounded-xl shadow overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-12">

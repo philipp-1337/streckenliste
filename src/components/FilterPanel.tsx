@@ -44,7 +44,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
   }, [jaegerInput, onFilterChange]);
 
   return (
-    <div className="bg-white p-4 rounded-lg mb-6 shadow">
+    <div className="bg-white p-4 rounded-xl mb-6 shadow">
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2">
           <Filter size={20} />
