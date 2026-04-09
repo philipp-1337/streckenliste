@@ -155,6 +155,16 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                   )}
                 </span>
               </th>
+              <th className="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('ort')}>
+                <span className="inline-flex items-center gap-1">
+                  Ort/Revier
+                  {sortColumn === 'ort' ? (
+                    sortDirection === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />
+                  ) : (
+                    <ChevronsUpDown size={16} className="opacity-70 group-hover:opacity-100" />
+                  )}
+                </span>
+              </th>
               <th className="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('bemerkung')}>
                 <span className="inline-flex items-center gap-1">
                   Bemerkung
@@ -206,6 +216,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                 </td>
                 <td className="px-4 py-3 text-center text-sm">{eintrag.gewicht || '-'}</td>
                 <td className="px-4 py-3 text-sm">{eintrag.jaeger}</td>
+                <td className="px-4 py-3 text-sm">{eintrag.ort || '-'}</td>
                 <td className="px-4 py-3 text-sm">{sanitizeHtml(eintrag.bemerkung || '')}</td>
                 <td className="px-4 py-3 text-sm">{eintrag.wildursprungsschein || '-'}</td>
                 <td className="px-4 py-3 text-center">
