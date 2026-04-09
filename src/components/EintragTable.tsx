@@ -6,18 +6,18 @@ import type { Eintrag, UserData } from '@types';
 import { sanitizeHtml } from '@utils/sanitization';
 
 const COLUMNS = [
-  { id: 'nr',                  label: 'Nr.',         mandatory: true,  sortable: false },
-  { id: 'datum',               label: 'Datum',       mandatory: true,  sortable: true  },
-  { id: 'wildart',             label: 'Wildart',     mandatory: true,  sortable: true  },
-  { id: 'fachbegriff',         label: 'Fachbegriff', mandatory: false, sortable: true  },
-  { id: 'altersklasse',        label: 'AK',          mandatory: false, sortable: true  },
-  { id: 'geschlecht',          label: '♂/♀',         mandatory: false, sortable: false },
-  { id: 'gewicht',             label: 'kg',          mandatory: false, sortable: true  },
-  { id: 'jaeger',              label: 'Jäger',       mandatory: false, sortable: true  },
-  { id: 'ort',                 label: 'Ort/Revier',  mandatory: false, sortable: true  },
-  { id: 'bemerkung',           label: 'Bemerkung',   mandatory: false, sortable: true  },
-  { id: 'wildursprungsschein', label: 'WUS',         mandatory: false, sortable: true  },
-  { id: 'aktionen',            label: 'Aktionen',    mandatory: true,  sortable: false },
+  { id: 'nr',                  label: 'Nr.',          mandatory: true,  sortable: false },
+  { id: 'datum',               label: 'Datum',        mandatory: true,  sortable: true  },
+  { id: 'wildart',             label: 'Wildart',      mandatory: true,  sortable: true  },
+  { id: 'fachbegriff',         label: 'Fachbegriff',  mandatory: false, sortable: true  },
+  { id: 'altersklasse',        label: 'Altersklasse', mandatory: false, sortable: true  },
+  { id: 'geschlecht',          label: 'Geschlecht',   mandatory: false, sortable: false },
+  { id: 'gewicht',             label: 'Gewicht',      mandatory: false, sortable: true  },
+  { id: 'jaeger',              label: 'Jäger',        mandatory: false, sortable: true  },
+  { id: 'ort',                 label: 'Ort/Revier',   mandatory: false, sortable: true  },
+  { id: 'bemerkung',           label: 'Bemerkung',    mandatory: false, sortable: true  },
+  { id: 'wildursprungsschein', label: 'WUS',          mandatory: false, sortable: true  },
+  { id: 'aktionen',            label: 'Aktionen',     mandatory: true,  sortable: false },
 ] as const;
 
 type ColumnId = typeof COLUMNS[number]['id'];
