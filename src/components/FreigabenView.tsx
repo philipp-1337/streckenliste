@@ -8,6 +8,9 @@ interface FreigabenViewProps {
   currentUser: UserData | null;
   onDelete: (id: string) => void;
   onApprove: (id: string) => Promise<void>;
+  onReject: (id: string) => void;
+  onResetToPending: (id: string) => Promise<void>;
+  onShowHistory: (eintrag: Eintrag) => void;
 }
 
 export const FreigabenView: React.FC<FreigabenViewProps> = memo(({
@@ -15,10 +18,15 @@ export const FreigabenView: React.FC<FreigabenViewProps> = memo(({
   currentUser,
   onDelete,
   onApprove,
+  onReject,
+  onResetToPending,
+  onShowHistory,
 }) => {
-  const pendingEintraege = eintraege.filter(e => e.status === 'pending');
+  const reviewEintraege = eintraege.filter(e => e.status === 'pending' || e.status === 'rejected');
+  const pendingCount = reviewEintraege.filter(e => e.status === 'pending').length;
+  const rejectedCount = reviewEintraege.filter(e => e.status === 'rejected').length;
 
-  if (pendingEintraege.length === 0) {
+  if (reviewEintraege.length === 0) {
     return (
       <>
         <h2 className="text-xl font-bold text-green-800 flex items-center gap-2.5 mb-4">
@@ -38,13 +46,18 @@ export const FreigabenView: React.FC<FreigabenViewProps> = memo(({
       <h2 className="text-xl font-bold text-green-800 flex items-center gap-2.5 mb-4">
         <ClipboardCheck size={20} strokeWidth={2} />
         Freigaben
-        <span className="ml-1 text-sm font-medium text-green-900/50">({pendingEintraege.length})</span>
+        <span className="ml-1 text-sm font-medium text-green-900/50">
+          ({pendingCount} ausstehend{rejectedCount > 0 ? `, ${rejectedCount} abgelehnt` : ''})
+        </span>
       </h2>
       <EintragTable
-        eintraege={pendingEintraege}
+        eintraege={reviewEintraege}
         currentUser={currentUser}
         onDelete={onDelete}
         onApprove={onApprove}
+        onReject={onReject}
+        onResetToPending={onResetToPending}
+        onShowHistory={onShowHistory}
       />
     </div>
   );
