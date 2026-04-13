@@ -41,6 +41,8 @@ const ImportDialog = lazy(() => import('@components/ImportDialog'));
 const KategorienFixDialog = lazy(() => import('@components/KategorienFixDialog'));
 const FreigabenView = lazy(() => import('@components/FreigabenView').then(m => ({ default: m.FreigabenView })));
 const UserManagement = lazy(() => import('@components/UserManagement').then(m => ({ default: m.UserManagement })));
+const AblehnungsModal = lazy(() => import('@components/AblehnungsModal').then(m => ({ default: m.AblehnungsModal })));
+const HistoryModal = lazy(() => import('@components/HistoryModal').then(m => ({ default: m.HistoryModal })));
 
 const App = () => {
   const { currentUser, loading: userLoading } = useAuth();
@@ -53,6 +55,8 @@ const App = () => {
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showFixDialog, setShowFixDialog] = useState(false);
   const [showLegende, setShowLegende] = useState(false);
+  const [rejectingEntryId, setRejectingEntryId] = useState<string | null>(null);
+  const [historyEntry, setHistoryEntry] = useState<Eintrag | null>(null);
   // Login-Flow Flag
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
@@ -81,13 +85,29 @@ const App = () => {
   );
 
   const pendingCount = useMemo(() =>
-    currentData.eintraege.filter(e => e.status === 'pending').length,
+    currentData.eintraege.filter(e => e.status === 'pending' || e.status === 'rejected').length,
     [currentData.eintraege]
   );
 
   const handleApprove = useCallback(async (id: string) => {
     await currentData.approveEintrag(id);
   }, [currentData]);
+
+  const handleReject = useCallback((id: string) => {
+    setRejectingEntryId(id);
+  }, []);
+
+  const handleConfirmReject = useCallback(async (id: string, grund: string) => {
+    await currentData.rejectEintrag(id, grund);
+  }, [currentData]);
+
+  const handleResetToPending = useCallback(async (id: string) => {
+    await currentData.resetToPending(id);
+  }, [currentData]);
+
+  const handleShowHistory = useCallback((eintrag: Eintrag) => {
+    setHistoryEntry(eintrag);
+  }, []);
 
   // Handler for hunting year change
   const handleJagdjahrChange = useCallback((jagdjahr: string) => {
@@ -341,6 +361,9 @@ const App = () => {
                           onEdit={handleEdit}
                           onDelete={handleDelete}
                           onApprove={handleApprove}
+                          onReject={handleReject}
+                          onResetToPending={handleResetToPending}
+                          onShowHistory={handleShowHistory}
                           currentUser={currentUser}
                         />
                       </>
@@ -372,6 +395,9 @@ const App = () => {
                       currentUser={currentUser}
                       onDelete={handleDelete}
                       onApprove={handleApprove}
+                      onReject={handleReject}
+                      onResetToPending={handleResetToPending}
+                      onShowHistory={handleShowHistory}
                     />
                   </Suspense>
                 } />
@@ -396,6 +422,26 @@ const App = () => {
               isOpen={showFixDialog}
               onClose={() => setShowFixDialog(false)}
             />
+          </Suspense>
+          <Suspense fallback={null}>
+            {rejectingEntryId && (
+              <AblehnungsModal
+                eintragId={rejectingEntryId}
+                onConfirm={handleConfirmReject}
+                onClose={() => setRejectingEntryId(null)}
+              />
+            )}
+          </Suspense>
+          <Suspense fallback={null}>
+            {historyEntry && (
+              <HistoryModal
+                eintragId={historyEntry.id}
+                wildart={historyEntry.wildart}
+                datum={historyEntry.datum}
+                onClose={() => setHistoryEntry(null)}
+                getHistory={currentData.getHistory}
+              />
+            )}
           </Suspense>
         </>
       )}
