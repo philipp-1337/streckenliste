@@ -15,7 +15,8 @@ export interface Eintrag {
   notizen: string;
   jagdbezirkId: string;
   userId: string;
-  status?: 'pending' | 'approved';
+  status?: 'pending' | 'approved' | 'rejected';
+  ablehnungsGrund?: string;
   fallwild?: boolean;
   anzahl?: number;
 }
@@ -74,6 +75,16 @@ export type Role = 'admin' | 'user';
 export interface Jagdbezirk {
   id: string;
   name: string;
+}
+
+export interface EintragHistory {
+  id: string;
+  timestamp: import('firebase/firestore').Timestamp;
+  changedByUid: string;
+  changedByName: string;
+  action: 'created' | 'updated' | 'approved' | 'rejected' | 'reset_to_pending';
+  previousData?: Partial<Omit<Eintrag, 'id'>>;
+  reason?: string;
 }
 
 export interface UserData {
