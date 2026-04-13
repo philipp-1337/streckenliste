@@ -1,10 +1,28 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import { db } from '../firebase';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy, where, onSnapshot } from 'firebase/firestore';
-import type { Eintrag } from '@types'; 
+import { collection, getDocs, addDoc, deleteDoc, doc, query, orderBy, where, onSnapshot, writeBatch, serverTimestamp } from 'firebase/firestore';
+import type { Eintrag, EintragHistory } from '@types';
 import useAuth from '@hooks/useAuth';
 import { isUserAuthenticated, canPerformWriteOperation, isAdmin, getAuthErrorMessage } from '@utils/validation';
+
+function makeHistoryEntry(
+  action: EintragHistory['action'],
+  changedByUid: string,
+  changedByName: string,
+  previousData?: Partial<Omit<Eintrag, 'id'>>,
+  reason?: string
+) {
+  const entry: Record<string, unknown> = {
+    timestamp: serverTimestamp(),
+    changedByUid,
+    changedByName,
+    action,
+  };
+  if (previousData) entry.previousData = previousData;
+  if (reason) entry.reason = reason;
+  return entry;
+}
 
 export const useFirestore = () => {
   const { currentUser } = useAuth();
@@ -123,14 +141,20 @@ export const useFirestore = () => {
     }
 
     try {
+      const batch = writeBatch(db);
+      const newDocRef = doc(streckenCollectionRef);
       const newEintrag = {
         ...eintrag,
         userId: currentUser.uid,
         jagdbezirkId: currentUser.jagdbezirkId,
         status: isAdmin(currentUser) ? 'approved' : 'pending',
       };
-      await addDoc(streckenCollectionRef, newEintrag);
-      // onSnapshot will automatically update eintraege
+      batch.set(newDocRef, newEintrag);
+
+      const historyRef = doc(collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/eintraege/${newDocRef.id}/history`));
+      batch.set(historyRef, makeHistoryEntry('created', currentUser.uid, currentUser.displayName ?? currentUser.email ?? 'Unbekannt'));
+
+      await batch.commit();
     } catch (err) {
       const errorMsg = "Fehler beim Speichern";
       setError(errorMsg);
@@ -141,13 +165,19 @@ export const useFirestore = () => {
   }, [streckenCollectionRef, currentUser]);
 
   const approveEintrag = useCallback(async (id: string) => {
-    if (!streckenCollectionRef || !isAdmin(currentUser)) {
+    if (!streckenCollectionRef || !isAdmin(currentUser) || !currentUser) {
       toast.error("Keine Berechtigung");
       return;
     }
     try {
       const eintragDoc = doc(streckenCollectionRef, id);
-      await updateDoc(eintragDoc, { status: 'approved' });
+      const batch = writeBatch(db);
+      batch.update(eintragDoc, { status: 'approved', ablehnungsGrund: '' });
+
+      const historyRef = doc(collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/eintraege/${id}/history`));
+      batch.set(historyRef, makeHistoryEntry('approved', currentUser.uid, currentUser.displayName ?? currentUser.email ?? 'Unbekannt'));
+
+      await batch.commit();
     } catch (err) {
       const errorMsg = "Fehler beim Freigeben";
       setError(errorMsg);
@@ -157,6 +187,65 @@ export const useFirestore = () => {
     }
   }, [streckenCollectionRef, currentUser]);
 
+  const rejectEintrag = useCallback(async (id: string, grund: string) => {
+    if (!streckenCollectionRef || !isAdmin(currentUser) || !currentUser) {
+      toast.error("Keine Berechtigung");
+      return;
+    }
+    try {
+      const eintragDoc = doc(streckenCollectionRef, id);
+      const batch = writeBatch(db);
+      batch.update(eintragDoc, { status: 'rejected', ablehnungsGrund: grund });
+
+      const historyRef = doc(collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/eintraege/${id}/history`));
+      batch.set(historyRef, makeHistoryEntry('rejected', currentUser.uid, currentUser.displayName ?? currentUser.email ?? 'Unbekannt', undefined, grund));
+
+      await batch.commit();
+    } catch (err) {
+      const errorMsg = "Fehler beim Ablehnen";
+      setError(errorMsg);
+      toast.error(errorMsg);
+      console.error('Error rejecting entry:', err);
+      throw err;
+    }
+  }, [streckenCollectionRef, currentUser]);
+
+  const resetToPending = useCallback(async (id: string) => {
+    if (!streckenCollectionRef || !isAdmin(currentUser) || !currentUser) {
+      toast.error("Keine Berechtigung");
+      return;
+    }
+    try {
+      const eintragDoc = doc(streckenCollectionRef, id);
+      const batch = writeBatch(db);
+      batch.update(eintragDoc, { status: 'pending', ablehnungsGrund: '' });
+
+      const historyRef = doc(collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/eintraege/${id}/history`));
+      batch.set(historyRef, makeHistoryEntry('reset_to_pending', currentUser.uid, currentUser.displayName ?? currentUser.email ?? 'Unbekannt'));
+
+      await batch.commit();
+    } catch (err) {
+      const errorMsg = "Fehler beim Zurücksetzen";
+      setError(errorMsg);
+      toast.error(errorMsg);
+      console.error('Error resetting entry:', err);
+      throw err;
+    }
+  }, [streckenCollectionRef, currentUser]);
+
+  const getHistory = useCallback(async (eintragId: string): Promise<EintragHistory[]> => {
+    if (!currentUser?.jagdbezirkId || !isAdmin(currentUser)) return [];
+    try {
+      const historyRef = collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/eintraege/${eintragId}/history`);
+      const q = query(historyRef, orderBy('timestamp', 'desc'));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(d => ({ ...d.data(), id: d.id } as EintragHistory));
+    } catch (err) {
+      console.error('Error loading history:', err);
+      return [];
+    }
+  }, [currentUser]);
+
   const updateEintrag = useCallback(async (id: string, eintrag: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId' | 'status'>) => {
     const errorMessage = getAuthErrorMessage(currentUser);
     if (errorMessage || !streckenCollectionRef || !canPerformWriteOperation(currentUser) || !currentUser) {
@@ -164,16 +253,37 @@ export const useFirestore = () => {
       toast.error(errorMessage || "Keine Berechtigung");
       return;
     }
-    
+
     try {
       const eintragDoc = doc(streckenCollectionRef, id);
-      const updatedEintrag = {
+      const existing = eintraege.find(e => e.id === id);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { ablehnungsGrund: _ag, ...previousDataClean } = existing ?? {} as Eintrag;
+
+      const updatedEintrag: Record<string, unknown> = {
         ...eintrag,
         userId: currentUser.uid,
         jagdbezirkId: currentUser.jagdbezirkId,
       };
-      await updateDoc(eintragDoc, updatedEintrag);
-      // onSnapshot will automatically update eintraege
+
+      // Nicht-Admins: freigegebene oder abgelehnte Einträge zurück auf pending setzen
+      if (!isAdmin(currentUser)) {
+        updatedEintrag.status = 'pending';
+        updatedEintrag.ablehnungsGrund = '';
+      }
+
+      const batch = writeBatch(db);
+      batch.update(eintragDoc, updatedEintrag);
+
+      const historyRef = doc(collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/eintraege/${id}/history`));
+      batch.set(historyRef, makeHistoryEntry(
+        'updated',
+        currentUser.uid,
+        currentUser.displayName ?? currentUser.email ?? 'Unbekannt',
+        existing ? previousDataClean as Partial<Omit<Eintrag, 'id'>> : undefined
+      ));
+
+      await batch.commit();
     } catch (err) {
       const errorMsg = "Fehler beim Aktualisieren";
       setError(errorMsg);
@@ -181,7 +291,7 @@ export const useFirestore = () => {
       console.error('Error updating entry:', err);
       throw err;
     }
-  }, [streckenCollectionRef, currentUser]);
+  }, [streckenCollectionRef, currentUser, eintraege]);
 
   const deleteEintrag = useCallback(async (id: string) => {
     const errorMessage = getAuthErrorMessage(currentUser);
@@ -285,8 +395,11 @@ export const useFirestore = () => {
     error,
     addEintrag,
     approveEintrag,
+    rejectEintrag,
+    resetToPending,
+    getHistory,
     updateEintrag,
     deleteEintrag,
-    importEintraege
+    importEintraege,
   };
 };
