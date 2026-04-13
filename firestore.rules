@@ -27,7 +27,8 @@ service cloud.firestore {
         && (!data.keys().hasAny(['kategorie']) || data.kategorie is string)
         && (!data.keys().hasAny(['notizen']) || (data.notizen is string && data.notizen.size() <= 1000))
         && (!data.keys().hasAny(['timestamp']) || data.timestamp is timestamp)
-        && (!data.keys().hasAny(['status']) || data.status in ['pending', 'approved']);
+        && (!data.keys().hasAny(['status']) || data.status in ['pending', 'approved', 'rejected'])
+        && (!data.keys().hasAny(['ablehnungsGrund']) || data.ablehnungsGrund is string);
     }
 
     // Users can read/update their own profile
@@ -78,19 +79,33 @@ service cloud.firestore {
              (getUserData().role == 'admin' || request.resource.data.get('status', 'pending') == 'pending');
 
       // Allow update if user is admin OR owns the entry
-      // Only admins may change status to 'approved' (prevent self-approval)
+      // Only admins may change status to 'approved' or 'rejected', or write ablehnungsGrund
     allow update: if request.auth != null &&
              getUserData().jagdbezirkId == jagdbezirkId &&
              (getUserData().role == 'admin' || resource.data.userId == request.auth.uid) &&
              isValidEntry() &&
              (getUserData().role == 'admin' ||
-              request.resource.data.get('status', 'pending') != 'approved' ||
-              resource.data.get('status', 'approved') == 'approved');
+              (request.resource.data.get('status', 'pending') != 'approved' &&
+               request.resource.data.get('status', 'pending') != 'rejected' &&
+               !request.resource.data.keys().hasAny(['ablehnungsGrund'])));
 
       // Allow delete if user is admin OR owns the entry (no data validation needed)
     allow delete: if request.auth != null &&
              getUserData().jagdbezirkId == jagdbezirkId &&
              (getUserData().role == 'admin' || resource.data.userId == request.auth.uid);
+
+      // Änderungsverlauf – nur Admin kann lesen, History-Einträge sind unveränderlich
+      match /history/{historyId} {
+        allow read: if request.auth != null &&
+                 getUserData().jagdbezirkId == jagdbezirkId &&
+                 getUserData().role == 'admin';
+        allow create: if request.auth != null &&
+                 getUserData().jagdbezirkId == jagdbezirkId &&
+                 request.resource.data.keys().hasAll(['timestamp', 'changedByUid', 'changedByName', 'action']) &&
+                 request.resource.data.action in ['created', 'updated', 'approved', 'rejected', 'reset_to_pending'];
+        allow update: if false;
+        allow delete: if false;
+      }
     }
   }
 }
