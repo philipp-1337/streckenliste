@@ -1,7 +1,7 @@
 import { memo, useMemo, useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Spinner from '@components/Spinner';
-import { Edit, Trash2, Mars, Venus, ChevronUp, ChevronDown, ChevronsUpDown, Check, SlidersHorizontal } from 'lucide-react';
+import { Edit, Trash2, Mars, Venus, ChevronUp, ChevronDown, ChevronsUpDown, Check, SlidersHorizontal, X, RotateCcw, Clock } from 'lucide-react';
 import type { Eintrag, UserData } from '@types';
 import { sanitizeHtml } from '@utils/sanitization';
 
@@ -42,6 +42,9 @@ interface EintragTableProps {
   onEdit?: (eintrag: Eintrag) => void;
   onDelete: (id: string) => void;
   onApprove?: (id: string) => Promise<void>;
+  onReject?: (id: string) => void;
+  onResetToPending?: (id: string) => Promise<void>;
+  onShowHistory?: (eintrag: Eintrag) => void;
   currentUser: UserData | null;
 }
 
@@ -50,6 +53,9 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
   onEdit,
   onDelete,
   onApprove,
+  onReject,
+  onResetToPending,
+  onShowHistory,
   currentUser,
 }) => {
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -114,6 +120,21 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
     setLoadingId(id);
     await onApprove(id);
     setLoadingId(null);
+  };
+
+  const handleReject = (id: string) => {
+    onReject?.(id);
+  };
+
+  const handleResetToPending = async (id: string) => {
+    if (!onResetToPending) return;
+    setLoadingId(id);
+    await onResetToPending(id);
+    setLoadingId(null);
+  };
+
+  const handleShowHistory = (eintrag: Eintrag) => {
+    onShowHistory?.(eintrag);
   };
 
   const handleSort = (column: string) => {
@@ -235,8 +256,9 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
           <tbody className="divide-y divide-gray-200">
             {sortedEintraege.map((eintrag, index) => {
               const isPending = eintrag.status === 'pending';
+              const isRejected = eintrag.status === 'rejected';
               return (
-                <tr key={eintrag.id} className={`hover:bg-gray-50 ${isPending ? 'bg-amber-50' : ''}`}>
+                <tr key={eintrag.id} className={`hover:bg-gray-50 ${isPending ? 'bg-amber-50' : ''} ${isRejected ? 'bg-rose-50' : ''}`}>
                   {isVisible('nr') && <td className="px-4 py-3 text-sm">{index + 1}</td>}
                   {isVisible('datum') && (
                     <td className="px-4 py-3 text-sm">
@@ -246,6 +268,16 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                           <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-300 whitespace-nowrap">
                             Ausstehend
                           </span>
+                        )}
+                        {isRejected && (
+                          <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 border border-rose-300 whitespace-nowrap">
+                            Abgelehnt
+                          </span>
+                        )}
+                        {isRejected && eintrag.ablehnungsGrund && (
+                          <p className="text-[10px] text-rose-600 mt-0.5 max-w-[160px] truncate" title={eintrag.ablehnungsGrund}>
+                            {eintrag.ablehnungsGrund}
+                          </p>
                         )}
                       </div>
                     </td>
@@ -271,29 +303,64 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                     <td className="px-4 py-3 text-center">
                       {(currentUser?.role === 'admin' || currentUser?.uid === eintrag.userId) && (
                         <div className="flex justify-center gap-2">
+                          {/* Freigeben: nur für pending */}
                           {currentUser?.role === 'admin' && isPending && onApprove && (
                             <button
                               onClick={() => handleApprove(eintrag.id)}
-                              className="text-green-600 hover:text-green-800 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                              className="text-green-600 hover:text-green-800 transition-colors cursor-pointer"
                               title="Freigeben"
                               disabled={loadingId === eintrag.id}
                             >
                               {loadingId === eintrag.id ? <Spinner size={16} /> : <Check size={16} />}
                             </button>
                           )}
+                          {/* Ablehnen: für pending und approved */}
+                          {currentUser?.role === 'admin' && (isPending || eintrag.status === 'approved') && onReject && (
+                            <button
+                              onClick={() => handleReject(eintrag.id)}
+                              className="text-rose-600 hover:text-rose-800 transition-colors cursor-pointer"
+                              title="Ablehnen"
+                              disabled={loadingId === eintrag.id}
+                            >
+                              <X size={16} />
+                            </button>
+                          )}
+                          {/* Zurück auf Ausstehend: nur für approved */}
+                          {currentUser?.role === 'admin' && eintrag.status === 'approved' && onResetToPending && (
+                            <button
+                              onClick={() => handleResetToPending(eintrag.id)}
+                              className="text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+                              title="Zurück auf Ausstehend"
+                              disabled={loadingId === eintrag.id}
+                            >
+                              {loadingId === eintrag.id ? <Spinner size={16} /> : <RotateCcw size={16} />}
+                            </button>
+                          )}
+                          {/* Verlauf: nur Admin */}
+                          {currentUser?.role === 'admin' && onShowHistory && (
+                            <button
+                              onClick={() => handleShowHistory(eintrag)}
+                              className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                              title="Verlauf anzeigen"
+                            >
+                              <Clock size={16} />
+                            </button>
+                          )}
+                          {/* Bearbeiten */}
                           {onEdit && (
                             <button
                               onClick={() => handleEdit(eintrag)}
-                              className="text-blue-600 hover:text-blue-800 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                              className="text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
                               title="Bearbeiten"
                               disabled={loadingId === eintrag.id}
                             >
                               {loadingId === eintrag.id ? <Spinner size={16} /> : <Edit size={16} />}
                             </button>
                           )}
+                          {/* Löschen */}
                           <button
                             onClick={() => handleDelete(eintrag.id)}
-                            className="text-red-600 hover:text-red-800 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                            className="text-red-600 hover:text-red-800 transition-colors cursor-pointer"
                             title="Löschen"
                             disabled={loadingId === eintrag.id}
                           >
