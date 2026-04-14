@@ -359,7 +359,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                 <tr key={eintrag.id} className={`hover:bg-gray-50 ${isPending ? 'bg-amber-50' : ''} ${isRejected ? 'bg-rose-50' : ''}`}>
                   {isVisible('nr') && <td className={`px-4 py-3 text-sm sticky left-0 z-[1] ${isPending ? 'bg-amber-50' : isRejected ? 'bg-rose-50' : 'bg-white'}`}>{index + 1}</td>}
                   {isVisible('datum') && (
-                    <td className={`px-4 py-3 text-sm${isVisible('nr') ? ` sticky left-14 z-[1] ${isPending ? 'bg-amber-50' : isRejected ? 'bg-rose-50' : 'bg-white'}` : ''}`}>
+                    <td className={`px-4 py-3 text-sm${isVisible('nr') ? ` left-14 z-[1] ${isPending ? 'bg-amber-50' : isRejected ? 'bg-rose-50' : 'bg-white'}` : ''}`}>
                       <div className="flex items-center gap-2">
                         {new Date(eintrag.datum).toLocaleDateString('de-DE')}
                         {isPending && (
