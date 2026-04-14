@@ -1,7 +1,7 @@
 import { memo, useMemo, useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Spinner from '@components/Spinner';
-import { Edit, Trash2, Mars, Venus, ChevronUp, ChevronDown, ChevronsUpDown, Check, SlidersHorizontal, X, RotateCcw, Clock } from 'lucide-react';
+import { Edit, Trash2, Mars, Venus, ChevronUp, ChevronDown, ChevronsUpDown, Check, SlidersHorizontal, X, RotateCcw, Clock, MoreVertical } from 'lucide-react';
 import type { Eintrag, UserData } from '@types';
 import { sanitizeHtml } from '@utils/sanitization';
 
@@ -65,9 +65,13 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [visibleColumns, setVisibleColumns] = useState<ColumnId[]>(loadVisibleColumns);
   const [showColumnPicker, setShowColumnPicker] = useState(false);
+  const [openActionMenuId, setOpenActionMenuId] = useState<string | null>(null);
   const [dropdownPos, setDropdownPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
+  const [actionMenuPos, setActionMenuPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const actionMenuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const actionMenuRef = useRef<HTMLDivElement>(null);
 
   const isVisible = (id: ColumnId) => visibleColumns.includes(id);
 
@@ -89,6 +93,25 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
     setShowColumnPicker(v => !v);
   };
 
+  const handleToggleActionMenu = (id: string, button: HTMLButtonElement) => {
+    if (openActionMenuId === id) {
+      setOpenActionMenuId(null);
+      return;
+    }
+
+    const rect = button.getBoundingClientRect();
+    const menuWidth = 220;
+    const left = Math.max(8, Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 8));
+
+    actionMenuButtonRef.current = button;
+    setActionMenuPos({ top: rect.bottom + 4, left });
+    setOpenActionMenuId(id);
+  };
+
+  const closeActionMenu = () => {
+    setOpenActionMenuId(null);
+  };
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -104,6 +127,33 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showColumnPicker]);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        !actionMenuButtonRef.current?.contains(e.target as Node) &&
+        !actionMenuRef.current?.contains(e.target as Node)
+      ) {
+        closeActionMenu();
+      }
+    };
+
+    const handleViewportChange = () => {
+      closeActionMenu();
+    };
+
+    if (openActionMenuId) {
+      document.addEventListener('mousedown', handleClickOutside);
+      window.addEventListener('resize', handleViewportChange);
+      window.addEventListener('scroll', handleViewportChange, true);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('resize', handleViewportChange);
+      window.removeEventListener('scroll', handleViewportChange, true);
+    };
+  }, [openActionMenuId]);
+
   const handleEdit = async (eintrag: Eintrag) => {
     if (!onEdit) return;
     setLoadingId(eintrag.id);
@@ -112,6 +162,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
   };
 
   const handleDelete = async (id: string) => {
+    closeActionMenu();
     setLoadingId(id);
     await Promise.resolve(onDelete(id));
     setLoadingId(null);
@@ -119,23 +170,27 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
 
   const handleApprove = async (id: string) => {
     if (!onApprove) return;
+    closeActionMenu();
     setLoadingId(id);
     await onApprove(id);
     setLoadingId(null);
   };
 
   const handleReject = (id: string) => {
+    closeActionMenu();
     onReject?.(id);
   };
 
   const handleResetToPending = async (id: string) => {
     if (!onResetToPending) return;
+    closeActionMenu();
     setLoadingId(id);
     await onResetToPending(id);
     setLoadingId(null);
   };
 
   const handleShowHistory = (eintrag: Eintrag) => {
+    closeActionMenu();
     onShowHistory?.(eintrag);
   };
 
@@ -175,6 +230,11 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
       return 0;
     });
   }, [eintraege, sortColumn, sortDirection]);
+
+  const selectedMenuEintrag = useMemo(
+    () => eintraege.find(eintrag => eintrag.id === openActionMenuId),
+    [eintraege, openActionMenuId]
+  );
 
   const renderSortIcon = (col: string) =>
     sortColumn === col
@@ -304,69 +364,28 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                   {isVisible('aktionen') && (
                     <td className="px-4 py-3 text-center">
                       {(currentUser?.role === 'admin' || currentUser?.uid === eintrag.userId) && (
-                        <div className="flex justify-center gap-2">
-                          {/* Freigeben: nur für pending */}
-                          {currentUser?.role === 'admin' && isPending && onApprove && (
-                            <button
-                              onClick={() => handleApprove(eintrag.id)}
-                              className="text-green-600 hover:text-green-800 transition-colors cursor-pointer"
-                              title="Freigeben"
-                              disabled={loadingId === eintrag.id}
-                            >
-                              {loadingId === eintrag.id ? <Spinner size={16} /> : <Check size={16} />}
-                            </button>
-                          )}
-                          {/* Ablehnen: für pending und approved */}
-                          {currentUser?.role === 'admin' && (isPending || eintrag.status === 'approved') && onReject && (
-                            <button
-                              onClick={() => handleReject(eintrag.id)}
-                              className="text-rose-600 hover:text-rose-800 transition-colors cursor-pointer"
-                              title="Ablehnen"
-                              disabled={loadingId === eintrag.id}
-                            >
-                              <X size={16} />
-                            </button>
-                          )}
-                          {/* Zurück auf Ausstehend: nur für approved */}
-                          {currentUser?.role === 'admin' && eintrag.status === 'approved' && onResetToPending && (
-                            <button
-                              onClick={() => handleResetToPending(eintrag.id)}
-                              className="text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
-                              title="Zurück auf Ausstehend"
-                              disabled={loadingId === eintrag.id}
-                            >
-                              {loadingId === eintrag.id ? <Spinner size={16} /> : <RotateCcw size={16} />}
-                            </button>
-                          )}
-                          {/* Verlauf: nur Admin */}
-                          {currentUser?.role === 'admin' && onShowHistory && (
-                            <button
-                              onClick={() => handleShowHistory(eintrag)}
-                              className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-                              title="Verlauf anzeigen"
-                            >
-                              <Clock size={16} />
-                            </button>
-                          )}
+                        <div className="flex items-center justify-center gap-1">
                           {/* Bearbeiten */}
                           {onEdit && (
                             <button
                               onClick={() => handleEdit(eintrag)}
-                              className="text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+                              className="inline-flex h-9 w-9 items-center justify-center rounded-md text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-800 cursor-pointer"
                               title="Bearbeiten"
                               disabled={loadingId === eintrag.id}
                             >
                               {loadingId === eintrag.id ? <Spinner size={16} /> : <Edit size={16} />}
                             </button>
                           )}
-                          {/* Löschen */}
                           <button
-                            onClick={() => handleDelete(eintrag.id)}
-                            className="text-red-600 hover:text-red-800 transition-colors cursor-pointer"
-                            title="Löschen"
+                            onClick={(event) => handleToggleActionMenu(eintrag.id, event.currentTarget)}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 cursor-pointer"
+                            title="Weitere Aktionen"
+                            aria-haspopup="menu"
+                            aria-expanded={openActionMenuId === eintrag.id}
+                            aria-label="Weitere Aktionen"
                             disabled={loadingId === eintrag.id}
                           >
-                            {loadingId === eintrag.id ? <Spinner size={16} /> : <Trash2 size={16} />}
+                            <MoreVertical size={16} />
                           </button>
                         </div>
                       )}
@@ -406,6 +425,73 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
               {col.label}
             </label>
           ))}
+        </div>,
+        document.body
+      )}
+
+      {openActionMenuId && createPortal(
+        <div
+          ref={actionMenuRef}
+          className="fixed z-50 min-w-[220px] overflow-hidden rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
+          style={{ top: actionMenuPos.top, left: actionMenuPos.left }}
+          role="menu"
+        >
+          {currentUser?.role === 'admin' && openActionMenuId && onApprove && selectedMenuEintrag?.status === 'pending' && (
+            <button
+              onClick={() => handleApprove(openActionMenuId)}
+              className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm text-green-700 transition-colors hover:bg-green-50 disabled:opacity-60"
+              disabled={loadingId === openActionMenuId}
+              role="menuitem"
+            >
+              {loadingId === openActionMenuId ? <Spinner size={16} /> : <Check size={16} />}
+              Freigeben
+            </button>
+          )}
+          {currentUser?.role === 'admin' && openActionMenuId && onReject && ['pending', 'approved'].includes(selectedMenuEintrag?.status || '') && (
+            <button
+              onClick={() => handleReject(openActionMenuId)}
+              className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm text-rose-700 transition-colors hover:bg-rose-50 disabled:opacity-60"
+              disabled={loadingId === openActionMenuId}
+              role="menuitem"
+            >
+              <X size={16} />
+              Ablehnen
+            </button>
+          )}
+          {currentUser?.role === 'admin' && openActionMenuId && onResetToPending && selectedMenuEintrag?.status === 'approved' && (
+            <button
+              onClick={() => handleResetToPending(openActionMenuId)}
+              className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm text-amber-700 transition-colors hover:bg-amber-50 disabled:opacity-60"
+              disabled={loadingId === openActionMenuId}
+              role="menuitem"
+            >
+              {loadingId === openActionMenuId ? <Spinner size={16} /> : <RotateCcw size={16} />}
+              Zurück auf Ausstehend
+            </button>
+          )}
+          {currentUser?.role === 'admin' && openActionMenuId && onShowHistory && (
+            <button
+              onClick={() => {
+                if (selectedMenuEintrag) handleShowHistory(selectedMenuEintrag);
+              }}
+              className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50"
+              role="menuitem"
+            >
+              <Clock size={16} />
+              Verlauf anzeigen
+            </button>
+          )}
+          {openActionMenuId && (
+            <button
+              onClick={() => handleDelete(openActionMenuId)}
+              className="flex w-full cursor-pointer items-center gap-2 border-t border-gray-100 px-3 py-2 text-left text-sm text-red-700 transition-colors hover:bg-red-50 disabled:opacity-60"
+              disabled={loadingId === openActionMenuId}
+              role="menuitem"
+            >
+              {loadingId === openActionMenuId ? <Spinner size={16} /> : <Trash2 size={16} />}
+              Löschen
+            </button>
+          )}
         </div>,
         document.body
       )}
