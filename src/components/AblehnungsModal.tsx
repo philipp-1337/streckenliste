@@ -43,7 +43,7 @@ export const AblehnungsModal: React.FC<AblehnungsModalProps> = ({ eintragId, onC
           onChange={e => setGrund(e.target.value)}
           placeholder="z. B. Gewicht fehlt, Wildart unklar …"
           rows={4}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 resize-none"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-rose-400 resize-none"
         />
         <div className="mt-4 flex justify-end gap-2">
           <button

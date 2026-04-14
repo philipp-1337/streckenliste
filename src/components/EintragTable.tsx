@@ -33,7 +33,9 @@ function loadVisibleColumns(): ColumnId[] {
       const valid = parsed.filter((id): id is ColumnId => COLUMNS.some(c => c.id === id));
       return [...new Set([...mandatory, ...valid])];
     }
-  } catch {}
+  } catch {
+    // Fall back to the default column set when persisted data is invalid.
+  }
   return COLUMNS.map(c => c.id as ColumnId);
 }
 
@@ -174,7 +176,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
     });
   }, [eintraege, sortColumn, sortDirection]);
 
-  const SortIcon = ({ col }: { col: string }) =>
+  const renderSortIcon = (col: string) =>
     sortColumn === col
       ? (sortDirection === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />)
       : <ChevronsUpDown size={16} className="opacity-70 group-hover:opacity-100" />;
@@ -188,22 +190,22 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
               {isVisible('nr') && <th className="px-4 py-3 text-left text-sm font-medium">Nr.</th>}
               {isVisible('datum') && (
                 <th className="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('datum')}>
-                  <span className="inline-flex items-center gap-1">Datum <SortIcon col="datum" /></span>
+                  <span className="inline-flex items-center gap-1">Datum {renderSortIcon('datum')}</span>
                 </th>
               )}
               {isVisible('wildart') && (
                 <th className="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('wildart')}>
-                  <span className="inline-flex items-center gap-1">Wildart <SortIcon col="wildart" /></span>
+                  <span className="inline-flex items-center gap-1">Wildart {renderSortIcon('wildart')}</span>
                 </th>
               )}
               {isVisible('fachbegriff') && (
                 <th className="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('fachbegriff')}>
-                  <span className="inline-flex items-center gap-1">Fachbegriff <SortIcon col="fachbegriff" /></span>
+                  <span className="inline-flex items-center gap-1">Fachbegriff {renderSortIcon('fachbegriff')}</span>
                 </th>
               )}
               {isVisible('altersklasse') && (
                 <th className="px-4 py-3 text-center text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('altersklasse')}>
-                  <span className="inline-flex items-center gap-1">AK <SortIcon col="altersklasse" /></span>
+                  <span className="inline-flex items-center gap-1">AK {renderSortIcon('altersklasse')}</span>
                 </th>
               )}
               {isVisible('geschlecht') && (
@@ -215,27 +217,27 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
               )}
               {isVisible('gewicht') && (
                 <th className="px-4 py-3 text-center text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('gewicht')}>
-                  <span className="inline-flex items-center gap-1">kg <SortIcon col="gewicht" /></span>
+                  <span className="inline-flex items-center gap-1">kg {renderSortIcon('gewicht')}</span>
                 </th>
               )}
               {isVisible('jaeger') && (
                 <th className="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('jaeger')}>
-                  <span className="inline-flex items-center gap-1">Jäger <SortIcon col="jaeger" /></span>
+                  <span className="inline-flex items-center gap-1">Jäger {renderSortIcon('jaeger')}</span>
                 </th>
               )}
               {isVisible('ort') && (
                 <th className="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('ort')}>
-                  <span className="inline-flex items-center gap-1">Ort/Revier <SortIcon col="ort" /></span>
+                  <span className="inline-flex items-center gap-1">Ort/Revier {renderSortIcon('ort')}</span>
                 </th>
               )}
               {isVisible('bemerkung') && (
                 <th className="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('bemerkung')}>
-                  <span className="inline-flex items-center gap-1">Bemerkung <SortIcon col="bemerkung" /></span>
+                  <span className="inline-flex items-center gap-1">Bemerkung {renderSortIcon('bemerkung')}</span>
                 </th>
               )}
               {isVisible('wildursprungsschein') && (
                 <th className="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none transition-colors hover:bg-green-700 group" onClick={() => handleSort('wildursprungsschein')}>
-                  <span className="inline-flex items-center gap-1">WUS <SortIcon col="wildursprungsschein" /></span>
+                  <span className="inline-flex items-center gap-1">WUS {renderSortIcon('wildursprungsschein')}</span>
                 </th>
               )}
               {isVisible('aktionen') && <th className="px-4 py-3 text-center text-sm font-medium">Aktionen</th>}
