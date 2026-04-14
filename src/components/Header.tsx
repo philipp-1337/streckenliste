@@ -33,7 +33,7 @@ export const Header: React.FC<HeaderProps> = ({ jagdjahr, availableJagdjahre, on
     currentUser?.displayName || currentUser?.email || "Unbekannt";
 
   return (
-    <header className="mb-6 print:hidden">
+    <header className="mb-4 print:hidden">
       <div className="flex justify-between items-start gap-2">
         <div className="flex-1 min-w-0">
           {/* Title row */}

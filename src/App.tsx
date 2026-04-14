@@ -305,7 +305,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={
                   <>
-                    <div className="flex items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center justify-between gap-4 mb-4">
                       <h2 className="text-xl font-bold text-green-800 flex items-center gap-2.5 shrink-0">
                         <HomeIcon size={20} strokeWidth={2} />
                         Übersicht

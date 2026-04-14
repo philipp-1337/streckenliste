@@ -31,7 +31,7 @@ export const JagdjahrSelect: React.FC<JagdjahrSelectProps> = ({
           onClick={toggle}
           className="
             relative
-            w-12 h-12 rounded-xl
+            w-10 h-10 rounded-xl
             flex items-center justify-center
             bg-white/80 border-2 border-green-600
             transition-all duration-200

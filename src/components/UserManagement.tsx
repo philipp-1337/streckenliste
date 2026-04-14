@@ -64,8 +64,8 @@ export const UserManagement: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div>
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold text-green-800 flex items-center gap-2.5">
           <Users size={20} strokeWidth={2} />
           Benutzer
@@ -102,7 +102,7 @@ export const UserManagement: React.FC = () => {
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow p-5 space-y-4 mb-6">
           <h3 className="text-base font-semibold text-green-800">Neuen Benutzer anlegen</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
