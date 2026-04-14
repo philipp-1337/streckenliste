@@ -513,7 +513,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                   <div className="flex items-center gap-2 mt-0.5 text-xs text-gray-500">
                     {eintrag.altersklasse && <span>{eintrag.altersklasse}</span>}
                     {eintrag.geschlecht && !['Raubwild', 'Invasive Arten'].includes(eintrag.kategorie) && (
-                      <span>{eintrag.geschlecht === 'm' ? '♂' : '♀'}</span>
+                      <span>{eintrag.geschlecht === 'm' ? '♂\uFE0E' : '♀\uFE0E'}</span>
                     )}
                     {eintrag.gewicht && <span>{eintrag.gewicht} kg</span>}
                   </div>

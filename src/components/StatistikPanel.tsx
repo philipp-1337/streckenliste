@@ -45,10 +45,10 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ stats }) =>
                       </p>
                       <div className="ml-2 space-y-0.5 text-green-900/60">
                         {akStats.männlich.gesamt > 0 && (
-                          <p>♂ männlich: {akStats.männlich.gesamt}{akStats.männlich.fallwild > 0 && <span className="text-amber-700"> ({akStats.männlich.fallwild} Fallwild)</span>}</p>
+                          <p>{'♂\uFE0E'} männlich: {akStats.männlich.gesamt}{akStats.männlich.fallwild > 0 && <span className="text-amber-700"> ({akStats.männlich.fallwild} Fallwild)</span>}</p>
                         )}
                         {akStats.weiblich.gesamt > 0 && (
-                          <p>♀ weiblich: {akStats.weiblich.gesamt}{akStats.weiblich.fallwild > 0 && <span className="text-amber-700"> ({akStats.weiblich.fallwild} Fallwild)</span>}</p>
+                          <p>{'♀\uFE0E'} weiblich: {akStats.weiblich.gesamt}{akStats.weiblich.fallwild > 0 && <span className="text-amber-700"> ({akStats.weiblich.fallwild} Fallwild)</span>}</p>
                         )}
                         {akStats.unbekannt.gesamt > 0 && (
                           <p>— unbekannt: {akStats.unbekannt.gesamt}{akStats.unbekannt.fallwild > 0 && <span className="text-amber-700"> ({akStats.unbekannt.fallwild} Fallwild)</span>}</p>

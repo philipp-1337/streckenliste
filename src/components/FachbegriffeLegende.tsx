@@ -1,8 +1,8 @@
 import { wildarten } from '@data/wildarten';
 
 const GeschlechtIcon: React.FC<{ geschlecht: string }> = ({ geschlecht }) => {
-  if (geschlecht === 'm') return <span className="text-blue-500/70 text-[10px] leading-none" title="männlich">♂</span>;
-  if (geschlecht === 'w') return <span className="text-pink-500/70 text-[10px] leading-none" title="weiblich">♀</span>;
+  if (geschlecht === 'm') return <span className="text-blue-500/70 text-[10px] leading-none align-middle" title="männlich">{'♂\uFE0E'}</span>;
+  if (geschlecht === 'w') return <span className="text-pink-500/70 text-[10px] leading-none align-middle" title="weiblich">{'♀\uFE0E'}</span>;
   return null;
 };
 
