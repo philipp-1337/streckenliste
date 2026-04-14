@@ -1,6 +1,6 @@
 import { useState, useCallback, lazy, Suspense, useMemo } from 'react';
 import { Toaster, toast } from 'sonner';
-import { HomeIcon } from 'lucide-react';
+import { HomeIcon, LayoutList, Table } from 'lucide-react';
 import usePdfExport from '@hooks/usePdfExport';
 import type { Eintrag } from '@types';
 import { useFirestore } from '@hooks/useFirestore';
@@ -59,6 +59,13 @@ const App = () => {
   const [historyEntry, setHistoryEntry] = useState<Eintrag | null>(null);
   // Login-Flow Flag
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [mobileViewMode, setMobileViewMode] = useState<'cards' | 'table'>(() => {
+    try { return (localStorage.getItem('eintragTableMobileView') as 'cards' | 'table') || 'cards'; } catch { return 'cards'; }
+  });
+  const toggleMobileView = (view: 'cards' | 'table') => {
+    setMobileViewMode(view);
+    try { localStorage.setItem('eintragTableMobileView', view); } catch {}
+  };
 
   // PWA Hooks - sie zeigen die Toasts selbst an
   usePwaPrompt();
@@ -351,8 +358,27 @@ const App = () => {
                     {showLegende && <FachbegriffeLegende />}
                     {!(showNewEntryForm || editingEntry) && (
                       <>
-                        <div className="flex justify-end mb-2">
-                          <span className="text-xs text-green-900/40 tabular-nums">
+                        <div className="flex items-center mb-2">
+                          {/* Mobile view toggle */}
+                          <div className="sm:hidden flex items-center gap-0.5 bg-green-800/5 rounded-lg p-0.5">
+                            <button
+                              onClick={() => toggleMobileView('cards')}
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${mobileViewMode === 'cards' ? 'bg-white shadow-sm text-green-800' : 'text-green-900/40'}`}
+                              aria-label="Kartenansicht"
+                            >
+                              <LayoutList size={12} />
+                              Karten
+                            </button>
+                            <button
+                              onClick={() => toggleMobileView('table')}
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${mobileViewMode === 'table' ? 'bg-white shadow-sm text-green-800' : 'text-green-900/40'}`}
+                              aria-label="Tabellenansicht"
+                            >
+                              <Table size={12} />
+                              Tabelle
+                            </button>
+                          </div>
+                          <span className="text-xs text-green-900/40 tabular-nums ml-auto">
                             {filteredEintraege.length} von {currentData.eintraege.length} Einträge
                           </span>
                         </div>
@@ -365,6 +391,7 @@ const App = () => {
                           onResetToPending={handleResetToPending}
                           onShowHistory={handleShowHistory}
                           currentUser={currentUser}
+                          mobileViewMode={mobileViewMode}
                         />
                       </>
                     )}
