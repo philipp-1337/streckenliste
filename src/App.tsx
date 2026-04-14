@@ -60,7 +60,7 @@ const App = () => {
   // Login-Flow Flag
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [mobileViewMode, setMobileViewMode] = useState<'cards' | 'table'>(() => {
-    try { return (localStorage.getItem('eintragTableMobileView') as 'cards' | 'table') || 'cards'; } catch { return 'cards'; }
+    try { return (localStorage.getItem('eintragTableMobileView') as 'cards' | 'table') || 'table'; } catch { return 'table'; }
   });
   const toggleMobileView = (view: 'cards' | 'table') => {
     setMobileViewMode(view);

@@ -576,7 +576,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                               Freigeben
                             </button>
                           )}
-                          {currentUser?.role === 'admin' && ['pending', 'approved'].includes(eintrag.status || '') && onReject && (
+                          {currentUser?.role === 'admin' && eintrag.status === 'pending' && onReject && (
                             <button
                               onClick={() => handleReject(eintrag.id)}
                               disabled={loadingId === eintrag.id}
@@ -672,7 +672,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
               Freigeben
             </button>
           )}
-          {currentUser?.role === 'admin' && openActionMenuId && onReject && ['pending', 'approved'].includes(selectedMenuEintrag?.status || '') && (
+          {currentUser?.role === 'admin' && openActionMenuId && onReject && selectedMenuEintrag?.status === 'pending' && (
             <button
               onClick={() => handleReject(openActionMenuId)}
               className="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm text-rose-700 transition-colors hover:bg-rose-50 disabled:opacity-60"
