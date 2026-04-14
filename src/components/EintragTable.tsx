@@ -242,10 +242,10 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
       : <ChevronsUpDown size={16} className="opacity-70 group-hover:opacity-100" />;
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="overflow-x-auto">
+    <div className="bg-white rounded-lg shadow overflow-clip">
+      <div className="overflow-auto max-h-[calc(100dvh-14rem)]">
         <table className="min-w-full">
-          <thead className="bg-green-800 text-white">
+          <thead className="bg-green-800 text-white sticky top-0 z-10">
             <tr>
               {isVisible('nr') && <th className="px-4 py-3 text-left text-sm font-medium">Nr.</th>}
               {isVisible('datum') && (
