@@ -84,6 +84,12 @@ export interface EintragHistory {
   changedByName: string;
   action: 'created' | 'updated' | 'approved' | 'rejected' | 'reset_to_pending';
   previousData?: Partial<Omit<Eintrag, 'id'>>;
+  changedFields?: Array<{
+    field: string;
+    label: string;
+    before: string;
+    after: string;
+  }>;
   reason?: string;
 }
 

@@ -80,6 +80,18 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ eintragId, wildart, 
                           Grund: {entry.reason}
                         </p>
                       )}
+                      {entry.changedFields && entry.changedFields.length > 0 && (
+                        <div className="mt-2 rounded-lg border border-amber-100 bg-amber-50/60 px-3 py-2">
+                          <p className="text-xs font-medium text-amber-900">Geänderte Felder</p>
+                          <ul className="mt-1 space-y-1 text-xs text-amber-950">
+                            {entry.changedFields.map((change) => (
+                              <li key={`${entry.id}-${change.field}`}>
+                                <span className="font-medium">{change.label}:</span> {change.before} → {change.after}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </li>
                 );

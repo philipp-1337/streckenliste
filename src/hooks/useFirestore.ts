@@ -1,16 +1,79 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import { db } from '../firebase';
-import { collection, getDocs, addDoc, deleteDoc, doc, query, orderBy, where, onSnapshot, writeBatch, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, addDoc, deleteDoc, doc, query, orderBy, where, onSnapshot, writeBatch, serverTimestamp, deleteField } from 'firebase/firestore';
 import type { Eintrag, EintragHistory } from '@types';
 import useAuth from '@hooks/useAuth';
 import { isUserAuthenticated, canPerformWriteOperation, isAdmin, getAuthErrorMessage } from '@utils/validation';
+
+const FIELD_LABELS: Partial<Record<keyof Omit<Eintrag, 'id'>, string>> = {
+  datum: 'Datum',
+  wildart: 'Wildart',
+  kategorie: 'Kategorie',
+  altersklasse: 'Altersklasse',
+  geschlecht: 'Geschlecht',
+  fachbegriff: 'Fachbegriff',
+  gewicht: 'Gewicht',
+  bemerkung: 'Bemerkung',
+  wildursprungsschein: 'Wildursprungsschein',
+  jaeger: 'Jäger',
+  ort: 'Ort/Revier',
+  einnahmen: 'Einnahmen',
+  notizen: 'Notizen',
+  status: 'Status',
+  ablehnungsGrund: 'Ablehnungsgrund',
+  fallwild: 'Fallwild',
+  anzahl: 'Anzahl',
+}
+
+type HistoryFieldChange = NonNullable<EintragHistory['changedFields']>[number]
+
+function formatHistoryValue(value: unknown): string {
+  if (value === undefined || value === null || value === '') return 'Leer';
+  if (typeof value === 'boolean') return value ? 'Ja' : 'Nein';
+  return String(value);
+}
+
+function getChangedFields(
+  previousData: Partial<Omit<Eintrag, 'id'>> | undefined,
+  nextData: Partial<Omit<Eintrag, 'id'>>
+): EintragHistory['changedFields'] {
+  if (!previousData) return undefined;
+
+  const keys = new Set<keyof Omit<Eintrag, 'id'>>([
+    ...Object.keys(previousData),
+    ...Object.keys(nextData),
+  ] as Array<keyof Omit<Eintrag, 'id'>>)
+
+  const ignoredFields: Array<keyof Omit<Eintrag, 'id'>> = ['userId', 'jagdbezirkId']
+
+  const changedFields = Array.from(keys)
+    .filter((key) => !ignoredFields.includes(key))
+    .reduce<HistoryFieldChange[]>((acc, key) => {
+      const before = previousData[key]
+      const after = nextData[key]
+
+      if (before === after) return acc
+
+      acc.push({
+        field: key,
+        label: FIELD_LABELS[key] ?? key,
+        before: formatHistoryValue(before),
+        after: formatHistoryValue(after),
+      })
+
+      return acc
+    }, [])
+
+  return changedFields.length > 0 ? changedFields : undefined
+}
 
 function makeHistoryEntry(
   action: EintragHistory['action'],
   changedByUid: string,
   changedByName: string,
   previousData?: Partial<Omit<Eintrag, 'id'>>,
+  changedFields?: EintragHistory['changedFields'],
   reason?: string
 ) {
   const entry: Record<string, unknown> = {
@@ -20,6 +83,7 @@ function makeHistoryEntry(
     action,
   };
   if (previousData) entry.previousData = previousData;
+  if (changedFields?.length) entry.changedFields = changedFields;
   if (reason) entry.reason = reason;
   return entry;
 }
@@ -198,7 +262,7 @@ export const useFirestore = () => {
       batch.update(eintragDoc, { status: 'rejected', ablehnungsGrund: grund });
 
       const historyRef = doc(collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/eintraege/${id}/history`));
-      batch.set(historyRef, makeHistoryEntry('rejected', currentUser.uid, currentUser.displayName ?? currentUser.email ?? 'Unbekannt', undefined, grund));
+      batch.set(historyRef, makeHistoryEntry('rejected', currentUser.uid, currentUser.displayName ?? currentUser.email ?? 'Unbekannt', undefined, undefined, grund));
 
       await batch.commit();
     } catch (err) {
@@ -258,7 +322,7 @@ export const useFirestore = () => {
       const eintragDoc = doc(streckenCollectionRef, id);
       const existing = eintraege.find(e => e.id === id);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { ablehnungsGrund: _ag, ...previousDataClean } = existing ?? {} as Eintrag;
+      const { id: _id, ablehnungsGrund: _ag, ...previousDataClean } = existing ?? {} as Eintrag;
 
       const updatedEintrag: Record<string, unknown> = {
         ...eintrag,
@@ -266,11 +330,27 @@ export const useFirestore = () => {
         jagdbezirkId: currentUser.jagdbezirkId,
       };
 
+      const nextHistoryData: Partial<Omit<Eintrag, 'id'>> = {
+        ...previousDataClean,
+        ...eintrag,
+        userId: currentUser.uid,
+        jagdbezirkId: currentUser.jagdbezirkId,
+      }
+
       // Nicht-Admins: freigegebene oder abgelehnte Einträge zurück auf pending setzen
       if (!isAdmin(currentUser)) {
         updatedEintrag.status = 'pending';
-        updatedEintrag.ablehnungsGrund = '';
+        nextHistoryData.status = 'pending'
+        // Firestore rules erlauben Nutzern nicht, `ablehnungsGrund` zu schreiben.
+        // Beim erneuten Speichern eines abgelehnten Eintrags entfernen wir das Feld daher komplett.
+        updatedEintrag.ablehnungsGrund = deleteField();
+        nextHistoryData.ablehnungsGrund = undefined
       }
+
+      const changedFields = getChangedFields(
+        existing ? previousDataClean as Partial<Omit<Eintrag, 'id'>> : undefined,
+        nextHistoryData
+      )
 
       const batch = writeBatch(db);
       batch.update(eintragDoc, updatedEintrag);
@@ -280,7 +360,8 @@ export const useFirestore = () => {
         'updated',
         currentUser.uid,
         currentUser.displayName ?? currentUser.email ?? 'Unbekannt',
-        existing ? previousDataClean as Partial<Omit<Eintrag, 'id'>> : undefined
+        existing ? previousDataClean as Partial<Omit<Eintrag, 'id'>> : undefined,
+        changedFields
       ));
 
       await batch.commit();
