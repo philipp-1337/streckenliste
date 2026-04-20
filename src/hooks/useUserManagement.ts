@@ -90,6 +90,24 @@ export const useUserManagement = () => {
     }
   }, []);
 
+  const updateUserName = useCallback(async (uid: string, displayName: string) => {
+    const trimmedName = displayName.trim();
+    if (!trimmedName) {
+      toast.error('Der Anzeigename darf nicht leer sein.');
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, 'users', uid), { displayName: trimmedName });
+      setUsers(prev => prev.map(u => u.uid === uid ? { ...u, displayName: trimmedName } : u));
+      toast.success('Anzeigename aktualisiert.');
+    } catch (err) {
+      toast.error('Fehler beim Aktualisieren des Namens.');
+      console.error('Error updating name:', err);
+      throw err;
+    }
+  }, []);
+
   const deactivateUser = useCallback(async (uid: string) => {
     try {
       await deleteDoc(doc(db, 'users', uid));
@@ -101,5 +119,5 @@ export const useUserManagement = () => {
     }
   }, []);
 
-  return { users, loading, loadUsers, createUser, updateUserRole, deactivateUser };
+  return { users, loading, loadUsers, createUser, updateUserRole, updateUserName, deactivateUser };
 };

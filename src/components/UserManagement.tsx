@@ -1,25 +1,34 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { UserPlus, Trash2, Users, X } from 'lucide-react';
+import { UserPlus, Trash2, Users, X, Pencil } from 'lucide-react';
 import { useUserManagement } from '@hooks/useUserManagement';
 import useAuth from '@hooks/useAuth';
 import Spinner from '@components/Spinner';
-import type { Role } from '@types';
+import type { UserData, Role } from '@types';
 
 export const UserManagement: React.FC = () => {
   const { currentUser } = useAuth();
-  const { users, loading, loadUsers, createUser, updateUserRole, deactivateUser } = useUserManagement();
+  const { users, loading, loadUsers, createUser, updateUserRole, deactivateUser, updateUserName } = useUserManagement();
   const [showForm, setShowForm] = useState(false);
   const [formEmail, setFormEmail] = useState('');
   const [formName, setFormName] = useState('');
   const [formRole, setFormRole] = useState<Role>('user');
   const [submitting, setSubmitting] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserData | null>(null);
+  const [editedName, setEditedName] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    if (editingUser) {
+      setEditedName(editingUser.displayName || '');
+    }
+  }, [editingUser]);
+
+  const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
@@ -32,6 +41,22 @@ export const UserManagement: React.FC = () => {
       // error already shown via toast in hook
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleUpdateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+
+    setIsUpdating(true);
+    try {
+      await updateUserName(editingUser.uid, editedName);
+      setEditingUser(null);
+      setEditedName('');
+    } catch {
+      // error toast is in hook
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -63,6 +88,11 @@ export const UserManagement: React.FC = () => {
     ), { duration: 10000 });
   };
 
+  const handleCancelEdit = () => {
+    setEditingUser(null);
+    setShowForm(false);
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -71,7 +101,10 @@ export const UserManagement: React.FC = () => {
           Benutzer
         </h2>
         <button
-          onClick={() => setShowForm(v => !v)}
+          onClick={() => {
+            setShowForm(v => !v);
+            setEditingUser(null);
+          }}
           title={showForm ? 'Abbrechen' : 'Neuer Benutzer'}
           className={`
             group relative
@@ -93,16 +126,16 @@ export const UserManagement: React.FC = () => {
             transition-opacity duration-300
             ${showForm ? 'opacity-100' : 'group-hover:opacity-50'}
           `} />
-          {showForm
-            ? <X size={20} className="relative z-10 transition-all duration-300 ease-bounce group-hover:scale-110" />
+          {showForm || editingUser
+            ? <X size={20} className="relative z-10 transition-all duration-300 ease-bounce group-hover:scale-110" onClick={handleCancelEdit} />
             : <UserPlus size={20} className="relative z-10 transition-all duration-300 ease-bounce group-hover:scale-110" />
           }
           <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-white/20 opacity-0 scale-0 group-active:opacity-100 group-active:scale-100 transition-all duration-150" />
         </button>
       </div>
 
-      {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow p-5 space-y-4 mb-6">
+      {showForm && !editingUser && (
+        <form onSubmit={handleCreateSubmit} className="bg-white rounded-xl shadow p-5 space-y-4 mb-6">
           <h3 className="text-base font-semibold text-green-800">Neuen Benutzer anlegen</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -155,6 +188,42 @@ export const UserManagement: React.FC = () => {
         </form>
       )}
 
+      {editingUser && (
+        <form onSubmit={handleUpdateSubmit} className="bg-white rounded-xl shadow p-5 space-y-4 mb-6">
+          <h3 className="text-base font-semibold text-green-800">Benutzer "{editingUser.displayName}" bearbeiten</h3>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Anzeigename</label>
+            <input
+              type="text"
+              required
+              value={editedName}
+              onChange={e => setEditedName(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+              placeholder="Max Mustermann"
+              disabled={isUpdating}
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setEditingUser(null)}
+              disabled={isUpdating}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium transition cursor-pointer disabled:opacity-50"
+            >
+              Abbrechen
+            </button>
+            <button
+              type="submit"
+              disabled={isUpdating}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-700 hover:bg-green-800 text-white text-sm font-medium transition cursor-pointer disabled:opacity-50"
+            >
+              {isUpdating && <Spinner size={16} />}
+              Speichern
+            </button>
+          </div>
+        </form>
+      )}
+
       <div className="flex justify-end mb-2">
         <span className="text-xs text-green-900/40 tabular-nums">
           {users.length} Benutzer
@@ -201,13 +270,25 @@ export const UserManagement: React.FC = () => {
                   </td>
                   <td className="px-4 py-3 text-center">
                     {user.uid !== currentUser?.uid && (
-                      <button
-                        onClick={() => handleDeactivate(user.uid, user.displayName)}
-                        className="text-red-600 hover:text-red-800 transition-colors cursor-pointer"
-                        title="Deaktivieren"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => {
+                            setEditingUser(user)
+                            setShowForm(false)
+                          }}
+                          className="text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+                          title="Bearbeiten"
+                        >
+                          <Pencil size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeactivate(user.uid, user.displayName)}
+                          className="text-red-600 hover:text-red-800 transition-colors cursor-pointer"
+                          title="Deaktivieren"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
