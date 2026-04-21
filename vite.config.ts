@@ -81,23 +81,46 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
-            if (id.includes("sonner")) {
-              return "sonner";
-            }
+            // Heavy libraries first
             if (id.includes("firebase")) {
               return "firebase";
+            }
+            if (id.includes("jspdf") || id.includes("html-to-image")) {
+              return "pdf-export";
             }
             if (id.includes("lucide-react")) {
               return "lucide";
             }
-            if (id.includes("react")) {
-              return "react";
+            if (id.includes("sonner")) {
+              return "sonner";
             }
+            if (id.includes("zod")) {
+              return "zod";
+            }
+            
+            // Framework pieces
+            if (id.includes("react-router")) {
+              return "router";
+            }
+            if (id.includes("react-hook-form") || id.includes("@hookform/resolvers")) {
+              return "forms";
+            }
+            
+            // Core React - be specific to avoid catching other react-related libs
+            if (
+              id.includes("node_modules/react/") ||
+              id.includes("node_modules/react-dom/") ||
+              id.includes("node_modules/scheduler/")
+            ) {
+              return "react-core";
+            }
+
             return "vendor";
           }
         },
       },
     },
+    chunkSizeWarningLimit: 1000,
   },
   server: {
     open: true,
