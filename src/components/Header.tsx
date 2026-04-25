@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({ jagdjahr, availableJagdjahre, on
   const toggleCollapsed = () => {
     setIsCollapsed(prev => {
       const next = !prev;
-      try { localStorage.setItem(COLLAPSE_KEY, String(next)); } catch {}
+      try { localStorage.setItem(COLLAPSE_KEY, String(next)); } catch { /* ignore */ }
       return next;
     });
   };
@@ -59,7 +59,7 @@ export const Header: React.FC<HeaderProps> = ({ jagdjahr, availableJagdjahre, on
             {/* Collapse toggle — mobile only */}
             <button
               onClick={toggleCollapsed}
-              className="sm:hidden ml-2 flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full text-green-800/40 hover:text-green-800/70 hover:bg-green-100 transition-colors"
+              className="sm:hidden ml-2 flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full text-green-800/40 hover:text-green-800/70 hover:bg-green-100 transition-colors cursor-pointer"
               aria-label={isCollapsed ? 'Details einblenden' : 'Details ausblenden'}
             >
               {isCollapsed ? <ChevronDown size={15} /> : <ChevronUp size={15} />}

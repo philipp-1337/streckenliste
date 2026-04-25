@@ -64,7 +64,7 @@ const App = () => {
   });
   const toggleMobileView = (view: 'cards' | 'table') => {
     setMobileViewMode(view);
-    try { localStorage.setItem('eintragTableMobileView', view); } catch {}
+    try { localStorage.setItem('eintragTableMobileView', view); } catch { /* ignore */ }
   };
 
   // PWA Hooks - sie zeigen die Toasts selbst an

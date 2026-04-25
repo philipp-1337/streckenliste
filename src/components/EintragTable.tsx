@@ -452,7 +452,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                   {onEdit && (
                     <button
                       onClick={() => { setSwipedOpenId(null); handleEdit(eintrag); }}
-                      className="flex items-center justify-center w-10 h-10 rounded-xl bg-green-100 text-green-700 active:bg-green-200"
+                      className="flex items-center justify-center w-10 h-10 rounded-xl bg-green-100 text-green-700 active:bg-green-200 cursor-pointer"
                       aria-label="Bearbeiten"
                     >
                       {loadingId === eintrag.id ? <Spinner size={16} /> : <Edit size={18} />}
@@ -460,7 +460,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                   )}
                   <button
                     onClick={() => { setSwipedOpenId(null); handleDelete(eintrag.id); }}
-                    className="flex items-center justify-center w-10 h-10 rounded-xl bg-red-100 text-red-600 active:bg-red-200"
+                    className="flex items-center justify-center w-10 h-10 rounded-xl bg-red-100 text-red-600 active:bg-red-200 cursor-pointer"
                     aria-label="Löschen"
                     disabled={loadingId === eintrag.id}
                   >
@@ -560,7 +560,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                             <button
                               onClick={() => handleEdit(eintrag)}
                               disabled={loadingId === eintrag.id}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-green-700 bg-green-50 hover:bg-green-100 transition-colors disabled:opacity-50"
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-green-700 bg-green-50 hover:bg-green-100 transition-colors disabled:opacity-50 cursor-pointer"
                             >
                               {loadingId === eintrag.id ? <Spinner size={14} /> : <Edit size={14} />}
                               Bearbeiten
@@ -570,7 +570,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                             <button
                               onClick={() => handleApprove(eintrag.id)}
                               disabled={loadingId === eintrag.id}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-green-700 bg-green-50 hover:bg-green-100 transition-colors disabled:opacity-50"
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-green-700 bg-green-50 hover:bg-green-100 transition-colors disabled:opacity-50 cursor-pointer"
                             >
                               {loadingId === eintrag.id ? <Spinner size={14} /> : <Check size={14} />}
                               Freigeben
@@ -580,7 +580,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                             <button
                               onClick={() => handleReject(eintrag.id)}
                               disabled={loadingId === eintrag.id}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-rose-700 bg-rose-50 hover:bg-rose-100 transition-colors disabled:opacity-50"
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-rose-700 bg-rose-50 hover:bg-rose-100 transition-colors disabled:opacity-50 cursor-pointer"
                             >
                               <X size={14} />
                               Ablehnen
@@ -590,7 +590,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                             <button
                               onClick={() => handleResetToPending(eintrag.id)}
                               disabled={loadingId === eintrag.id}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors disabled:opacity-50"
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors disabled:opacity-50 cursor-pointer"
                             >
                               {loadingId === eintrag.id ? <Spinner size={14} /> : <RotateCcw size={14} />}
                               Zurücksetzen
@@ -599,7 +599,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                           {currentUser?.role === 'admin' && onShowHistory && (
                             <button
                               onClick={() => handleShowHistory(eintrag)}
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-gray-600 bg-gray-50 hover:bg-gray-100 transition-colors"
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-gray-600 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
                             >
                               <Clock size={14} />
                               Verlauf
@@ -608,7 +608,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                           <button
                             onClick={() => handleDelete(eintrag.id)}
                             disabled={loadingId === eintrag.id}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-red-700 bg-red-50 hover:bg-red-100 transition-colors disabled:opacity-50"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-red-700 bg-red-50 hover:bg-red-100 transition-colors disabled:opacity-50 cursor-pointer"
                           >
                             {loadingId === eintrag.id ? <Spinner size={14} /> : <Trash2 size={14} />}
                             Löschen
