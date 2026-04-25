@@ -1,0 +1,17 @@
+# Streckenliste - AI Agent Guidelines
+
+## Repository Context
+- **Project**: Streckenliste (Hunting Domain Web App)
+- **Tech Stack**: React, TypeScript, Vite, Tailwind CSS, Firebase (Firestore, Auth)
+- **Package Manager**: Bun (`bun install`, `bun run dev`, `bun run build`, `bun run lint`)
+
+## Core Validation & Commit Rules (STRICT)
+As an AI Agent working in this repository, you MUST follow these steps for every modification:
+
+1. **Always Validate:** After making changes to the code, you MUST ALWAYS run the following validation commands to ensure no errors were introduced:
+   ```bash
+   bun run lint
+   bun run build
+   ```
+2. **Auto-Commit on Success:** If and only if both the lint and build commands succeed without errors, you MUST automatically create a git commit for your changes. Follow the conventional commit format (e.g., `feat(Scope): description` or `fix(Scope): description`).
+3. **NEVER Push:** Do NOT automatically run `git push`. You may ONLY push to the remote repository when the user explicitly grants you permission to do so.
