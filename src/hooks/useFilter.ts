@@ -8,7 +8,8 @@ export const useFilter = (eintraege: Eintrag[]) => {
     jaeger: '',
     jahr: '',
     kategorie: '',
-    jagdjahr: getCurrentJagdjahr()
+    jagdjahr: getCurrentJagdjahr(),
+    status: ''
   });
 
   const filteredEintraege = useMemo(() => {
@@ -18,7 +19,10 @@ export const useFilter = (eintraege: Eintrag[]) => {
       const matchJahr = !filter.jahr || eintrag.datum.startsWith(filter.jahr);
       const matchKategorie = !filter.kategorie || eintrag.fachbegriff.toLowerCase().includes(filter.kategorie.toLowerCase());
       const matchJagdjahr = !filter.jagdjahr || isDateInJagdjahr(eintrag.datum, filter.jagdjahr);
-      return matchWildart && matchJaeger && matchJahr && matchKategorie && matchJagdjahr;
+      const matchStatus = !filter.status || 
+        (filter.status === 'approved' && (eintrag.status === 'approved' || !eintrag.status)) ||
+        eintrag.status === filter.status;
+      return matchWildart && matchJaeger && matchJahr && matchKategorie && matchJagdjahr && matchStatus;
     });
   }, [eintraege, filter]);
 

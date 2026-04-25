@@ -31,7 +31,8 @@ const getDefaultFilterState = () => ({
   jaeger: '',
   jahr: '',
   kategorie: '',
-  jagdjahr: getCurrentJagdjahr()
+  jagdjahr: getCurrentJagdjahr(),
+  status: ''
 });
 
 // Lazy load große Komponenten für bessere Bundle Size
@@ -39,7 +40,6 @@ const StatistikPanel = lazy(() => import('@components/StatistikPanel'));
 const OfficialPrintView = lazy(() => import('@components/OfficialPrintView'));
 const ImportDialog = lazy(() => import('@components/ImportDialog'));
 const KategorienFixDialog = lazy(() => import('@components/KategorienFixDialog'));
-const FreigabenView = lazy(() => import('@components/FreigabenView').then(m => ({ default: m.FreigabenView })));
 const UserManagement = lazy(() => import('@components/UserManagement').then(m => ({ default: m.UserManagement })));
 const AblehnungsModal = lazy(() => import('@components/AblehnungsModal').then(m => ({ default: m.AblehnungsModal })));
 const HistoryModal = lazy(() => import('@components/HistoryModal').then(m => ({ default: m.HistoryModal })));
@@ -134,7 +134,8 @@ const App = () => {
     return Number(filter.wildart !== defaults.wildart) +
       Number(filter.jaeger !== defaults.jaeger) +
       Number(filter.jahr !== defaults.jahr) +
-      Number(filter.kategorie !== defaults.kategorie);
+      Number(filter.kategorie !== defaults.kategorie) +
+      Number(filter.status !== defaults.status);
   }, [filter]);
   const handleToggleNewEntryForm = useCallback(() => setShowNewEntryForm((v) => !v), []);
   const handleToggleFixDialog = useCallback(() => setShowFixDialog((v) => !v), []);
@@ -415,19 +416,7 @@ const App = () => {
                     <UserManagement />
                   </Suspense>
                 } />
-                <Route path="/freigaben" element={
-                  <Suspense fallback={<div className="p-4">Wird geladen...</div>}>
-                    <FreigabenView
-                      eintraege={currentData.eintraege}
-                      currentUser={currentUser}
-                      onDelete={handleDelete}
-                      onApprove={handleApprove}
-                      onReject={handleReject}
-                      onResetToPending={handleResetToPending}
-                      onShowHistory={handleShowHistory}
-                    />
-                  </Suspense>
-                } />
+
                 <Route path="/print" element={
                   <Suspense fallback={<div className="p-4">Wird geladen...</div>}>
                     <OfficialPrintView eintraege={filteredEintraege} jagdjahr={filter.jagdjahr} />

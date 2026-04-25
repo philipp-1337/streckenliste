@@ -58,7 +58,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
           Filter zurücksetzen
         </button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <select
           value={filter.wildart}
           onChange={(e) => onFilterChange({...filter, wildart: e.target.value})}
@@ -95,6 +95,17 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
           <option value="">Alle Jahre</option>
           <option value="2024">2024</option>
           <option value="2025">2025</option>
+        </select>
+        <select
+          value={filter.status}
+          onChange={(e) => onFilterChange({...filter, status: e.target.value})}
+          aria-label="Status filtern"
+          className="border border-gray-300 rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+        >
+          <option value="">Alle Status</option>
+          <option value="approved">Freigegeben</option>
+          <option value="pending">Ausstehend</option>
+          <option value="rejected">Abgelehnt</option>
         </select>
       </div>
     </div>
