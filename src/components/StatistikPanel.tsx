@@ -1,6 +1,6 @@
-import { memo, useMemo, useState } from 'react';
+import { memo, useMemo, useState, useEffect } from 'react';
 import type { AllStats, MonatStat } from '@types';
-import { BarChart3, CalendarDays } from 'lucide-react';
+import { BarChart3, CalendarDays, Maximize2, Minimize2 } from 'lucide-react';
 import useAuth from '@hooks/useAuth';
 import { 
   ComposedChart,
@@ -75,6 +75,17 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
     return true;
   });
 
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    if (isFullscreen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isFullscreen]);
+
   const maxVal = useMemo(() => {
     let max = Math.max(...monatsStats.map(m => (m.anzahl as number) || 0), 10);
     if (isAverage && showYearLines && availableJahre) {
@@ -89,34 +100,48 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
   return (
     <div className="mb-6 space-y-8">
       {/* Monthly Chart */}
-      <div className="bg-white rounded-2xl shadow-sm border border-green-100 p-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            <h2 className="text-lg sm:text-xl font-bold text-green-800 flex items-center gap-2 sm:gap-2.5">
+      <div className={
+        isFullscreen 
+          ? "fixed inset-0 z-[100] bg-white overflow-hidden flex flex-col p-4 sm:p-8 animate-in fade-in duration-200" 
+          : "bg-white rounded-2xl shadow-sm border border-green-100 p-5"
+      }>
+        <div className="flex items-center justify-between mb-6 w-full">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <h2 className="text-lg sm:text-xl font-bold text-green-800 flex items-center gap-2 sm:gap-2.5 truncate">
               <CalendarDays size={20} strokeWidth={2} className="shrink-0" />
-              <span className="hidden sm:inline">Abschüsse pro Monat</span>
-              <span className="sm:hidden">Monatsverlauf</span>
+              <span className="truncate">Monatsverlauf</span>
             </h2>
             {isAverage && (
-              <span className="bg-green-100 text-green-800 text-[10px] sm:text-xs font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full whitespace-nowrap">
+              <span className="bg-green-100 text-green-800 text-[10px] sm:text-xs font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full whitespace-nowrap shrink-0">
                 Ø Durchschnitt
               </span>
             )}
           </div>
-          {isAverage && availableJahre?.length > 0 && (
-            <label className="hidden sm:flex items-center gap-2 text-sm text-green-800 cursor-pointer hover:opacity-80 transition-opacity select-none bg-green-50 px-3 py-1.5 rounded-lg border border-green-100 self-start sm:self-auto">
-              <input 
-                type="checkbox" 
-                className="w-4 h-4 rounded border-green-600 text-green-700 focus:ring-green-600 cursor-pointer"
-                checked={showYearLines}
-                onChange={(e) => setShowYearLines(e.target.checked)}
-              />
-              <span className="font-medium">Jahre anzeigen</span>
-            </label>
-          )}
+          
+          <div className="flex items-center justify-end gap-3 shrink-0 ml-3">
+            {isAverage && availableJahre?.length > 0 && (
+              <label className="hidden md:flex items-center gap-2 text-sm text-green-800 cursor-pointer hover:opacity-80 transition-opacity select-none bg-green-50 px-3 py-1.5 rounded-lg border border-green-100 shrink-0">
+                <input 
+                  type="checkbox" 
+                  className="w-4 h-4 rounded border-green-600 text-green-700 focus:ring-green-600 cursor-pointer shrink-0"
+                  checked={showYearLines}
+                  onChange={(e) => setShowYearLines(e.target.checked)}
+                />
+                <span className="font-medium whitespace-nowrap">Jahre anzeigen</span>
+              </label>
+            )}
+            
+            <button
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="p-2 text-green-700 hover:bg-green-50 rounded-lg transition-colors border border-transparent hover:border-green-100 shrink-0"
+              title={isFullscreen ? "Vollbild beenden" : "Vollbild öffnen"}
+            >
+              {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+            </button>
+          </div>
         </div>
         
-        <div className="h-[300px] w-full">
+        <div className={isFullscreen ? "flex-1 w-full min-h-[400px] mt-4" : "h-[300px] w-full"}>
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={monatsStats}
