@@ -118,7 +118,7 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
             )}
           </div>
           
-          <div className="flex items-center justify-end gap-3 shrink-0 ml-3">
+          <div className="hidden sm:flex items-center justify-end gap-3 shrink-0 ml-3">
             {isAverage && availableJahre?.length > 0 && (
               <label className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm text-green-800 cursor-pointer hover:opacity-80 transition-opacity select-none bg-green-50 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-green-100 shrink-0">
                 <input 
