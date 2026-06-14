@@ -141,7 +141,7 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
           </div>
         </div>
         
-        <div className={isFullscreen ? "flex-1 w-full min-h-[400px] mt-4" : "h-[300px] w-full"}>
+        <div className={isFullscreen ? "flex-1 w-full min-h-0 mt-4" : "h-[300px] w-full"}>
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={monatsStats}
