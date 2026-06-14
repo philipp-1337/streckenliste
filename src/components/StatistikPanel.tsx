@@ -86,6 +86,28 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
     return () => { document.body.style.overflow = 'unset'; };
   }, [isFullscreen]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mql = window.matchMedia('(max-width: 767px)');
+    const handleMatch = (e: MediaQueryListEvent) => {
+      if (e.matches) {
+        setShowYearLines(false);
+      }
+    };
+    // For older Safari compatibility (iOS < 14) we should ideally use addListener,
+    // but addEventListener is modern and supported in iOS 14+
+    if (mql.addEventListener) {
+      mql.addEventListener('change', handleMatch);
+      return () => mql.removeEventListener('change', handleMatch);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isAverage) {
+      setShowYearLines(false);
+    }
+  }, [isAverage]);
+
   const maxVal = useMemo(() => {
     let max = Math.max(...monatsStats.map(m => (m.anzahl as number) || 0), 10);
     if (isAverage && showYearLines && availableJahre) {
