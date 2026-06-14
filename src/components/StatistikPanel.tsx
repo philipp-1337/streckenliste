@@ -102,7 +102,7 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
       {/* Monthly Chart */}
       <div className={
         isFullscreen 
-          ? "fixed inset-0 z-[100] bg-white overflow-hidden flex flex-col p-4 sm:p-8 animate-in fade-in duration-200" 
+          ? "fixed inset-0 z-[2000] bg-white overflow-hidden flex flex-col p-4 sm:p-8 animate-in fade-in duration-200" 
           : "bg-white rounded-2xl shadow-sm border border-green-100 p-5"
       }>
         <div className="flex items-center justify-between mb-6 w-full">
