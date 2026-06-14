@@ -51,7 +51,7 @@ export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount })
       <div
         style={{ width: navWidth }}
         className="
-        fixed left-1/2 -translate-x-1/2 bottom-safe-floating
+        fixed left-1/2 -translate-x-1/2 transform-gpu will-change-transform bottom-safe-floating
         h-16
         glass-bg glass-shadow rounded-pill
         backdrop-blur-xl backdrop-saturate-[180%]
