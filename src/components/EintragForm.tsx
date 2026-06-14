@@ -3,10 +3,12 @@ import Spinner from '@components/Spinner';
 import { useForm, type Resolver, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Mars, Venus } from 'lucide-react';
-import type { Eintrag } from '@types';
+import type { Eintrag, JaegerProfile } from '@types';
 import { wildarten } from '@data/wildarten';
 import { eintragFormSchema } from '@utils/validation';
 import useAuth from '@hooks/useAuth';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase';
 
 interface EintragFormProps {
   editingEntry: Eintrag | null;
@@ -20,9 +22,14 @@ export const EintragForm: React.FC<EintragFormProps> = ({
   onCancel
 }) => {
   const { currentUser } = useAuth();
+  const isUserWithoutAssignment = currentUser?.role === 'user' && (!currentUser.jaegerId || !currentUser.jaegerProfile);
+  const assignedJaegerName = currentUser?.jaegerProfile?.displayName || '';
+  const isAdmin = currentUser?.role === 'admin';
   const [loading, setLoading] = useState(false);
   const [isFallwild, setIsFallwild] = useState(false);
   const [sonstigeAnzahl, setSonstigeAnzahl] = useState(1);
+  const [jaegerProfiles, setJaegerProfiles] = useState<JaegerProfile[]>([]);
+  const [loadingJaegerProfiles, setLoadingJaegerProfiles] = useState(false);
 
   // Initialize form with React Hook Form and Zod validation
   const {
@@ -48,6 +55,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           bemerkung: editingEntry.bemerkung,
           wildursprungsschein: editingEntry.wildursprungsschein,
           jaeger: editingEntry.jaeger,
+          jaegerId: editingEntry.jaegerId,
           ort: editingEntry.ort,
           einnahmen: editingEntry.einnahmen,
           notizen: editingEntry.notizen,
@@ -64,7 +72,8 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           gewicht: '',
           bemerkung: '',
           wildursprungsschein: '',
-          jaeger: currentUser?.role === 'user' ? (currentUser?.displayName ?? '') : '',
+          jaeger: currentUser?.role === 'user' ? assignedJaegerName : '',
+          jaegerId: currentUser?.role === 'user' ? (currentUser?.jaegerId ?? '') : '',
           ort: '',
           einnahmen: '',
           notizen: '',
@@ -79,6 +88,13 @@ export const EintragForm: React.FC<EintragFormProps> = ({
   const watchedFachbegriff = watch('fachbegriff');
   const watchedAltersklasse = watch('altersklasse');
   const watchedGeschlecht = watch('geschlecht');
+  const watchedJaegerId = watch('jaegerId');
+
+  const selectableJaegerProfiles = jaegerProfiles.filter(profile =>
+    profile.active !== false || (editingEntry?.jaegerId && profile.id === editingEntry.jaegerId)
+  );
+  const adminHasSelectableProfile = selectableJaegerProfiles.length > 0;
+  const adminNeedsJaegerSelection = isAdmin && !watchedJaegerId;
 
   // Sync Fallwild/Anzahl state when editingEntry changes
   useEffect(() => {
@@ -112,6 +128,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
         bemerkung: editingEntry.bemerkung ?? '',
         wildursprungsschein: editingEntry.wildursprungsschein ?? '',
         jaeger: editingEntry.jaeger ?? '',
+        jaegerId: editingEntry.jaegerId ?? '',
         ort: editingEntry.ort ?? '',
         einnahmen: editingEntry.einnahmen != null ? String(editingEntry.einnahmen) : '',
         notizen: editingEntry.notizen ?? '',
@@ -121,6 +138,65 @@ export const EintragForm: React.FC<EintragFormProps> = ({
       trigger();
     }
   }, [editingEntry, reset, trigger]);
+
+  useEffect(() => {
+    if (editingEntry || currentUser?.role !== 'user') return;
+
+    setValue('jaeger', assignedJaegerName, { shouldValidate: true });
+    setValue('jaegerId', currentUser?.jaegerId ?? '', { shouldValidate: true });
+    trigger(['jaeger', 'jaegerId']);
+  }, [assignedJaegerName, currentUser?.jaegerId, currentUser?.role, editingEntry, setValue, trigger]);
+
+  useEffect(() => {
+    if (!currentUser?.jagdbezirkId || currentUser.role !== 'admin') {
+      setJaegerProfiles([]);
+      setLoadingJaegerProfiles(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadJaegerProfiles = async () => {
+      setLoadingJaegerProfiles(true);
+      try {
+        const snapshot = await getDocs(collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/jaeger`));
+        if (cancelled) return;
+
+        const loadedProfiles = snapshot.docs
+          .map(d => ({
+            id: d.id,
+            displayName: d.data().displayName || d.id,
+            jagdbezirkId: currentUser.jagdbezirkId,
+            active: d.data().active,
+          } as JaegerProfile))
+          .sort((a, b) => a.displayName.localeCompare(b.displayName, 'de'));
+
+        setJaegerProfiles(loadedProfiles);
+      } finally {
+        if (!cancelled) {
+          setLoadingJaegerProfiles(false);
+        }
+      }
+    }
+
+    void loadJaegerProfiles();
+
+    return () => {
+      cancelled = true;
+    }
+  }, [currentUser?.jagdbezirkId, currentUser?.role]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    const selectedProfile = jaegerProfiles.find(profile => profile.id === watchedJaegerId);
+    if (!selectedProfile) {
+      setValue('jaeger', '', { shouldValidate: true });
+      return;
+    }
+
+    setValue('jaeger', selectedProfile.displayName, { shouldValidate: true });
+  }, [isAdmin, jaegerProfiles, setValue, watchedJaegerId]);
 
   const getKategorienFuerWildart = (wildart: string) => {
     return wildarten[wildart] || [];
@@ -193,7 +269,20 @@ export const EintragForm: React.FC<EintragFormProps> = ({
       <h3 className="text-base font-semibold text-green-800 mb-4">
         {editingEntry ? 'Eintrag bearbeiten' : 'Neuer Eintrag'}
       </h3>
+      {isUserWithoutAssignment && (
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          {!currentUser?.jaegerId
+            ? 'Ihr Benutzer ist noch keinem Jäger zugeordnet. Bitte wenden Sie sich an den Administrator, bevor Sie Abschüsse erfassen.'
+            : 'Das zugeordnete Jägerprofil konnte nicht geladen werden. Bitte wenden Sie sich an den Administrator.'}
+        </div>
+      )}
+      {isAdmin && !loadingJaegerProfiles && !adminHasSelectableProfile && (
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Es sind keine aktiven Jägerprofile verfügbar. Bitte aktiviere oder erstelle zuerst ein Jägerprofil in der Benutzerverwaltung.
+        </div>
+      )}
       <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
+        <input type="hidden" {...register('jaegerId')} />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Datum *</label>
@@ -327,15 +416,44 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           )}
           <div>
             <label className="block text-sm font-medium mb-1">Jäger</label>
-            <input
-              type="text"
-              {...register('jaeger')}
-              className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
-                errors.jaeger ? 'border-red-500' : 'border-gray-300'
-              }`}
-            />
-            {errors.jaeger && (
-              <p className="text-red-500 text-sm mt-1">{errors.jaeger.message}</p>
+            {isAdmin ? (
+              <>
+                <select
+                  value={watchedJaegerId || ''}
+                  onChange={(e) => {
+                    setValue('jaegerId', e.target.value, { shouldValidate: true })
+                    trigger(['jaegerId', 'jaeger'])
+                  }}
+                  disabled={loadingJaegerProfiles || !adminHasSelectableProfile}
+                  className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+                    errors.jaeger ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                >
+                  <option value="">Bitte wählen...</option>
+                  {selectableJaegerProfiles.map(profile => (
+                    <option key={profile.id} value={profile.id}>
+                      {profile.displayName}{profile.active === false ? ' (inaktiv)' : ''}
+                    </option>
+                  ))}
+                </select>
+                {adminNeedsJaegerSelection && (
+                  <p className="text-red-500 text-sm mt-1">Bitte ein aktives Jägerprofil auswählen.</p>
+                )}
+              </>
+            ) : (
+              <>
+                <input
+                  type="text"
+                  {...register('jaeger')}
+                  readOnly
+                  className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+                    errors.jaeger ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                {errors.jaeger && (
+                  <p className="text-red-500 text-sm mt-1">{errors.jaeger.message}</p>
+                )}
+              </>
             )}
           </div>
           <div>
@@ -435,7 +553,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
         <div className="flex flex-wrap gap-4">
           <button
             type="submit"
-            disabled={!isValid || loading}
+            disabled={!isValid || loading || isUserWithoutAssignment || loadingJaegerProfiles || adminNeedsJaegerSelection || (isAdmin && !adminHasSelectableProfile)}
             className="w-full sm:w-auto bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-xl transition-colors flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300 cursor-pointer"
           >
             {loading ? <Spinner size={20} /> : null}

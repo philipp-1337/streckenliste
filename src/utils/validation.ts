@@ -79,6 +79,8 @@ export const eintragFormSchema = z.object({
   notizen: z
     .string()
     .max(1000, 'Notizen dürfen maximal 1000 Zeichen lang sein'),
+
+  jaegerId: z.string().optional().default(''),
   
   // Diese Felder werden automatisch vom Backend gesetzt und sind im Formular optional
   jagdbezirkId: z.string().optional().default(''),
@@ -131,7 +133,9 @@ export const isAdmin = (currentUser: UserData | null): boolean => {
 export const canPerformWriteOperation = (
   currentUser: UserData | null
 ): boolean => {
-  return isUserAuthenticated(currentUser);
+  if (!isUserAuthenticated(currentUser)) return false;
+  if (currentUser.role === 'admin') return true;
+  return Boolean(currentUser.jaegerId);
 };
 
 /**
@@ -152,7 +156,13 @@ export const getAuthErrorMessage = (
   currentUser: UserData | null
 ): string | null => {
   if (!isUserAuthenticated(currentUser)) {
-    return "Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.";
+    return 'Benutzer nicht authentifiziert oder Jagdbezirk nicht verfügbar.';
+  }
+  if (currentUser.role !== 'admin' && !currentUser.jaegerId) {
+    return 'Ihr Benutzer ist noch keinem Jäger zugeordnet. Bitte wenden Sie sich an den Administrator.';
+  }
+  if (currentUser.role !== 'admin' && currentUser.jaegerId && !currentUser.jaegerProfile) {
+    return 'Das zugeordnete Jägerprofil konnte nicht geladen werden.';
   }
   return null;
 };

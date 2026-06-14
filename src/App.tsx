@@ -1,8 +1,8 @@
-import { useState, useCallback, lazy, Suspense, useMemo } from 'react';
+import { useState, useCallback, lazy, Suspense, useMemo, useEffect } from 'react';
 import { Toaster, toast } from 'sonner';
 import { HomeIcon, LayoutList, Table } from 'lucide-react';
 import usePdfExport from '@hooks/usePdfExport';
-import type { Eintrag } from '@types';
+import type { Eintrag, JaegerProfile } from '@types';
 import { useFirestore } from '@hooks/useFirestore';
 import { useStatistiken } from '@hooks/useStatistiken';
 import { useFilter } from '@hooks/useFilter';
@@ -22,13 +22,15 @@ import useAuth from '@hooks/useAuth';
 import Login from '@auth/Login';
 import ActionHandler from '@auth/ActionHandler';
 import { auth } from './firebase';
+import { db } from './firebase';
 import { signOut } from 'firebase/auth';
+import { collection, getDocs } from 'firebase/firestore';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { getAvailableJagdjahre, getCurrentJagdjahr } from '@utils/jagdjahrUtils';
 
 const getDefaultFilterState = () => ({
   wildart: '',
-  jaeger: '',
+  jaegerId: '',
   jahr: '',
   kategorie: '',
   jagdjahr: getCurrentJagdjahr(),
@@ -57,6 +59,7 @@ const App = () => {
   const [showLegende, setShowLegende] = useState(false);
   const [rejectingEntryId, setRejectingEntryId] = useState<string | null>(null);
   const [historyEntry, setHistoryEntry] = useState<Eintrag | null>(null);
+  const [jaegerProfiles, setJaegerProfiles] = useState<JaegerProfile[]>([]);
   // Login-Flow Flag
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [mobileViewMode, setMobileViewMode] = useState<'cards' | 'table'>(() => {
@@ -96,6 +99,61 @@ const App = () => {
     [currentData.eintraege]
   );
 
+  useEffect(() => {
+    if (!currentUser?.jagdbezirkId) {
+      setJaegerProfiles([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadJaegerProfiles = async () => {
+      const snapshot = await getDocs(collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/jaeger`));
+      if (cancelled) return;
+
+      const loadedProfiles = snapshot.docs
+        .map(d => ({
+          id: d.id,
+          displayName: d.data().displayName || d.id,
+          jagdbezirkId: currentUser.jagdbezirkId,
+          active: d.data().active,
+        } as JaegerProfile))
+        .sort((a, b) => a.displayName.localeCompare(b.displayName, 'de'));
+
+      setJaegerProfiles(loadedProfiles);
+    };
+
+    void loadJaegerProfiles();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser?.jagdbezirkId]);
+
+  const jaegerFilterOptions = useMemo(() => {
+    const activeProfiles = jaegerProfiles.filter(profile => profile.active !== false);
+    const options = activeProfiles.map(profile => ({
+      value: profile.id,
+      label: profile.displayName,
+    }));
+
+    const existingIds = new Set(options.map(option => option.value));
+    const legacyProfiles = currentData.eintraege
+      .filter(eintrag => eintrag.jaegerId)
+      .map(eintrag => ({
+        id: eintrag.jaegerId as string,
+        label: eintrag.jaeger,
+      }))
+      .filter(profile => !existingIds.has(profile.id))
+      .sort((a, b) => a.label.localeCompare(b.label, 'de'))
+      .map(profile => ({
+        value: profile.id,
+        label: `${profile.label} (archiviert)`,
+      }));
+
+    return [...options, ...legacyProfiles];
+  }, [currentData.eintraege, jaegerProfiles]);
+
   const handleApprove = useCallback(async (id: string) => {
     await currentData.approveEintrag(id);
   }, [currentData]);
@@ -132,7 +190,7 @@ const App = () => {
   const activeFilterCount = useMemo(() => {
     const defaults = getDefaultFilterState();
     return Number(filter.wildart !== defaults.wildart) +
-      Number(filter.jaeger !== defaults.jaeger) +
+      Number(filter.jaegerId !== defaults.jaegerId) +
       Number(filter.jahr !== defaults.jahr) +
       Number(filter.kategorie !== defaults.kategorie) +
       Number(filter.status !== defaults.status);
@@ -354,6 +412,7 @@ const App = () => {
                         filter={filter}
                         onFilterChange={setFilter}
                         onResetFilters={handleResetFilters}
+                        jaegerOptions={jaegerFilterOptions}
                       />
                     )}
                     {showLegende && <FachbegriffeLegende />}
@@ -385,6 +444,7 @@ const App = () => {
                         </div>
                         <EintragTable
                           eintraege={filteredEintraege}
+                          jaegerProfiles={jaegerProfiles}
                           onEdit={handleEdit}
                           onDelete={handleDelete}
                           onApprove={handleApprove}

@@ -5,7 +5,7 @@ import { isDateInJagdjahr, getCurrentJagdjahr } from '@utils/jagdjahrUtils';
 export const useFilter = (eintraege: Eintrag[]) => {
   const [filter, setFilter] = useState<FilterState>({
     wildart: '',
-    jaeger: '',
+    jaegerId: '',
     jahr: '',
     kategorie: '',
     jagdjahr: getCurrentJagdjahr(),
@@ -15,7 +15,7 @@ export const useFilter = (eintraege: Eintrag[]) => {
   const filteredEintraege = useMemo(() => {
     return eintraege.filter(eintrag => {
       const matchWildart = !filter.wildart || eintrag.wildart === filter.wildart;
-      const matchJaeger = !filter.jaeger || eintrag.jaeger.toLowerCase().includes(filter.jaeger.toLowerCase());
+      const matchJaeger = !filter.jaegerId || eintrag.jaegerId === filter.jaegerId;
       const matchJahr = !filter.jahr || eintrag.datum.startsWith(filter.jahr);
       const matchKategorie = !filter.kategorie || eintrag.fachbegriff.toLowerCase().includes(filter.kategorie.toLowerCase());
       const matchJagdjahr = !filter.jagdjahr || isDateInJagdjahr(eintrag.datum, filter.jagdjahr);

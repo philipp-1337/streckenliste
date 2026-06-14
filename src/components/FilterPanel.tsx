@@ -3,17 +3,21 @@ import { Filter } from 'lucide-react';
 import type { FilterState } from '@types';
 import { wildarten } from '@data/wildarten';
 
+interface JaegerFilterOption {
+  value: string;
+  label: string;
+}
+
 interface FilterPanelProps {
   filter: FilterState;
   onFilterChange: (filter: FilterState) => void;
   onResetFilters: () => void;
+  jaegerOptions: JaegerFilterOption[];
 }
 
-export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterChange, onResetFilters }) => {
+export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterChange, onResetFilters, jaegerOptions }) => {
   const [kategorieInput, setKategorieInput] = useState(filter.kategorie);
-  const [jaegerInput, setJaegerInput] = useState(filter.jaeger);
   const [prevKategorie, setPrevKategorie] = useState(filter.kategorie);
-  const [prevJaeger, setPrevJaeger] = useState(filter.jaeger);
   const filterRef = useRef(filter);
   useEffect(() => { filterRef.current = filter; });
 
@@ -21,10 +25,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
   if (prevKategorie !== filter.kategorie) {
     setPrevKategorie(filter.kategorie);
     setKategorieInput(filter.kategorie);
-  }
-  if (prevJaeger !== filter.jaeger) {
-    setPrevJaeger(filter.jaeger);
-    setJaegerInput(filter.jaeger);
   }
 
   // Debounce kategorie → only refilter 300ms after typing stops
@@ -34,14 +34,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
     }, 300);
     return () => clearTimeout(t);
   }, [kategorieInput, onFilterChange]);
-
-  // Debounce jaeger → only refilter 300ms after typing stops
-  useEffect(() => {
-    const t = setTimeout(() => {
-      onFilterChange({ ...filterRef.current, jaeger: jaegerInput });
-    }, 300);
-    return () => clearTimeout(t);
-  }, [jaegerInput, onFilterChange]);
 
   return (
     <div className="bg-white p-4 rounded-xl mb-6 shadow">
@@ -78,14 +70,17 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
           onChange={(e) => setKategorieInput(e.target.value)}
           className="border border-gray-300 rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
         />
-        <input
-          type="text"
-          placeholder="Jäger suchen..."
+        <select
+          value={filter.jaegerId}
+          onChange={(e) => onFilterChange({ ...filter, jaegerId: e.target.value })}
           aria-label="Nach Jäger filtern"
-          value={jaegerInput}
-          onChange={(e) => setJaegerInput(e.target.value)}
           className="border border-gray-300 rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
-        />
+        >
+          <option value="">Alle Jäger</option>
+          {jaegerOptions.map(option => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
         <select
           value={filter.jahr}
           onChange={(e) => onFilterChange({...filter, jahr: e.target.value})}

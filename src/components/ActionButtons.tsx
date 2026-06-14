@@ -41,19 +41,22 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
   onToggleLegende,
   showLegende,
   activeFilterCount,
+  currentUser,
 }) => {
-  // const isAdmin = currentUser?.role === 'admin';
+  const isUserWithoutAssignment = currentUser?.role === 'user' && (!currentUser.jaegerId || !currentUser.jaegerProfile);
 
   const toggleButtons = [
     {
       id: 'new-entry',
       icon: Plus,
-      title: showNewEntryForm ? 'Neuen Eintrag schließen' : 'Neuer Eintrag',
+      title: isUserWithoutAssignment
+        ? 'Neuer Eintrag erst nach Jäger-Zuordnung möglich'
+        : showNewEntryForm ? 'Neuen Eintrag schließen' : 'Neuer Eintrag',
       onClick: onToggleNewEntryForm,
       isActive: showNewEntryForm,
       activeColors: 'text-red-700',
       iconClass: showNewEntryForm ? 'rotate-45' : '',
-      disabled: false,
+      disabled: isUserWithoutAssignment,
       show: true,
     },
     {

@@ -209,6 +209,8 @@ export const useFirestore = () => {
       const newDocRef = doc(streckenCollectionRef);
       const newEintrag = {
         ...eintrag,
+        jaeger: currentUser.role === 'user' ? (currentUser.jaegerProfile?.displayName ?? eintrag.jaeger) : eintrag.jaeger,
+        jaegerId: currentUser.role === 'user' ? (currentUser.jaegerId ?? '') : (eintrag.jaegerId ?? ''),
         userId: currentUser.uid,
         jagdbezirkId: currentUser.jagdbezirkId,
         status: isAdmin(currentUser) ? 'approved' : 'pending',
@@ -323,18 +325,30 @@ export const useFirestore = () => {
       const existing = eintraege.find(e => e.id === id);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { id: _id, ablehnungsGrund: _ag, ...previousDataClean } = existing ?? {} as Eintrag;
+      const nextUserId = existing?.userId ?? currentUser.uid;
+      const nextJagdbezirkId = existing?.jagdbezirkId ?? currentUser.jagdbezirkId;
+      const nextJaegerId = currentUser.role === 'user'
+        ? (currentUser.jaegerId ?? existing?.jaegerId ?? '')
+        : (eintrag.jaegerId ?? existing?.jaegerId ?? '');
+      const nextJaegerName = currentUser.role === 'user'
+        ? (currentUser.jaegerProfile?.displayName ?? eintrag.jaeger)
+        : eintrag.jaeger;
 
       const updatedEintrag: Record<string, unknown> = {
         ...eintrag,
-        userId: currentUser.uid,
-        jagdbezirkId: currentUser.jagdbezirkId,
+        jaeger: nextJaegerName,
+        jaegerId: nextJaegerId,
+        userId: nextUserId,
+        jagdbezirkId: nextJagdbezirkId,
       };
 
       const nextHistoryData: Partial<Omit<Eintrag, 'id'>> = {
         ...previousDataClean,
         ...eintrag,
-        userId: currentUser.uid,
-        jagdbezirkId: currentUser.jagdbezirkId,
+        jaeger: nextJaegerName,
+        jaegerId: nextJaegerId,
+        userId: nextUserId,
+        jagdbezirkId: nextJagdbezirkId,
       }
 
       // Nicht-Admins: freigegebene oder abgelehnte Einträge zurück auf pending setzen

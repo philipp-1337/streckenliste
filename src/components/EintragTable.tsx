@@ -2,7 +2,7 @@ import { memo, useMemo, useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Spinner from '@components/Spinner';
 import { Edit, Trash2, Mars, Venus, ChevronUp, ChevronDown, ChevronsUpDown, Check, SlidersHorizontal, X, RotateCcw, Clock, MoreVertical } from 'lucide-react';
-import type { Eintrag, UserData } from '@types';
+import type { Eintrag, JaegerProfile, UserData } from '@types';
 import { sanitizeHtml } from '@utils/sanitization';
 
 const COLUMNS = [
@@ -41,6 +41,7 @@ function loadVisibleColumns(): ColumnId[] {
 
 interface EintragTableProps {
   eintraege: Eintrag[];
+  jaegerProfiles?: JaegerProfile[];
   onEdit?: (eintrag: Eintrag) => void;
   onDelete: (id: string) => void;
   onApprove?: (id: string) => Promise<void>;
@@ -53,6 +54,7 @@ interface EintragTableProps {
 
 export const EintragTable: React.FC<EintragTableProps> = memo(({
   eintraege,
+  jaegerProfiles = [],
   onEdit,
   onDelete,
   onApprove,
@@ -79,8 +81,14 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
   const touchStartXRef = useRef<number>(0);
   const touchStartYRef = useRef<number>(0);
   const isSwipingRef = useRef(false);
+  const jaegerNameById = useMemo(
+    () => new Map(jaegerProfiles.map(profile => [profile.id, profile.displayName])),
+    [jaegerProfiles]
+  );
 
   const isVisible = (id: ColumnId) => visibleColumns.includes(id);
+  const getDisplayJaegerName = (eintrag: Eintrag) =>
+    (eintrag.jaegerId ? jaegerNameById.get(eintrag.jaegerId) : undefined) || eintrag.jaeger;
 
   const toggleColumn = (id: ColumnId) => {
     const col = COLUMNS.find(c => c.id === id);
@@ -227,6 +235,10 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
         aValue = a.gewicht ? Number(a.gewicht) : 0;
         bValue = b.gewicht ? Number(b.gewicht) : 0;
       }
+      if (sortColumn === 'jaeger') {
+        aValue = getDisplayJaegerName(a);
+        bValue = getDisplayJaegerName(b);
+      }
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         const cmp = aValue.localeCompare(bValue, 'de', { numeric: true });
         return sortDirection === 'asc' ? cmp : -cmp;
@@ -236,7 +248,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
       }
       return 0;
     });
-  }, [eintraege, sortColumn, sortDirection]);
+  }, [eintraege, getDisplayJaegerName, sortColumn, sortDirection]);
 
   const selectedMenuEintrag = useMemo(
     () => eintraege.find(eintrag => eintrag.id === openActionMenuId),
@@ -393,7 +405,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                     </td>
                   )}
                   {isVisible('gewicht') && <td className="px-4 py-3 text-center text-sm">{eintrag.gewicht || '-'}</td>}
-                  {isVisible('jaeger') && <td className="px-4 py-3 text-sm">{eintrag.jaeger}</td>}
+                  {isVisible('jaeger') && <td className="px-4 py-3 text-sm">{getDisplayJaegerName(eintrag)}</td>}
                   {isVisible('ort') && <td className="px-4 py-3 text-sm">{eintrag.ort || '-'}</td>}
                   {isVisible('bemerkung') && <td className="px-4 py-3 text-sm">{sanitizeHtml(eintrag.bemerkung || '')}</td>}
                   {isVisible('wildursprungsschein') && <td className="px-4 py-3 text-sm">{eintrag.wildursprungsschein || '-'}</td>}
@@ -528,10 +540,10 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                           {eintrag.ablehnungsGrund}
                         </p>
                       )}
-                      {eintrag.jaeger && (
+                      {getDisplayJaegerName(eintrag) && (
                         <div className="flex gap-2 text-sm">
                           <span className="text-gray-400 shrink-0 w-24">Jäger</span>
-                          <span className="text-gray-700">{eintrag.jaeger}</span>
+                          <span className="text-gray-700">{getDisplayJaegerName(eintrag)}</span>
                         </div>
                       )}
                       {eintrag.ort && (

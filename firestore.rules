@@ -8,6 +8,25 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
 
+    function isAdmin() {
+      return request.auth != null && getUserData().role == 'admin';
+    }
+
+    function isOwnUser(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function userDistrictFromRequestOrResource() {
+      return request.resource.data.get('jagdbezirkId', resource.data.get('jagdbezirkId', ''));
+    }
+
+    function getAssignedJaegerId(jagdbezirkId) {
+      let assignment = get(/databases/$(database)/documents/jagdbezirke/$(jagdbezirkId)/userAssignments/$(request.auth.uid));
+      return assignment.exists()
+        ? assignment.data.jaegerId
+        : getUserData().get('jaegerId', '');
+    }
+
     // Validate entry data structure and content
     function isValidEntry() {
       let data = request.resource.data;
@@ -19,6 +38,7 @@ service cloud.firestore {
         && data.wildart.size() <= 100
         && data.userId is string
         && data.jagdbezirkId is string
+        && (!data.keys().hasAny(['jaegerId']) || data.jaegerId is string)
         && (!data.keys().hasAny(['gewicht']) || data.gewicht is string)
         && (!data.keys().hasAny(['einnahmen']) || data.einnahmen is string)
         && (!data.keys().hasAny(['ausgaben']) || data.ausgaben is string)
@@ -34,21 +54,27 @@ service cloud.firestore {
     // Users can read/update their own profile
     // Admins can manage users in their own Jagdbezirk
     match /users/{userId} {
-      allow read: if request.auth.uid == userId;
-      allow update: if request.auth.uid == userId;
+      allow read: if isOwnUser(userId);
       // Admin: read all users (filtered by jagdbezirkId in app)
-      allow read: if request.auth != null && getUserData().role == 'admin';
+      allow read: if isAdmin();
       // Admin: create user profile for their own jagdbezirk
-      allow create: if request.auth != null &&
-                    getUserData().role == 'admin' &&
+      allow create: if isAdmin() &&
                     getUserData().jagdbezirkId == request.resource.data.jagdbezirkId;
-      // Admin: update role of users in their own jagdbezirk
-      allow update: if request.auth != null &&
-                    getUserData().role == 'admin' &&
-                    getUserData().jagdbezirkId == resource.data.jagdbezirkId;
+      // Users may update their own display data but not role, district, or jaeger assignment.
+      // Admins may update any user in their own Jagdbezirk.
+      allow update: if
+                    (
+                      isOwnUser(userId) &&
+                      request.resource.data.role == resource.data.role &&
+                      request.resource.data.jagdbezirkId == resource.data.jagdbezirkId &&
+                      request.resource.data.get('jaegerId', '') == resource.data.get('jaegerId', '')
+                    ) ||
+                    (
+                      isAdmin() &&
+                      getUserData().jagdbezirkId == userDistrictFromRequestOrResource()
+                    );
       // Admin: deactivate (delete) users in their own jagdbezirk
-      allow delete: if request.auth != null &&
-                    getUserData().role == 'admin' &&
+      allow delete: if isAdmin() &&
                     getUserData().jagdbezirkId == resource.data.jagdbezirkId;
     }
 
@@ -57,7 +83,18 @@ service cloud.firestore {
       // Any user in the district can read its metadata
     allow read: if request.auth != null && getUserData().jagdbezirkId == jagdbezirkId;
       // Only admins can modify the district (e.g. add hunters later)
-    allow write: if request.auth != null && getUserData().role == 'admin';
+    allow write: if isAdmin();
+
+      match /jaeger/{jaegerId} {
+        allow read: if request.auth != null && getUserData().jagdbezirkId == jagdbezirkId;
+        allow write: if isAdmin() && getUserData().jagdbezirkId == jagdbezirkId;
+      }
+
+      match /userAssignments/{userId} {
+        allow read: if (request.auth != null && request.auth.uid == userId && getUserData().jagdbezirkId == jagdbezirkId) ||
+                      (isAdmin() && getUserData().jagdbezirkId == jagdbezirkId);
+        allow write: if isAdmin() && getUserData().jagdbezirkId == jagdbezirkId;
+      }
     }
 
     // Entries within a Jagdbezirk
@@ -71,34 +108,46 @@ service cloud.firestore {
              resource.data.userId == request.auth.uid;
 
       // Allow create if user belongs to the district and sets their own userId
-      // Users must set status='pending'; admins may set status='approved'
+      // Users must set status='pending' and their fixed jaegerId; admins may set status='approved'
     allow create: if request.auth != null &&
              getUserData().jagdbezirkId == jagdbezirkId &&
              request.resource.data.userId == request.auth.uid &&
              isValidEntry() &&
-             (getUserData().role == 'admin' || request.resource.data.get('status', 'pending') == 'pending');
+             (
+               isAdmin() ||
+               (
+                 getAssignedJaegerId(jagdbezirkId) is string &&
+                 getAssignedJaegerId(jagdbezirkId).size() > 0 &&
+                 request.resource.data.get('status', 'pending') == 'pending' &&
+                 request.resource.data.get('jaegerId', '') == getAssignedJaegerId(jagdbezirkId)
+               )
+             );
 
       // Allow update if user is admin OR owns the entry
       // Only admins may change status to 'approved' or 'rejected', or write ablehnungsGrund
     allow update: if request.auth != null &&
              getUserData().jagdbezirkId == jagdbezirkId &&
-             (getUserData().role == 'admin' || resource.data.userId == request.auth.uid) &&
+             (isAdmin() || resource.data.userId == request.auth.uid) &&
              isValidEntry() &&
-             (getUserData().role == 'admin' ||
-              (request.resource.data.get('status', 'pending') != 'approved' &&
-               request.resource.data.get('status', 'pending') != 'rejected' &&
-               !request.resource.data.keys().hasAny(['ablehnungsGrund'])));
+             (isAdmin() ||
+              (
+                request.resource.data.get('status', 'pending') != 'approved' &&
+                request.resource.data.get('status', 'pending') != 'rejected' &&
+                !request.resource.data.keys().hasAny(['ablehnungsGrund']) &&
+                request.resource.data.userId == request.auth.uid &&
+                request.resource.data.get('jaegerId', '') == getAssignedJaegerId(jagdbezirkId)
+              ));
 
       // Allow delete if user is admin OR owns the entry (no data validation needed)
     allow delete: if request.auth != null &&
              getUserData().jagdbezirkId == jagdbezirkId &&
-             (getUserData().role == 'admin' || resource.data.userId == request.auth.uid);
+             (isAdmin() || resource.data.userId == request.auth.uid);
 
       // Änderungsverlauf – nur Admin kann lesen, History-Einträge sind unveränderlich
       match /history/{historyId} {
         allow read: if request.auth != null &&
                  getUserData().jagdbezirkId == jagdbezirkId &&
-                 getUserData().role == 'admin';
+                 isAdmin();
         allow create: if request.auth != null &&
                  getUserData().jagdbezirkId == jagdbezirkId &&
                  request.resource.data.keys().hasAll(['timestamp', 'changedByUid', 'changedByName', 'action']) &&

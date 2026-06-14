@@ -10,6 +10,7 @@ export interface Eintrag {
   bemerkung: string;
   wildursprungsschein: string;
   jaeger: string;
+  jaegerId?: string;
   ort: string;
   einnahmen: string;
   notizen: string;
@@ -65,7 +66,7 @@ export interface Wildarten {
 
 export interface FilterState {
   wildart: string;
-  jaeger: string;
+  jaegerId: string;
   jahr: string;
   kategorie: string;
   jagdjahr: string; // Hunting year filter like "2025/2026" or "" for all
@@ -82,6 +83,14 @@ export type Role = 'admin' | 'user';
 export interface Jagdbezirk {
   id: string;
   name: string;
+}
+
+export interface JaegerProfile {
+  id: string;
+  displayName: string;
+  jagdbezirkId: string;
+  active?: boolean;
+  entryCount?: number;
 }
 
 export interface EintragHistory {
@@ -106,5 +115,7 @@ export interface UserData {
   displayName: string | null;
   jagdbezirkId: string;
   jagdbezirk?: Jagdbezirk;
+  jaegerId?: string;
+  jaegerProfile?: JaegerProfile | null;
   role: Role;
 }
