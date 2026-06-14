@@ -83,7 +83,7 @@ const App = () => {
   const { filter, setFilter, filteredEintraege } = useFilter(
     currentData.eintraege
   );
-  const statistiken = useStatistiken(filteredEintraege);
+  const statistikenData = useStatistiken(filteredEintraege, filter.jagdjahr);
 
   // Calculate available hunting years from all entries
   const availableJagdjahre = useMemo(() =>
@@ -407,7 +407,7 @@ const App = () => {
                 } />
                 <Route path="/stats" element={
                   <Suspense fallback={<SkeletonStatistik />}>
-                    <StatistikPanel stats={statistiken} />
+                    <StatistikPanel data={statistikenData} />
                   </Suspense>
                 } />
                 <Route path="/legende" element={<FachbegriffeLegende />} />

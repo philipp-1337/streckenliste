@@ -46,6 +46,12 @@ export interface AllStats {
   [key: string]: WildartStats;
 }
 
+export interface MonatStat {
+  name: string;
+  anzahl: number;
+  [key: string]: string | number;
+}
+
 export interface WildartInfo {
   kategorie: string;
   altersklasse: string;
