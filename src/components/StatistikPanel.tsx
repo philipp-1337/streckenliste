@@ -167,21 +167,35 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
                 cursor={{ fill: '#f3f4f6' }}
               />
               {isAverage && showYearLines && <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', paddingBottom: '10px' }} />}
-              <Bar 
-                dataKey="anzahl" 
-                name={isAverage ? "Ø Durchschnitt" : "Abschüsse"}
-                radius={[4, 4, 0, 0]}
-                barSize={isAverage ? 32 : undefined}
-                animationDuration={300}
-              >
-                {monatsStats.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={(entry.anzahl as number) > 0 ? '#16a34a' : '#d1d5db'}
-                    className="transition-all duration-300 hover:opacity-80"
-                  />
-                ))}
-              </Bar>
+              {!showYearLines ? (
+                <Bar 
+                  dataKey="anzahl" 
+                  name={isAverage ? "Ø Durchschnitt" : "Abschüsse"}
+                  radius={[4, 4, 0, 0]}
+                  barSize={isAverage ? 32 : undefined}
+                  animationDuration={300}
+                >
+                  {monatsStats.map((entry, index) => (
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={(entry.anzahl as number) > 0 ? '#16a34a' : '#d1d5db'}
+                      className="transition-all duration-300 hover:opacity-80"
+                    />
+                  ))}
+                </Bar>
+              ) : (
+                <Line
+                  type="monotone"
+                  dataKey="anzahl"
+                  name="Ø Durchschnitt"
+                  stroke="#16a34a"
+                  strokeWidth={3}
+                  strokeDasharray="6 6"
+                  dot={{ r: 4, fill: "#16a34a", strokeWidth: 0 }}
+                  activeDot={{ r: 6, strokeWidth: 0 }}
+                  animationDuration={300}
+                />
+              )}
               {isAverage && showYearLines && availableJahre?.map((jahr, idx) => (
                 <Line 
                   key={jahr}

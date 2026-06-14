@@ -47,19 +47,19 @@ export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount })
   const navWidth = `clamp(280px, 90vw, ${tabs.length * 82}px)`;
 
   return (
-    <nav>
-      <div
+    <div className="fixed inset-0 pointer-events-none z-[1001]">
+      <nav
         style={{ width: navWidth }}
         className="
-        fixed left-1/2 -translate-x-1/2 transform-gpu will-change-transform bottom-safe-floating
+        absolute left-1/2 -translate-x-1/2 bottom-safe-floating
         h-16
         glass-bg glass-shadow rounded-pill
         backdrop-blur-xl backdrop-saturate-[180%]
         flex justify-around items-center
-        z-[1001] px-2 py-2 sm:px-1.5 sm:py-1.5
-        animate-slide-up
-      ">
-
+        px-2 py-2 sm:px-1.5 sm:py-1.5
+        animate-slide-up pointer-events-auto
+        "
+      >
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = location.pathname === tab.path;
@@ -107,7 +107,7 @@ export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount })
           );
         })}
 
-      </div>
-    </nav>
+      </nav>
+    </div>
   );
 }
