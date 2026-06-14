@@ -120,7 +120,7 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
           
           <div className="flex items-center justify-end gap-3 shrink-0 ml-3">
             {isAverage && availableJahre?.length > 0 && (
-              <label className="hidden sm:flex items-center gap-2 text-sm text-green-800 cursor-pointer hover:opacity-80 transition-opacity select-none bg-green-50 px-3 py-1.5 rounded-lg border border-green-100 shrink-0">
+              <label className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm text-green-800 cursor-pointer hover:opacity-80 transition-opacity select-none bg-green-50 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-green-100 shrink-0">
                 <input 
                   type="checkbox" 
                   className="w-4 h-4 rounded border-green-600 text-green-700 focus:ring-green-600 cursor-pointer shrink-0"
@@ -172,8 +172,7 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
                 name={isAverage ? "Ø Durchschnitt" : "Abschüsse"}
                 radius={[4, 4, 0, 0]}
                 barSize={isAverage ? 32 : undefined}
-                animationDuration={1500}
-                animationEasing="ease-out"
+                animationDuration={300}
               >
                 {monatsStats.map((entry, index) => (
                   <Cell 
@@ -193,7 +192,7 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
                   strokeWidth={2}
                   dot={{ r: 3, strokeWidth: 1 }}
                   activeDot={{ r: 5, strokeWidth: 0 }}
-                  animationDuration={2000}
+                  animationDuration={300}
                 />
               ))}
             </ComposedChart>
