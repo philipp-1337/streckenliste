@@ -68,7 +68,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => {
   const { currentUser } = useAuth();
   const { wildartStats, monatsStats, isAverage, availableJahre } = data;
-  const [showYearLines, setShowYearLines] = useState(true);
+  const [showYearLines, setShowYearLines] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 768;
+    }
+    return true;
+  });
 
   const maxVal = useMemo(() => {
     let max = Math.max(...monatsStats.map(m => (m.anzahl as number) || 0), 10);
@@ -86,10 +91,11 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
       {/* Monthly Chart */}
       <div className="bg-white rounded-2xl shadow-sm border border-green-100 p-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
-          <div className="flex items-center gap-3">
-            <h2 className="text-xl font-bold text-green-800 flex items-center gap-2.5">
-              <CalendarDays size={20} strokeWidth={2} />
-              Abschüsse pro Monat
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <h2 className="text-lg sm:text-xl font-bold text-green-800 flex items-center gap-2 sm:gap-2.5">
+              <CalendarDays size={20} strokeWidth={2} className="shrink-0" />
+              <span className="hidden sm:inline">Abschüsse pro Monat</span>
+              <span className="sm:hidden">Monatsverlauf</span>
             </h2>
             {isAverage && (
               <span className="bg-green-100 text-green-800 text-[10px] sm:text-xs font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full whitespace-nowrap">
