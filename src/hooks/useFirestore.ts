@@ -110,17 +110,29 @@ export const useFirestore = () => {
     }
 
     try {
-      let q;
       if (!isAdmin(currentUser)) {
-        q = query(streckenCollectionRef, where("userId", "==", currentUser.uid));
+        const q1 = query(streckenCollectionRef, where("userId", "==", currentUser.uid));
+        const [snap1, snap2] = await Promise.all([
+          getDocs(q1),
+          currentUser.jaegerId 
+            ? getDocs(query(streckenCollectionRef, where("jaegerId", "==", currentUser.jaegerId)))
+            : Promise.resolve({ docs: [] })
+        ]);
+        
+        const map = new Map<string, Eintrag>();
+        snap1.docs.forEach(doc => map.set(doc.id, { ...doc.data(), id: doc.id } as Eintrag));
+        snap2.docs.forEach(doc => map.set(doc.id, { ...doc.data(), id: doc.id } as Eintrag));
+        
+        const geladeneEintraege = Array.from(map.values());
+        setEintraege(geladeneEintraege);
+        console.log('🔄 Manual fetch completed:', geladeneEintraege.length, 'entries');
       } else {
-        q = query(streckenCollectionRef, orderBy("datum", "asc"));
+        const q = query(streckenCollectionRef, orderBy("datum", "asc"));
+        const data = await getDocs(q);
+        const geladeneEintraege = data.docs.map(doc => ({ ...doc.data(), id: doc.id } as Eintrag));
+        setEintraege(geladeneEintraege);
+        console.log('🔄 Manual fetch completed:', geladeneEintraege.length, 'entries');
       }
-
-      const data = await getDocs(q);
-      const geladeneEintraege = data.docs.map(doc => ({ ...doc.data(), id: doc.id } as Eintrag));
-      setEintraege(geladeneEintraege);
-      console.log('🔄 Manual fetch completed:', geladeneEintraege.length, 'entries');
     } catch (err) {
       console.error("Error in manual fetch:", err);
     }
@@ -137,36 +149,66 @@ export const useFirestore = () => {
     setLoading(true);
     setError(null);
 
-    let q;
-    // If user is not an admin, only fetch their own entries
-    // No orderBy here — avoids composite index requirement; table sorts client-side
+    let unsubscribes: (() => void)[] = [];
+
+    const handleSnapshotError = (err: Error) => {
+      const errorMessage = "Fehler beim Laden der Daten";
+      setError(errorMessage);
+      toast.error(errorMessage);
+      console.error("Error listening to Firestore:", err);
+      setLoading(false);
+    };
+
     if (!isAdmin(currentUser)) {
-      q = query(streckenCollectionRef, where("userId", "==", currentUser.uid));
+      const q1 = query(streckenCollectionRef, where("userId", "==", currentUser.uid));
+      const map1 = new Map<string, Eintrag>();
+      const map2 = new Map<string, Eintrag>();
+
+      const updateEintraege = () => {
+        const merged = new Map([...map1, ...map2]);
+        const geladeneEintraege = Array.from(merged.values());
+        setEintraege(geladeneEintraege);
+        setLoading(false);
+      };
+
+      const unsub1 = onSnapshot(q1, (snapshot) => {
+        map1.clear();
+        snapshot.docs.forEach(doc => map1.set(doc.id, { ...doc.data(), id: doc.id } as Eintrag));
+        updateEintraege();
+        console.log('📡 onSnapshot 1 update:', map1.size, 'entries');
+      }, (err) => {
+        console.error("Query 1 (userId) failed:", err);
+        handleSnapshotError(err);
+      });
+      unsubscribes.push(unsub1);
+
+      if (currentUser.jaegerId) {
+        const q2 = query(streckenCollectionRef, where("jaegerId", "==", currentUser.jaegerId));
+        const unsub2 = onSnapshot(q2, (snapshot) => {
+          map2.clear();
+          snapshot.docs.forEach(doc => map2.set(doc.id, { ...doc.data(), id: doc.id } as Eintrag));
+          updateEintraege();
+          console.log('📡 onSnapshot 2 update:', map2.size, 'entries');
+        }, (err) => {
+          console.error("Query 2 (jaegerId) failed:", err);
+          handleSnapshotError(err);
+        });
+        unsubscribes.push(unsub2);
+      }
     } else {
       // Admin gets all entries
-      q = query(streckenCollectionRef, orderBy("datum", "asc"));
-    }
-
-    // Set up real-time listener
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot) => {
+      const q = query(streckenCollectionRef, orderBy("datum", "asc"));
+      const unsub = onSnapshot(q, (snapshot) => {
         const geladeneEintraege = snapshot.docs.map(doc => ({ 
           ...doc.data(), 
           id: doc.id 
         } as Eintrag));
         setEintraege(geladeneEintraege);
         setLoading(false);
-        console.log('📡 onSnapshot update:', geladeneEintraege.length, 'entries');
-      },
-      (err) => {
-        const errorMessage = "Fehler beim Laden der Daten";
-        setError(errorMessage);
-        toast.error(errorMessage);
-        console.error("Error listening to Firestore:", err);
-        setLoading(false);
-      }
-    );
+        console.log('📡 onSnapshot admin update:', geladeneEintraege.length, 'entries');
+      }, handleSnapshotError);
+      unsubscribes.push(unsub);
+    }
 
     // iOS/Safari PWA Fix: Re-activate listener when page becomes visible
     // This handles cases where iOS pauses background listeners
@@ -191,7 +233,7 @@ export const useFirestore = () => {
 
     // Cleanup function to unsubscribe when component unmounts or dependencies change
     return () => {
-      unsubscribe();
+      unsubscribes.forEach(unsub => unsub());
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [streckenCollectionRef, currentUser, manualFetch]);
