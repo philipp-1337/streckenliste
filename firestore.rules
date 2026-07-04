@@ -21,9 +21,9 @@ service cloud.firestore {
     }
 
     function getAssignedJaegerId(jagdbezirkId) {
-      let assignment = get(/databases/$(database)/documents/jagdbezirke/$(jagdbezirkId)/userAssignments/$(request.auth.uid));
-      return assignment.exists()
-        ? assignment.data.get('jaegerId', '')
+      let assignmentPath = /databases/$(database)/documents/jagdbezirke/$(jagdbezirkId)/userAssignments/$(request.auth.uid);
+      return exists(assignmentPath)
+        ? get(assignmentPath).data.get('jaegerId', '')
         : getUserData().get('jaegerId', '');
     }
 
