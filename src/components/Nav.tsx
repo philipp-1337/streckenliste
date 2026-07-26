@@ -1,4 +1,4 @@
-import { BarChart3, HomeIcon, LogOutIcon, Users } from 'lucide-react';
+import { BarChart3, HomeIcon, LogOutIcon, SettingsIcon, Users } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { UserData } from '@types';
 
@@ -35,6 +35,12 @@ export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount })
         onClick: () => navigate('/users'),
       },
     ] : []),
+    {
+      path: '/einstellungen',
+      label: 'Einstellungen',
+      icon: SettingsIcon,
+      onClick: () => navigate('/einstellungen'),
+    },
     {
       path: '/logout',
       label: 'Logout',

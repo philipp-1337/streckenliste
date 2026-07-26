@@ -80,6 +80,8 @@ export interface SortConfig {
 
 export type Role = 'admin' | 'user';
 
+export type PushLevel = 'wichtig' | 'status' | 'alle';
+
 export interface Jagdbezirk {
   id: string;
   name: string;
@@ -118,4 +120,5 @@ export interface UserData {
   jaegerId?: string;
   jaegerProfile?: JaegerProfile | null;
   role: Role;
+  pushLevel?: PushLevel;
 }
