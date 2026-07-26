@@ -11,6 +11,9 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'prompt',
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {
         name: 'Streckenliste',
@@ -38,27 +41,13 @@ export default defineConfig({
           }
         ]
       },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-        // Prevent the SW from intercepting blob: URL navigations — iOS Safari
-        // throws WebKitBlobResource error 1 when the SW serves index.html for them.
-        navigateFallbackDenylist: [/^blob:/],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 Jahr
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          }
-        ]
+      // Der eigene Service Worker (src/sw.ts) registriert bewusst keine
+      // NavigationRoute. Dadurch kann der iOS-WebKitBlobResource-Fehler beim
+      // PDF-Export nicht auftreten, für den die alte generateSW-Config eine
+      // navigateFallbackDenylist brauchte. SPA-Routing übernimmt online die
+      // Hosting-Rewrite-Regel.
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}']
       }
     })
   ],
