@@ -40,5 +40,8 @@
     }
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/types/index.ts"],
-  "exclude": ["src/sw.ts"]
+  // Tests laufen über bun test, das sie selbst transpiliert – die bun:test-Typen
+  // gehören daher nicht in den App-Typecheck. sw.ts braucht die WebWorker-Lib
+  // statt DOM und hat sein eigenes Projekt (tsconfig.sw.json).
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/sw.ts"]
 }

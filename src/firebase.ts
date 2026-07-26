@@ -4,6 +4,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 import { getPerformance } from "firebase/performance";
 import { getAnalytics, isSupported, type Analytics } from "firebase/analytics";
+import { getFunctions } from "firebase/functions";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -18,12 +19,18 @@ export const firebaseConfig = {
   appId: "1:980254797017:web:a9f21e1f502cbfbd54a2c8"
 };
 
+// Öffentlicher VAPID-Key für Web Push (Firebase Console → Cloud Messaging →
+// Web Push certificates). Öffentlich und im Bundle unkritisch, daher hier
+// neben firebaseConfig statt in einer .env-Datei.
+export const VAPID_PUBLIC_KEY = "HIER_DEN_VAPID_KEY_AUS_DER_FIREBASE_CONSOLE_EINSETZEN";
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
 // Initialize Cloud Firestore and get a reference to the service
 const db = getFirestore(app);
 const auth = getAuth(app);
+const functions = getFunctions(app, "europe-west3");
 
 // Initialize Performance Monitoring
 const perf = getPerformance(app);
@@ -50,4 +57,4 @@ enableIndexedDbPersistence(db)
     }
   });
 
-export { db, auth, perf, analytics };
+export { app, db, auth, functions, perf, analytics };
