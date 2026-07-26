@@ -50,6 +50,7 @@ interface EintragTableProps {
   onShowHistory?: (eintrag: Eintrag) => void;
   currentUser: UserData | null;
   mobileViewMode?: 'cards' | 'table';
+  highlightId?: string;
 }
 
 export const EintragTable: React.FC<EintragTableProps> = memo(({
@@ -63,6 +64,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
   onShowHistory,
   currentUser,
   mobileViewMode = 'table',
+  highlightId,
 }) => {
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [sortColumn, setSortColumn] = useState<string>('');
@@ -85,6 +87,15 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
     () => new Map(jaegerProfiles.map(profile => [profile.id, profile.displayName])),
     [jaegerProfiles]
   );
+
+  // Ein Notification-Klick landet auf der Übersicht mit ?eintrag=<id>. Ohne
+  // Scroll müsste der Nutzer die Zeile in bis zu mehreren hundert Einträgen
+  // selbst finden.
+  useEffect(() => {
+    if (!highlightId) return;
+    const element = document.querySelector(`[data-eintrag-id="${highlightId}"]`);
+    element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [highlightId]);
 
   const isVisible = (id: ColumnId) => visibleColumns.includes(id);
   const getDisplayJaegerName = (eintrag: Eintrag) =>
@@ -368,7 +379,11 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
               const isPending = eintrag.status === 'pending';
               const isRejected = eintrag.status === 'rejected';
               return (
-                <tr key={eintrag.id} className={`hover:bg-gray-50 ${isPending ? 'bg-amber-50' : ''} ${isRejected ? 'bg-rose-50' : ''}`}>
+                <tr
+                  key={eintrag.id}
+                  data-eintrag-id={eintrag.id}
+                  className={`hover:bg-gray-50 ${isPending ? 'bg-amber-50' : ''} ${isRejected ? 'bg-rose-50' : ''} ${eintrag.id === highlightId ? 'ring-2 ring-inset ring-green-600' : ''}`}
+                >
                   {isVisible('nr') && <td className={`px-4 py-3 text-sm sticky left-0 z-[1] ${isPending ? 'bg-amber-50' : isRejected ? 'bg-rose-50' : 'bg-white'}`}>{index + 1}</td>}
                   {isVisible('datum') && (
                     <td className={`px-4 py-3 text-sm${isVisible('nr') ? ` left-14 z-[1] ${isPending ? 'bg-amber-50' : isRejected ? 'bg-rose-50' : 'bg-white'}` : ''}`}>
@@ -457,7 +472,11 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
           const canAct = currentUser?.role === 'admin' || currentUser?.uid === eintrag.userId;
 
           return (
-            <div key={eintrag.id} className="relative overflow-hidden">
+            <div
+              key={eintrag.id}
+              data-eintrag-id={eintrag.id}
+              className={`relative overflow-hidden ${eintrag.id === highlightId ? 'ring-2 ring-green-600 rounded-2xl' : ''}`}
+            >
               {/* Swipe action strip */}
               {canAct && (
                 <div className={`absolute inset-y-0 right-0 w-24 flex items-center justify-center gap-2 transition-opacity duration-150 ${isSwiped ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
