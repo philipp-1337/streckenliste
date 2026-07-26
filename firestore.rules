@@ -3,6 +3,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Push-Geräte werden ausschließlich serverseitig über Cloud Functions
+    // verwaltet. Kein Client darf Tokens lesen oder schreiben.
+    match /push_devices/{deviceId} {
+      allow read, write: if false;
+    }
+
     // Helper function to get the current user's data from the /users collection
     function getUserData() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
