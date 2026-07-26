@@ -22,7 +22,7 @@ export const firebaseConfig = {
 // Öffentlicher VAPID-Key für Web Push (Firebase Console → Cloud Messaging →
 // Web Push certificates). Öffentlich und im Bundle unkritisch, daher hier
 // neben firebaseConfig statt in einer .env-Datei.
-export const VAPID_PUBLIC_KEY = "HIER_DEN_VAPID_KEY_AUS_DER_FIREBASE_CONSOLE_EINSETZEN";
+export const VAPID_PUBLIC_KEY = "BNqatKh2d5H_Wa6z2M1p9IyPvb4_-liTgvdG052_yWu695c6306ftZ7kOCYfoDzplegiNHKWwJSSAmnxGSmqH1w";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
