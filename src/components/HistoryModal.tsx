@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Clock, CheckCircle2, XCircle, RotateCcw, PlusCircle, Edit2 } from 'lucide-react';
+import { X, Clock, CheckCircle2, XCircle, RotateCcw, PlusCircle, Edit2, Trash2 } from 'lucide-react';
 import type { EintragHistory } from '@types';
 
 interface HistoryModalProps {
@@ -16,6 +16,7 @@ const ACTION_CONFIG: Record<EintragHistory['action'], { label: string; color: st
   approved:         { label: 'Freigegeben',             color: 'text-green-600', Icon: CheckCircle2 },
   rejected:         { label: 'Abgelehnt',               color: 'text-rose-600',  Icon: XCircle      },
   reset_to_pending: { label: 'Zurück auf Ausstehend',   color: 'text-gray-500',  Icon: RotateCcw    },
+  deleted:          { label: 'Gelöscht',                color: 'text-rose-700',  Icon: Trash2       },
 };
 
 export const HistoryModal: React.FC<HistoryModalProps> = ({ eintragId, wildart, datum, onClose, getHistory }) => {

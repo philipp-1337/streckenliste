@@ -98,7 +98,7 @@ export interface EintragHistory {
   timestamp: import('firebase/firestore').Timestamp;
   changedByUid: string;
   changedByName: string;
-  action: 'created' | 'updated' | 'approved' | 'rejected' | 'reset_to_pending';
+  action: 'created' | 'updated' | 'approved' | 'rejected' | 'reset_to_pending' | 'deleted';
   previousData?: Partial<Omit<Eintrag, 'id'>>;
   changedFields?: Array<{
     field: string;
