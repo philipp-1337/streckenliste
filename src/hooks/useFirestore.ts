@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import { db } from '../firebase';
-import { collection, getDocs, addDoc, deleteDoc, doc, query, orderBy, where, onSnapshot, writeBatch, serverTimestamp, deleteField } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, query, orderBy, where, onSnapshot, writeBatch, serverTimestamp, deleteField } from 'firebase/firestore';
 import type { Eintrag, EintragHistory } from '@types';
 import useAuth from '@hooks/useAuth';
 import { isUserAuthenticated, canPerformWriteOperation, isAdmin, getAuthErrorMessage } from '@utils/validation';
@@ -440,7 +440,24 @@ export const useFirestore = () => {
     
     try {
       const eintragDoc = doc(streckenCollectionRef, id);
-      await deleteDoc(eintragDoc);
+      const existing = eintraege.find(e => e.id === id);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id: _id, ...previousDataClean } = existing ?? {} as Eintrag;
+
+      const batch = writeBatch(db);
+      // Das History-Dokument wird vor dem Löschen im selben Batch geschrieben:
+      // danach ist der Eintrag weg, und previousData ist die einzige Quelle
+      // für Kontext – sowohl für den Änderungsverlauf als auch für den Push-Trigger.
+      const historyRef = doc(collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/eintraege/${id}/history`));
+      batch.set(historyRef, makeHistoryEntry(
+        'deleted',
+        currentUser.uid,
+        currentUser.displayName ?? currentUser.email ?? 'Unbekannt',
+        existing ? previousDataClean as Partial<Omit<Eintrag, 'id'>> : undefined
+      ));
+      batch.delete(eintragDoc);
+
+      await batch.commit();
       // onSnapshot will automatically update eintraege
     } catch (err) {
       const errorMsg = "Fehler beim Löschen";
@@ -449,7 +466,7 @@ export const useFirestore = () => {
       console.error('Error deleting entry:', err);
       throw err;
     }
-  }, [streckenCollectionRef, currentUser]);
+  }, [streckenCollectionRef, currentUser, eintraege]);
 
   const importEintraege = useCallback(async (eintraege: Omit<Eintrag, 'id' | 'userId' | 'jagdbezirkId'>[]) => {
     const errorMessage = getAuthErrorMessage(currentUser);
