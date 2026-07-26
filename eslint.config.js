@@ -7,7 +7,7 @@ import buttonRequiresCursorPointer from "./eslint-rules/button-requires-cursor-p
 import inputRequiresTextBase from "./eslint-rules/input-requires-text-base.js";
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  { ignores: ["dist", "build", "functions/lib"] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
