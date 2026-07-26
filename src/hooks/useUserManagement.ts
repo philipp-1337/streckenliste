@@ -61,7 +61,12 @@ export const useUserManagement = () => {
       );
       const loadedUsers = usersSnapshot.docs
         .map(d => {
-          const user = d.data() as UserData;
+          // Die Dokument-ID ist die maßgebliche Auth-UID – niemals das uid-Feld,
+          // das bei manuell angelegten Dokumenten auf einen anderen Nutzer zeigen
+          // kann. Der uid-Wert von hier landet in updateUserRole, updateUserName,
+          // updateUserJaeger und deleteUser und würde sonst fremde Dokumente treffen.
+          // Gleiche Absicherung wie in AuthProvider.tsx.
+          const user = { ...(d.data() as UserData), uid: d.id };
           const assignedJaegerId = assignmentMap.get(user.uid) ?? user.jaegerId ?? '';
           return {
             ...user,
