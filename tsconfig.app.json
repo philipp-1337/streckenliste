@@ -27,6 +27,7 @@
 
     /* --- Aliase hierhin --- */
     "paths": {
+      "@/*": ["./src/*"],
       "@utils/*": ["./src/utils/*"],
       "@components/*": ["./src/components/*"],
       "@hooks/*": ["./src/hooks/*"],
@@ -38,5 +39,6 @@
       "@constants/*": ["./src/constants/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "src/types/index.ts"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/types/index.ts"],
+  "exclude": ["src/sw.ts"]
 }
