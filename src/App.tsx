@@ -27,7 +27,7 @@ import { auth } from './firebase';
 import { db } from './firebase';
 import { signOut } from 'firebase/auth';
 import { collection, getDocs } from 'firebase/firestore';
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { getAvailableJagdjahre, getCurrentJagdjahr } from '@utils/jagdjahrUtils';
 
 const getDefaultFilterState = () => ({
@@ -52,6 +52,9 @@ const App = () => {
   const { currentUser, loading: userLoading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Ziel eines angetippten Push: die Übersicht hebt diesen Eintrag hervor.
+  const highlightId = searchParams.get('eintrag') ?? undefined;
 
   const [editingEntry, setEditingEntry] = useState<Eintrag | null>(null);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -469,6 +472,7 @@ const App = () => {
                           onShowHistory={handleShowHistory}
                           currentUser={currentUser}
                           mobileViewMode={mobileViewMode}
+                          highlightId={highlightId}
                         />
                       </>
                     )}
