@@ -3284,11 +3284,11 @@ Dann Einstellungen → Push-Benachrichtigungen aktivieren. Erwartung: Berechtigu
 
 - [ ] **Step 6: Registrierung serverseitig prüfen**
 
-```bash
-firebase firestore:documents:list push_devices --limit 5
-```
+Firebase Console → Firestore Database → Collection `push_devices`.
 
 Erwartung: ein Dokument mit der eigenen `userId`, korrektem `jagdbezirkId` und `platform: "ios"`.
+
+Die Collection ist per Rules für Clients gesperrt (`allow read, write: if false`); die Console liest mit Admin-Rechten und sieht sie trotzdem. Ein CLI-Kommando gibt es dafür nicht — `firebase firestore:documents:list` existiert in der Firebase CLI nicht (geprüft mit CLI 15.24.0).
 
 - [ ] **Step 7: Zustellung prüfen**
 
@@ -3316,11 +3316,7 @@ Stufe auf „Nur Wichtiges" stellen. Mit dem zweiten Account einen bestehenden E
 
 - [ ] **Step 10: Deaktivieren prüfen**
 
-Toggle ausschalten, dann prüfen:
-
-```bash
-firebase firestore:documents:list push_devices --limit 5
-```
+Toggle ausschalten, dann in der Firebase Console erneut die Collection `push_devices` ansehen.
 
 Erwartung: das eigene Dokument ist wirklich verschwunden. Danach mit dem zweiten Account einen Eintrag anlegen — es darf keine Push mehr kommen.
 
