@@ -15,6 +15,8 @@ import { Nav } from '@components/Nav';
 import { EintragForm } from '@components/EintragForm';
 import { EintragTable } from '@components/EintragTable';
 import { FachbegriffeLegende } from '@components/FachbegriffeLegende';
+import { PushSettings } from '@components/PushSettings';
+import { takePendingDeepLink } from '@/lib/pendingDeepLink';
 import { SkeletonTable, SkeletonStatistik } from '@components/SkeletonLoaders';
 import Spinner from '@components/Spinner';
 import PdfDownloadDialog from '@components/PdfDownloadDialog';
@@ -98,6 +100,20 @@ const App = () => {
     currentData.eintraege.filter(e => e.status === 'pending' || e.status === 'rejected').length,
     [currentData.eintraege]
   );
+
+  // iOS ignoriert die URL von clients.openWindow(), wenn die PWA aus dem
+  // vollständig geschlossenen Zustand startet, und öffnet immer die start_url.
+  // Der Service Worker legt das Ziel deshalb in IndexedDB ab; hier wird es
+  // einmalig nachgeholt, sobald der Nutzer geladen ist.
+  useEffect(() => {
+    if (!currentUser) return;
+    let cancelled = false;
+    void (async () => {
+      const path = await takePendingDeepLink();
+      if (!cancelled && path) navigate(path, { replace: true });
+    })();
+    return () => { cancelled = true; };
+  }, [currentUser, navigate]);
 
   useEffect(() => {
     if (!currentUser?.jagdbezirkId) {
@@ -475,6 +491,15 @@ const App = () => {
                   <Suspense fallback={<div className="p-4">Wird geladen...</div>}>
                     <UserManagement />
                   </Suspense>
+                } />
+
+                <Route path="/einstellungen" element={
+                  <>
+                    <h2 className="text-xl font-bold text-green-800 flex items-center gap-2.5 mb-4">
+                      Einstellungen
+                    </h2>
+                    <PushSettings />
+                  </>
                 } />
 
                 <Route path="/print" element={
