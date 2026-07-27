@@ -28,20 +28,22 @@ const ActionHandler: React.FC = () => {
   const mode = searchParams.get('mode');
   const oobCode = searchParams.get('oobCode');
 
+  // Fehlende/falsche URL-Parameter sind direkt ableitbar; nur das Ergebnis
+  // der asynchronen Code-Prüfung braucht State.
+  const paramsInvalid = mode !== 'resetPassword' || !oobCode;
+
   const [email, setEmail] = useState<string | null>(null);
-  const [verifying, setVerifying] = useState(true);
-  const [invalidCode, setInvalidCode] = useState(false);
+  const [verifying, setVerifying] = useState(!paramsInvalid);
+  const [verifyFailed, setVerifyFailed] = useState(false);
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
+  const invalidCode = paramsInvalid || verifyFailed;
+
   useEffect(() => {
-    if (mode !== 'resetPassword' || !oobCode) {
-      setInvalidCode(true);
-      setVerifying(false);
-      return;
-    }
+    if (mode !== 'resetPassword' || !oobCode) return;
 
     verifyPasswordResetCode(auth, oobCode)
       .then(email => {
@@ -49,7 +51,7 @@ const ActionHandler: React.FC = () => {
         setVerifying(false);
       })
       .catch(() => {
-        setInvalidCode(true);
+        setVerifyFailed(true);
         setVerifying(false);
       });
   }, [mode, oobCode]);

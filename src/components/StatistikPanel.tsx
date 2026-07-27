@@ -36,6 +36,13 @@ interface StatistikPanelProps {
   data: StatistikData;
 }
 
+interface TooltipEntry {
+  dataKey?: string | number;
+  color?: string;
+  name?: string | number;
+  value?: string | number;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -43,7 +50,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       <div className="bg-white/95 backdrop-blur-md border border-green-200 p-3 rounded-xl shadow-xl min-w-[150px]">
         <p className="font-semibold text-green-900 mb-2 border-b border-green-100 pb-1">{label}</p>
         <div className="space-y-1.5">
-          {payload.map((entry: any, index: number) => {
+          {payload.map((entry: TooltipEntry, index: number) => {
             const isBar = entry.dataKey === 'anzahl';
             const color = isBar ? '#16a34a' : entry.color;
             return (
@@ -102,11 +109,10 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
     }
   }, []);
 
-  useEffect(() => {
-    if (!isAverage) {
-      setShowYearLines(false);
-    }
-  }, [isAverage]);
+  // Jahreslinien gibt es nur in der Durchschnittsansicht; in der
+  // Einzeljahr-Ansicht bleibt die Checkbox-Einstellung erhalten, wirkt
+  // aber nicht.
+  const yearLinesActive = isAverage && showYearLines;
 
   const maxVal = useMemo(() => {
     let max = Math.max(...monatsStats.map(m => (m.anzahl as number) || 0), 10);
@@ -155,7 +161,7 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
             
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="p-2 text-green-700 hover:bg-green-50 rounded-lg transition-colors border border-transparent hover:border-green-100 shrink-0"
+              className="p-2 text-green-700 hover:bg-green-50 rounded-lg transition-colors border border-transparent hover:border-green-100 shrink-0 cursor-pointer"
               title={isFullscreen ? "Vollbild beenden" : "Vollbild öffnen"}
             >
               {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
@@ -188,8 +194,8 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
                 content={<CustomTooltip />} 
                 cursor={{ fill: '#f3f4f6' }}
               />
-              {isAverage && showYearLines && <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', paddingBottom: '10px' }} />}
-              {!showYearLines ? (
+              {yearLinesActive && <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', paddingBottom: '10px' }} />}
+              {!yearLinesActive ? (
                 <Bar 
                   dataKey="anzahl" 
                   name={isAverage ? "Ø Durchschnitt" : "Abschüsse"}
@@ -218,7 +224,7 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
                   animationDuration={300}
                 />
               )}
-              {isAverage && showYearLines && availableJahre?.map((jahr, idx) => (
+              {yearLinesActive && availableJahre?.map((jahr, idx) => (
                 <Line 
                   key={jahr}
                   type="monotone"

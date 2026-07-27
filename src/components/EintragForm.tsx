@@ -82,7 +82,10 @@ export const EintragForm: React.FC<EintragFormProps> = ({
         }
   });
 
-  // Watch form fields for dynamic updates
+  // Watch form fields for dynamic updates. react-hook-form ist für den
+  // React Compiler nicht optimierbar; die Komponente wird schlicht nicht
+  // kompiliert, funktioniert aber unverändert.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const watchedWildart = watch('wildart');
   const watchedKategorie = watch('kategorie');
   const watchedFachbegriff = watch('fachbegriff');

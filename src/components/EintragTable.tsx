@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useRef, useEffect } from 'react';
+import { memo, useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Spinner from '@components/Spinner';
 import { Edit, Trash2, Mars, Venus, ChevronUp, ChevronDown, ChevronsUpDown, Check, SlidersHorizontal, X, RotateCcw, Clock, MoreVertical } from 'lucide-react';
@@ -98,8 +98,10 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
   }, [highlightId]);
 
   const isVisible = (id: ColumnId) => visibleColumns.includes(id);
-  const getDisplayJaegerName = (eintrag: Eintrag) =>
-    (eintrag.jaegerId ? jaegerNameById.get(eintrag.jaegerId) : undefined) || eintrag.jaeger;
+  const getDisplayJaegerName = useCallback((eintrag: Eintrag) =>
+    (eintrag.jaegerId ? jaegerNameById.get(eintrag.jaegerId) : undefined) || eintrag.jaeger,
+    [jaegerNameById]
+  );
 
   const toggleColumn = (id: ColumnId) => {
     const col = COLUMNS.find(c => c.id === id);

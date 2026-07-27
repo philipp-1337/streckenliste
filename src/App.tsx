@@ -33,6 +33,10 @@ import { collection, getDocs } from 'firebase/firestore';
 import { Routes, Route, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { getAvailableJagdjahre, getCurrentJagdjahr } from '@utils/jagdjahrUtils';
 
+// Stabile Leerliste, damit abgeleitete Memos bei "keine Profile" nicht bei
+// jedem Render eine neue Array-Identität sehen.
+const EMPTY_JAEGER_PROFILES: JaegerProfile[] = [];
+
 const getDefaultFilterState = () => ({
   wildart: '',
   jaegerId: '',
@@ -71,7 +75,13 @@ const App = () => {
   const [showLegende, setShowLegende] = useState(false);
   const [rejectingEntryId, setRejectingEntryId] = useState<string | null>(null);
   const [historyEntry, setHistoryEntry] = useState<Eintrag | null>(null);
-  const [jaegerProfiles, setJaegerProfiles] = useState<JaegerProfile[]>([]);
+  // Profile sind an ihren Bezirk gebunden: Passt der gespeicherte Bezirk nicht
+  // mehr zum Nutzer (Logout, Bezirkswechsel), gilt die Liste als leer, ohne
+  // dass ein Effect den State zurücksetzen muss.
+  const [loadedJaegerProfiles, setLoadedJaegerProfiles] = useState<{ bezirkId: string; profiles: JaegerProfile[] }>({ bezirkId: '', profiles: [] });
+  const jaegerProfiles = loadedJaegerProfiles.bezirkId === currentUser?.jagdbezirkId
+    ? loadedJaegerProfiles.profiles
+    : EMPTY_JAEGER_PROFILES;
   // Login-Flow Flag
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [mobileViewMode, setMobileViewMode] = useState<'cards' | 'table'>(() => {
@@ -126,27 +136,25 @@ const App = () => {
   }, [currentUser, navigate]);
 
   useEffect(() => {
-    if (!currentUser?.jagdbezirkId) {
-      setJaegerProfiles([]);
-      return;
-    }
+    const bezirkId = currentUser?.jagdbezirkId;
+    if (!bezirkId) return;
 
     let cancelled = false;
 
     const loadJaegerProfiles = async () => {
-      const snapshot = await getDocs(collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/jaeger`));
+      const snapshot = await getDocs(collection(db, `jagdbezirke/${bezirkId}/jaeger`));
       if (cancelled) return;
 
       const loadedProfiles = snapshot.docs
         .map(d => ({
           id: d.id,
           displayName: d.data().displayName || d.id,
-          jagdbezirkId: currentUser.jagdbezirkId,
+          jagdbezirkId: bezirkId,
           active: d.data().active,
         } as JaegerProfile))
         .sort((a, b) => a.displayName.localeCompare(b.displayName, 'de'));
 
-      setJaegerProfiles(loadedProfiles);
+      setLoadedJaegerProfiles({ bezirkId, profiles: loadedProfiles });
     };
 
     void loadJaegerProfiles();

@@ -88,12 +88,19 @@ function makeHistoryEntry(
   return entry;
 }
 
+// Stabile Leerliste, damit Konsumenten bei "keine Daten" nicht bei jedem
+// Render eine neue Array-Identität sehen.
+const EMPTY_EINTRAEGE: Eintrag[] = [];
+
 export const useFirestore = () => {
   const { currentUser } = useAuth();
-  const [eintraege, setEintraege] = useState<Eintrag[]>([]);
-  const [loading, setLoading] = useState(false);
+  // Einträge sind an ihren Collection-Pfad gebunden: Passt der gespeicherte
+  // Pfad nicht mehr zum Nutzer (Logout, Bezirkswechsel), gilt die Liste als
+  // leer, ohne dass ein Effect den State zurücksetzen muss.
+  const [loadedEintraege, setLoadedEintraege] = useState<{ key: string; list: Eintrag[] }>({ key: '', list: [] });
+  const [loadingRaw, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const lastVisibilityChange = useRef<number>(Date.now());
+  const lastVisibilityChange = useRef<number>(0);
 
   // Memoize the collection reference to prevent unnecessary re-creations
   const streckenCollectionRef = useMemo(() => {
@@ -102,6 +109,12 @@ export const useFirestore = () => {
     }
     return collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/eintraege`);
   }, [currentUser?.jagdbezirkId]);
+
+  const activeKey = streckenCollectionRef && isUserAuthenticated(currentUser) ? streckenCollectionRef.path : '';
+  const eintraege = activeKey !== '' && loadedEintraege.key === activeKey ? loadedEintraege.list : EMPTY_EINTRAEGE;
+  // Lädt, solange für die aktive Collection noch keine Daten angekommen sind
+  // (und kein Fehler vorliegt) oder eine Aktion das Busy-Flag gesetzt hat.
+  const loading = activeKey !== '' && ((loadedEintraege.key !== activeKey && !error) || loadingRaw);
 
   // Helper function to manually fetch data (iOS PWA fallback)
   const manualFetch = useCallback(async () => {
@@ -124,13 +137,13 @@ export const useFirestore = () => {
         snap2.docs.forEach(doc => map.set(doc.id, { ...doc.data(), id: doc.id } as Eintrag));
         
         const geladeneEintraege = Array.from(map.values());
-        setEintraege(geladeneEintraege);
+        setLoadedEintraege({ key: streckenCollectionRef.path, list: geladeneEintraege });
         console.log('🔄 Manual fetch completed:', geladeneEintraege.length, 'entries');
       } else {
         const q = query(streckenCollectionRef, orderBy("datum", "asc"));
         const data = await getDocs(q);
         const geladeneEintraege = data.docs.map(doc => ({ ...doc.data(), id: doc.id } as Eintrag));
-        setEintraege(geladeneEintraege);
+        setLoadedEintraege({ key: streckenCollectionRef.path, list: geladeneEintraege });
         console.log('🔄 Manual fetch completed:', geladeneEintraege.length, 'entries');
       }
     } catch (err) {
@@ -141,22 +154,18 @@ export const useFirestore = () => {
   // Set up real-time listener with onSnapshot
   useEffect(() => {
     if (!streckenCollectionRef || !isUserAuthenticated(currentUser)) {
-      setEintraege([]);
-      setLoading(false);
       return;
     }
 
-    setLoading(true);
-    setError(null);
+    lastVisibilityChange.current = Date.now();
 
-    let unsubscribes: (() => void)[] = [];
+    const unsubscribes: (() => void)[] = [];
 
     const handleSnapshotError = (err: Error) => {
       const errorMessage = "Fehler beim Laden der Daten";
       setError(errorMessage);
       toast.error(errorMessage);
       console.error("Error listening to Firestore:", err);
-      setLoading(false);
     };
 
     if (!isAdmin(currentUser)) {
@@ -167,8 +176,7 @@ export const useFirestore = () => {
       const updateEintraege = () => {
         const merged = new Map([...map1, ...map2]);
         const geladeneEintraege = Array.from(merged.values());
-        setEintraege(geladeneEintraege);
-        setLoading(false);
+        setLoadedEintraege({ key: streckenCollectionRef.path, list: geladeneEintraege });
       };
 
       const unsub1 = onSnapshot(q1, (snapshot) => {
@@ -203,8 +211,7 @@ export const useFirestore = () => {
           ...doc.data(), 
           id: doc.id 
         } as Eintrag));
-        setEintraege(geladeneEintraege);
-        setLoading(false);
+        setLoadedEintraege({ key: streckenCollectionRef.path, list: geladeneEintraege });
         console.log('📡 onSnapshot admin update:', geladeneEintraege.length, 'entries');
       }, handleSnapshotError);
       unsubscribes.push(unsub);
