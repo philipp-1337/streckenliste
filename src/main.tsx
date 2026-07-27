@@ -6,7 +6,10 @@ import './index.css';
 import { AuthProvider } from '@auth/AuthProvider';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { ErrorBoundary } from '@components/ErrorBoundary';
+import { initErrorMonitoring } from '@/lib/monitoring';
 import { initWebVitals } from '@utils/webVitals';
+
+initErrorMonitoring();
 
 // Initialize Web Vitals tracking
 initWebVitals();

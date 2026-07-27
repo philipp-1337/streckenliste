@@ -127,6 +127,18 @@ bun run dev:emulator
 Logins danach: `admin@test.local` / `test1234` (Admin) und
 `jaeger@test.local` / `test1234` (Jäger mit zugeordnetem Profil).
 
+### Error-Monitoring
+
+Produktionsfehler und React-Crashes können an Sentry gemeldet werden.
+Dafür beim Produktions-Build den öffentlichen Client-DSN setzen:
+
+```bash
+VITE_SENTRY_DSN=https://examplePublicKey@o0.ingest.sentry.io/0 bun run build
+```
+
+Ohne `VITE_SENTRY_DSN` bleibt das Monitoring deaktiviert. Performance-Tracing,
+Session Replay und die Übermittlung von Standard-PII sind nicht aktiviert.
+
 ## 🎯 Features im Detail
 
 ### Wildarten-Verwaltung

@@ -29,7 +29,7 @@ import ActionHandler from '@auth/ActionHandler';
 import { auth } from './firebase';
 import { db } from './firebase';
 import { signOut } from 'firebase/auth';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { Routes, Route, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { getAvailableJagdjahre, getCurrentJagdjahr } from '@utils/jagdjahrUtils';
 
@@ -139,29 +139,25 @@ const App = () => {
     const bezirkId = currentUser?.jagdbezirkId;
     if (!bezirkId) return;
 
-    let cancelled = false;
+    return onSnapshot(
+      collection(db, `jagdbezirke/${bezirkId}/jaeger`),
+      (snapshot) => {
+        const loadedProfiles = snapshot.docs
+          .map(d => ({
+            id: d.id,
+            displayName: d.data().displayName || d.id,
+            jagdbezirkId: bezirkId,
+            active: d.data().active,
+          } as JaegerProfile))
+          .sort((a, b) => a.displayName.localeCompare(b.displayName, 'de'));
 
-    const loadJaegerProfiles = async () => {
-      const snapshot = await getDocs(collection(db, `jagdbezirke/${bezirkId}/jaeger`));
-      if (cancelled) return;
-
-      const loadedProfiles = snapshot.docs
-        .map(d => ({
-          id: d.id,
-          displayName: d.data().displayName || d.id,
-          jagdbezirkId: bezirkId,
-          active: d.data().active,
-        } as JaegerProfile))
-        .sort((a, b) => a.displayName.localeCompare(b.displayName, 'de'));
-
-      setLoadedJaegerProfiles({ bezirkId, profiles: loadedProfiles });
-    };
-
-    void loadJaegerProfiles();
-
-    return () => {
-      cancelled = true;
-    };
+        setLoadedJaegerProfiles({ bezirkId, profiles: loadedProfiles });
+      },
+      (error) => {
+        console.error('Jägerprofile konnten nicht geladen werden:', error);
+        toast.error('Jägerprofile konnten nicht geladen werden');
+      }
+    );
   }, [currentUser?.jagdbezirkId]);
 
   const jaegerFilterOptions = useMemo(() => {

@@ -71,10 +71,9 @@ Multi-Tenant-Betrieb noch fehlt.
 
 Danach, ohne festen Termin:
 
-- [ ] **Jägerprofile im Eintragsformular können veralten:** `App.tsx`
-  lädt die Profile einmalig pro Bezirk (kein Listener). Neu angelegte
-  Profile erscheinen im Formular erst nach Reload. Bestandsverhalten,
-  niedrige Priorität.
+- [x] **Jägerprofile im Eintragsformular können veralten:** _(erledigt
+  2026-07-27)_ Profile werden in `App.tsx` und im Eintragsformular per
+  Echtzeit-Listener aktualisiert und erscheinen ohne Reload.
 - [ ] **firebase-functions-Versionswarnung der CLI:** 7.3.0 ist aktuell
   genug, die CLI meckert trotzdem. Upgrade bei Gelegenheit.
 
@@ -87,12 +86,11 @@ Reihenfolge nach Wichtigkeit:
   Jagdstrecken). Benötigt: Datenschutzerklärung, Impressum, vermutlich
   AV-Verträge mit den Pächtern. Kein Code-Thema, aber vor dem ersten
   fremden Bezirk zu klären.
-- [ ] **Langzeit-Backups:** PITR deckt 7 Tage ab. Zusätzlich einen
-  wöchentlichen Backup-Schedule mit längerer Aufbewahrung einrichten
-  (`gcloud firestore backups schedules create …`).
-- [ ] **Error-Monitoring** (z. B. Sentry): Produktionsfehler sind aktuell
-  nur sichtbar, wenn Nutzer sie melden. Spätestens mit fremden Nutzern
-  nötig.
+- [ ] **Error-Monitoring aktivieren:** Die technische Sentry-Integration
+  ist seit 2026-07-27 fertig. Offen sind nur noch Sentry-Projekt und
+  `VITE_SENTRY_DSN` vor dem Deploy. Danach werden Produktionsfehler und
+  React-Crashes erfasst; Performance-Tracing, Session Replay und
+  Standard-PII bleiben deaktiviert.
 - [ ] **App Check:** Functions prüfen Auth, aber nicht die App-Herkunft.
   Optional; bei iOS-PWAs mit Zusatzaufwand verbunden. Erst sinnvoll,
   wenn es echte fremde Nutzer gibt.
@@ -100,6 +98,10 @@ Reihenfolge nach Wichtigkeit:
   bündeln statt einzeln zuzustellen. Idee ohne Termin; Zusammenspiel mit
   Stufenmodell und Idempotenz-Sperre ist in der Gedächtnis-Notiz bzw.
   im Push-Design-Dokument skizziert.
+- [ ] **Langzeit-Backups (niedrige Priorität):** PITR deckt 7 Tage ab.
+  Zusätzlich bei Gelegenheit einen wöchentlichen Backup-Schedule mit
+  längerer Aufbewahrung einrichten
+  (`gcloud firestore backups schedules create …`).
 
 ## Kontext: Was am 2026-07-27 erledigt wurde
 

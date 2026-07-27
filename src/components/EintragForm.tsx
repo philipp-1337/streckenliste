@@ -7,7 +7,7 @@ import type { Eintrag, JaegerProfile } from '@types';
 import { wildarten } from '@data/wildarten';
 import { eintragFormSchema } from '@utils/validation';
 import useAuth from '@hooks/useAuth';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 
 interface EintragFormProps {
@@ -157,36 +157,29 @@ export const EintragForm: React.FC<EintragFormProps> = ({
       return;
     }
 
-    let cancelled = false;
+    const bezirkId = currentUser.jagdbezirkId;
+    setLoadingJaegerProfiles(true);
 
-    const loadJaegerProfiles = async () => {
-      setLoadingJaegerProfiles(true);
-      try {
-        const snapshot = await getDocs(collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/jaeger`));
-        if (cancelled) return;
-
+    return onSnapshot(
+      collection(db, `jagdbezirke/${bezirkId}/jaeger`),
+      (snapshot) => {
         const loadedProfiles = snapshot.docs
           .map(d => ({
             id: d.id,
             displayName: d.data().displayName || d.id,
-            jagdbezirkId: currentUser.jagdbezirkId,
+            jagdbezirkId: bezirkId,
             active: d.data().active,
           } as JaegerProfile))
           .sort((a, b) => a.displayName.localeCompare(b.displayName, 'de'));
 
         setJaegerProfiles(loadedProfiles);
-      } finally {
-        if (!cancelled) {
-          setLoadingJaegerProfiles(false);
-        }
+        setLoadingJaegerProfiles(false);
+      },
+      (error) => {
+        console.error('Jägerprofile konnten im Eintragsformular nicht geladen werden:', error);
+        setLoadingJaegerProfiles(false);
       }
-    }
-
-    void loadJaegerProfiles();
-
-    return () => {
-      cancelled = true;
-    }
+    );
   }, [currentUser?.jagdbezirkId, currentUser?.role]);
 
   useEffect(() => {
