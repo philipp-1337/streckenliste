@@ -370,6 +370,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                     onClick={handleToggleColumnPicker}
                     className="text-white/70 hover:text-white hover:bg-green-700 p-1 rounded transition-colors cursor-pointer"
                     title="Spalten konfigurieren"
+                    aria-label="Spalten konfigurieren"
                   >
                     <SlidersHorizontal size={15} />
                   </button>
@@ -447,6 +448,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                               onClick={() => handleEdit(eintrag)}
                               className="inline-flex h-9 w-9 items-center justify-center rounded-md text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-800 cursor-pointer"
                               title="Bearbeiten"
+                              aria-label="Bearbeiten"
                               disabled={loadingId === eintrag.id}
                             >
                               {loadingId === eintrag.id ? <Spinner size={16} /> : <Edit size={16} />}

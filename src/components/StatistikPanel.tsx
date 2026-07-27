@@ -163,6 +163,7 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
               onClick={() => setIsFullscreen(!isFullscreen)}
               className="p-2 text-green-700 hover:bg-green-50 rounded-lg transition-colors border border-transparent hover:border-green-100 shrink-0 cursor-pointer"
               title={isFullscreen ? "Vollbild beenden" : "Vollbild öffnen"}
+              aria-label={isFullscreen ? "Vollbild beenden" : "Vollbild öffnen"}
             >
               {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
             </button>

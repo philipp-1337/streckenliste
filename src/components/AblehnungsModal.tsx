@@ -30,7 +30,7 @@ export const AblehnungsModal: React.FC<AblehnungsModalProps> = ({ eintragId, onC
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Eintrag ablehnen</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer" aria-label="Schließen">
             <X size={20} />
           </button>
         </div>

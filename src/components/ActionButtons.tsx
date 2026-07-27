@@ -121,6 +121,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
           }
         `}
         title={button.title}
+        aria-label={button.title}
       >
         <div className={`
           absolute inset-0 rounded-xl sm:rounded-2xl

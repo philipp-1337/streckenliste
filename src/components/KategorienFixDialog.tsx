@@ -78,6 +78,7 @@ export const KategorienFixDialog: React.FC<KategorienFixDialogProps> = ({ isOpen
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
             title="Schließen"
+            aria-label="Schließen"
           >
             <X className="w-5 h-5" />
           </button>

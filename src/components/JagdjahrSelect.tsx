@@ -41,6 +41,7 @@ export const JagdjahrSelect: React.FC<JagdjahrSelectProps> = ({
             text-green-700
            cursor-pointer"
           title="Jagdjahr auswählen"
+          aria-label="Jagdjahr auswählen"
         >
           <Calendar size={18} className="transition-transform" />
 

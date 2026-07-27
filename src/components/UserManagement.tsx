@@ -295,10 +295,20 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
         <div className="flex items-center gap-2">
           <button
             onClick={() => {
-              setShowForm(v => !v)
-              setEditingUser(null)
+              // Bei offenem Formular ODER laufender Bearbeitung schließt der
+              // Klick beides; sonst öffnet er das Neuanlage-Formular. Ein
+              // blindes setShowForm(v => !v) würde beim Abbrechen einer
+              // Bearbeitung (showForm ist dabei false) stattdessen das
+              // Neuanlage-Formular öffnen.
+              if (showForm || editingUser) {
+                handleCancelEdit();
+              } else {
+                setShowForm(true);
+                setEditingUser(null);
+              }
             }}
-            title={showForm ? 'Abbrechen' : 'Neuer Benutzer'}
+            title={showForm || editingUser ? 'Abbrechen' : 'Neuer Benutzer'}
+            aria-label={showForm || editingUser ? 'Abbrechen' : 'Neuer Benutzer'}
             className={`
               group relative
               w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl
@@ -320,7 +330,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
               ${showForm ? 'opacity-100' : 'group-hover:opacity-50'}
             `} />
             {showForm || editingUser
-              ? <X size={20} className="relative z-10 transition-all duration-300 ease-bounce group-hover:scale-110" onClick={handleCancelEdit} />
+              ? <X size={20} className="relative z-10 transition-all duration-300 ease-bounce group-hover:scale-110" />
               : <UserPlus size={20} className="relative z-10 transition-all duration-300 ease-bounce group-hover:scale-110" />
             }
             <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-white/20 opacity-0 scale-0 group-active:opacity-100 group-active:scale-100 transition-all duration-150" />
@@ -585,6 +595,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
                           }}
                           className="text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
                           title="Bearbeiten"
+                          aria-label={`${user.displayName || 'Benutzer'} bearbeiten`}
                         >
                           <Pencil size={16} />
                         </button>
@@ -592,6 +603,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
                           onClick={() => handleDeactivate(user.uid, user.displayName)}
                           className="text-red-600 hover:text-red-800 transition-colors cursor-pointer"
                           title="Deaktivieren"
+                          aria-label={`${user.displayName || 'Benutzer'} deaktivieren`}
                         >
                           <Trash2 size={16} />
                         </button>
@@ -700,6 +712,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
                                 onClick={() => handleStartJaegerEdit(profile.id, profile.displayName)}
                                 className="text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
                                 title="Name bearbeiten"
+                                aria-label={`Name von ${profile.displayName} bearbeiten`}
                               >
                                 <Pencil size={16} />
                               </button>
@@ -708,6 +721,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
                                 onClick={() => handleStartJaegerMerge(profile.id)}
                                 className="text-green-700 hover:text-green-900 transition-colors cursor-pointer"
                                 title="Mit anderem Profil zusammenführen"
+                                aria-label={`${profile.displayName} mit anderem Profil zusammenführen`}
                               >
                                 <GitMerge size={16} />
                               </button>
@@ -716,6 +730,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
                                 onClick={() => handleArchiveJaegerProfile(profile)}
                                 className="text-red-600 hover:text-red-800 transition-colors cursor-pointer"
                                 title="Archivieren"
+                                aria-label={`${profile.displayName} archivieren`}
                               >
                                 <Trash2 size={16} />
                               </button>

@@ -80,6 +80,7 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({ isOpen, onClose, onI
           <button
             onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+            aria-label="Schließen"
           >
             <X className="w-6 h-6" />
           </button>

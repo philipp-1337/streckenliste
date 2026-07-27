@@ -49,7 +49,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ eintragId, wildart, 
               Verlauf – {wildart} ({new Date(datum).toLocaleDateString('de-DE')})
             </h3>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer" aria-label="Schließen">
             <X size={20} />
           </button>
         </div>
