@@ -260,6 +260,17 @@ test("niemand darf die jagdbezirkId eines Nutzers ändern", async () => {
   );
 });
 
+test("User-Dokumente entstehen nur serverseitig", async () => {
+  const db = testEnv.authenticatedContext(ADMIN).firestore();
+  await assertFails(
+    setDoc(doc(db, "users", "frisch-angelegt"), {
+      role: "user",
+      jagdbezirkId: BEZIRK,
+      displayName: "Client-Anlage",
+    })
+  );
+});
+
 test("Admin schreibt nur das eigene Bezirks-Dokument", async () => {
   const ownDb = testEnv.authenticatedContext(ADMIN).firestore();
   await assertSucceeds(

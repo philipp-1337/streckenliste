@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { UserPlus, Trash2, Users, X, Pencil, GitMerge, RotateCcw } from 'lucide-react';
 import { useUserManagement } from '@hooks/useUserManagement';
+import { JagdbezirkOnboarding } from '@components/JagdbezirkOnboarding';
 import useAuth from '@hooks/useAuth';
 import Spinner from '@components/Spinner';
 import type { UserData, Role, JaegerProfile } from '@types';
@@ -773,6 +774,8 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
           </div>
         )}
       </div>
+
+      <JagdbezirkOnboarding />
     </div>
   );
 };

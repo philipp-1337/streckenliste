@@ -6,3 +6,5 @@ export {registerPushDevice} from "./features/push/registerPushDevice";
 export {unregisterPushDevice} from "./features/push/unregisterPushDevice";
 export {getPushDeviceStatus} from "./features/push/getPushDeviceStatus";
 export {onEintragHistoryCreated} from "./features/push/onEintragHistoryCreated";
+export {createBezirkUser} from "./features/admin/createBezirkUser";
+export {createJagdbezirk} from "./features/admin/createJagdbezirk";

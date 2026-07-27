@@ -106,9 +106,10 @@ service cloud.firestore {
       // eine harte Grenze statt einer App-Konvention.
       allow read: if isAdmin() &&
                     resource.data.get('jagdbezirkId', '') == getUserData().jagdbezirkId;
-      // Admin: create user profile for their own jagdbezirk
-      allow create: if isAdmin() &&
-                    getUserData().jagdbezirkId == request.resource.data.jagdbezirkId;
+      // User-Dokumente entstehen ausschließlich serverseitig über die
+      // Cloud Functions createBezirkUser/createJagdbezirk (Admin SDK
+      // umgeht die Rules). Kein Client darf sie anlegen.
+      allow create: if false;
       // Users may update their own display data but not role, district, or jaeger assignment.
       // Admins may update users in their own Jagdbezirk; jagdbezirkId ist für
       // alle unveränderlich. Der Abgleich läuft gegen den BESTEHENDEN Bezirk

@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
-import { initializeApp, deleteApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { httpsCallable } from 'firebase/functions';
 import { collection, query, where, getDocs, setDoc, updateDoc, deleteDoc, doc, writeBatch } from 'firebase/firestore';
-import { firebaseConfig, db } from '../firebase';
+import { auth, db, functions } from '../firebase';
 import useAuth from '@hooks/useAuth';
 import type { UserData, Role, JaegerProfile } from '@types';
 
@@ -197,35 +197,24 @@ export const useUserManagement = () => {
     if (!currentUser?.jagdbezirkId) return;
     setLoading(true);
 
-    // Random temporary password — user will set their own via the reset email
-    const tempPassword = Math.random().toString(36).slice(-12) + 'A1!';
-
-    const secondaryApp = initializeApp(firebaseConfig, `user-creation-${Date.now()}`);
-    const secondaryAuth = getAuth(secondaryApp);
-
     try {
-      const { user: newUser } = await createUserWithEmailAndPassword(
-        secondaryAuth,
-        email.trim(),
-        tempPassword
-      );
-
-      await setDoc(doc(db, 'users', newUser.uid), {
-        uid: newUser.uid,
+      // Auth-Account und User-Dokument entstehen serverseitig in der Cloud
+      // Function (inkl. Zufallspasswort, das den Server nie verlässt). Die
+      // Einladung läuft über die Passwort-Reset-E-Mail.
+      const createBezirkUser = httpsCallable(functions, 'createBezirkUser');
+      await createBezirkUser({
         email: email.trim(),
         displayName: displayName.trim(),
-        jagdbezirkId: currentUser.jagdbezirkId,
-        jaegerId: '',
         role,
       });
 
-      await sendPasswordResetEmail(secondaryAuth, email.trim());
+      await sendPasswordResetEmail(auth, email.trim());
 
       toast.success(`Benutzer angelegt. Einladungs-E-Mail wurde an ${email} gesendet.`);
       await loadUsers();
     } catch (err: unknown) {
       const code = (err as { code?: string }).code;
-      if (code === 'auth/email-already-in-use') {
+      if (code === 'functions/already-exists') {
         toast.error('Diese E-Mail-Adresse wird bereits verwendet.');
       } else {
         toast.error('Fehler beim Anlegen des Benutzers.');
@@ -233,7 +222,6 @@ export const useUserManagement = () => {
       }
       throw err;
     } finally {
-      await deleteApp(secondaryApp);
       setLoading(false);
     }
   }, [currentUser, loadUsers]);
