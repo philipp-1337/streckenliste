@@ -1,9 +1,33 @@
 # Offene Punkte und Befunde
 
-Stand: 2026-07-27, nach der Aufräum- und Härtungsaktion (Mandanten-Grenzen
-in den Rules, Auflösung des dummy-jagdbezirk, Emulator-Setup, Lint-Grün,
-PITR, Onboarding über Cloud Functions). Dieses Dokument ist der Backlog
-der dabei festgehaltenen Restpunkte — beim Abarbeiten bitte hier pflegen.
+Stand: 2026-07-27. Dieses Dokument ist der Backlog der Restpunkte aus der
+Aufräum- und Härtungsaktion — beim Abarbeiten bitte hier pflegen.
+
+## Woher dieses Dokument kommt
+
+Die Streckenliste ist entstanden, um die alte Excel-Buchführung des
+Pächters (Schwiegervater) im Jagdbezirk gjb-10-randau abzulösen, und
+wurde seitdem Stück für Stück professionalisiert. Damit die übrigen
+Jäger des Bezirks nach und nach eigene Accounts bekommen können, wurden
+**Jägerprofile** eingeführt: Die historischen Abschüsse sind den
+Profilen zugeordnet, sodass ein Jäger ab dem ersten Login seine eigenen
+Abschüsse aus den Vorjahren sieht. Ein Admin verknüpft dafür jeden neuen
+Firebase-User mit seinem Jägerprofil (Jäger-User-Zuordnung).
+
+Der Anlass für die Aktion vom 2026-07-27: Im Dummy-Jagdbezirk zum Testen
+tauchten diese Jäger-User-Zuordnungen ebenfalls auf, obwohl historische
+Daten und Jägerprofile nur zum Bezirk des Schwiegervaters gehören
+sollten. Die Analyse ergab: kein Code-Fehler — der Code war korrekt pro
+Bezirk gescoped —, sondern Datendopplung. Der Testbezirk enthielt eine
+Kopie echter Randau-Einträge samt daraus generierter Jägerprofile mit
+echten Personennamen. Beim Aufräumen kamen weitere Altlasten und
+Mandanten-Lücken ans Licht (Details unten unter „Kontext").
+
+Der strategische Hintergrund: Produktiv ist bislang nur der eine
+Bezirk aktiv, aber die App soll demnächst beworben werden, damit auch
+**andere Pächter und Bezirke** sie nutzen können. Alles in diesem
+Dokument ist deshalb daran gemessen, was für einen sicheren
+Multi-Tenant-Betrieb noch fehlt.
 
 ## Direkt nach dem nächsten Deploy beachten
 
