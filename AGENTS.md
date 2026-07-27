@@ -21,5 +21,8 @@ There is no dedicated automated test runner configured yet. Treat `bun run build
 ## Commit & Pull Request Guidelines
 Recent history follows concise Conventional Commit-style subjects such as `fix(EintragTable): correct column labels` and `feat(EintragTable): add configurable column visibility`. Use the same pattern: `<type>(<scope>): <imperative summary>`. Keep PRs focused, describe the user-visible change, list validation steps, and link related issues. Include screenshots or short recordings for UI changes, especially table, filter, print, or mobile layout updates.
 
+## Validation & Commit Rules
+After every code modification, run `bun run lint` and `bun run build`. If and only if both commands succeed, create a commit using the Conventional Commit format. Never push unless the user explicitly grants permission.
+
 ## Security & Configuration Tips
 Firebase is central to the app. Review changes to [`src/firebase.ts`](/Users/philipp.kanter/Developer/Random/streckenliste/src/firebase.ts), [`firestore.rules`](/Users/philipp.kanter/Developer/Random/streckenliste/firestore.rules), and [`firebase.json`](/Users/philipp.kanter/Developer/Random/streckenliste/firebase.json) carefully. Do not weaken Firestore rules for convenience, and verify any auth or data-access change against admin/user role boundaries before merging.
