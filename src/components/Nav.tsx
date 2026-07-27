@@ -43,7 +43,7 @@ export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount })
     },
     {
       path: '/logout',
-      label: 'Logout',
+      label: 'Abmelden',
       icon: LogOutIcon,
       onClick: onLogout,
       isLogout: true,
@@ -63,7 +63,7 @@ export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount })
         backdrop-blur-xl backdrop-saturate-[180%]
         flex justify-around items-center
         px-2 py-2 sm:px-1.5 sm:py-1.5
-        animate-slide-up pointer-events-auto
+        animate-slide-up pointer-events-auto motion-reduce:animate-none
         "
       >
         {tabs.map((tab) => {
@@ -80,9 +80,11 @@ export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount })
                 group flex-1 flex flex-col items-center justify-center
                 p-1.5 sm:p-1 h-full
                 bg-transparent border-none outline-none cursor-pointer
-                font-inherit text-[11px] sm:text-xs
-                transition-all duration-300
+                font-inherit text-xs
+                transition-colors duration-200 motion-reduce:transition-none
                 relative rounded-3xl
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2
+                ${tab.isLogout ? 'ml-1 border-l border-green-900/10' : ''}
                 ${tab.isLogout
                   ? 'text-green-900/35 hover:text-red-500'
                   : isActive
@@ -94,17 +96,18 @@ export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount })
                   : 'before:absolute before:inset-0 before:rounded-3xl before:bg-gradient-active before:opacity-0 hover:before:opacity-50 before:transition-opacity before:duration-300'
                 }
               `}
-              title={tab.isLogout ? 'Logout' : undefined}
+              title={tab.isLogout ? 'Abmelden' : undefined}
+              aria-current={isActive && !tab.isLogout ? 'page' : undefined}
             >
               <span className="relative z-10 flex flex-col items-center gap-1">
                 <span className="relative">
                   <Icon
                     size={20}
                     strokeWidth={isActive && !tab.isLogout ? 2.5 : 2}
-                    className="transition-transform duration-300 group-hover:scale-105"
+                    className="transition-transform duration-200 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
                   />
                   {'badge' in tab && (tab.badge ?? 0) > 0 && (
-                    <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-0.5 rounded-full bg-red-500 text-white text-[10px] leading-4 font-bold text-center">
+                    <span className="absolute -right-2 -top-2 min-w-[20px] rounded-full bg-red-600 px-1 text-center text-xs font-bold leading-5 text-white">
                       {tab.badge}
                     </span>
                   )}

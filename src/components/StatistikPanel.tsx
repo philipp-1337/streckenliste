@@ -1,6 +1,7 @@
 import { memo, useMemo, useState, useEffect } from 'react';
 import type { AllStats, MonatStat } from '@types';
 import { BarChart3, CalendarDays, Maximize2, Minimize2 } from 'lucide-react';
+import { PageHeader } from '@components/PageHeader';
 import useAuth from '@hooks/useAuth';
 import { 
   ComposedChart,
@@ -94,6 +95,15 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
   }, [isFullscreen]);
 
   useEffect(() => {
+    if (!isFullscreen) return
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsFullscreen(false)
+    }
+    document.addEventListener('keydown', closeOnEscape)
+    return () => document.removeEventListener('keydown', closeOnEscape)
+  }, [isFullscreen])
+
+  useEffect(() => {
     if (typeof window === 'undefined') return;
     const mql = window.matchMedia('(max-width: 767px)');
     const handleMatch = (e: MediaQueryListEvent) => {
@@ -125,8 +135,29 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
     return max;
   }, [monatsStats, isAverage, availableJahre, showYearLines]);
 
+  if (Object.keys(wildartStats).length === 0) {
+    return (
+      <div className="mb-6">
+        <PageHeader title="Statistiken" icon={BarChart3} />
+        <div className="rounded-xl bg-white px-5 py-10 text-center shadow">
+          <h3 className="font-semibold text-green-900">Noch keine Statistik verfügbar</h3>
+          <p className="mx-auto mt-2 max-w-lg text-sm text-gray-600">
+            Für das ausgewählte Jagdjahr liegen keine Einträge vor. Wähle ein anderes Jagdjahr oder erfasse zuerst einen Eintrag.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="mb-6 space-y-8">
+      {!isFullscreen && (
+        <PageHeader
+          title="Statistiken"
+          icon={BarChart3}
+          description={`${Object.values(wildartStats).reduce((total, stat) => total + stat.anzahl, 0)} erfasste Stücke im ausgewählten Jagdjahr`}
+        />
+      )}
       {/* Monthly Chart */}
       <div className={
         isFullscreen 
@@ -140,15 +171,15 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
               <span className="truncate">Monatsverlauf</span>
             </h2>
             {isAverage && (
-              <span className="bg-green-100 text-green-800 text-[10px] sm:text-xs font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full whitespace-nowrap shrink-0">
+              <span className="shrink-0 whitespace-nowrap rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-800 sm:px-2.5">
                 Ø Durchschnitt
               </span>
             )}
           </div>
           
-          <div className="hidden sm:flex items-center justify-end gap-3 shrink-0 ml-3">
+          <div className="flex items-center justify-end gap-2 shrink-0 ml-3">
             {isAverage && availableJahre?.length > 0 && (
-              <label className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm text-green-800 cursor-pointer hover:opacity-80 transition-opacity select-none bg-green-50 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-green-100 shrink-0">
+              <label className="hidden min-h-11 cursor-pointer select-none items-center gap-2 rounded-lg border border-green-100 bg-green-50 px-3 py-2 text-sm text-green-800 transition-opacity hover:opacity-80 sm:flex">
                 <input 
                   type="checkbox" 
                   className="w-4 h-4 rounded border-green-600 text-green-700 focus:ring-green-600 cursor-pointer shrink-0"
@@ -161,7 +192,7 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
             
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="p-2 text-green-700 hover:bg-green-50 rounded-lg transition-colors border border-transparent hover:border-green-100 shrink-0 cursor-pointer"
+              className="inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-transparent text-green-700 transition-colors hover:border-green-100 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
               title={isFullscreen ? "Vollbild beenden" : "Vollbild öffnen"}
               aria-label={isFullscreen ? "Vollbild beenden" : "Vollbild öffnen"}
             >
@@ -195,7 +226,7 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
                 content={<CustomTooltip />} 
                 cursor={{ fill: '#f3f4f6' }}
               />
-              {yearLinesActive && <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px', paddingBottom: '10px' }} />}
+              {yearLinesActive && <Legend verticalAlign="top" height={40} iconType="circle" wrapperStyle={{ fontSize: '14px', paddingBottom: '10px' }} />}
               {!yearLinesActive ? (
                 <Bar 
                   dataKey="anzahl" 
@@ -272,7 +303,7 @@ export const StatistikPanel: React.FC<StatistikPanelProps> = memo(({ data }) => 
                     <p className="text-sm mb-3">Einnahmen: <strong>{stat.einnahmen.toFixed(2)}</strong> €</p>
                   )}
                   <div className="text-xs space-y-2 border-t border-green-50 pt-2 mt-2">
-                    <p className="font-medium text-gray-500 uppercase tracking-wider text-[10px]">Altersklassen</p>
+                    <p className="text-xs font-medium uppercase tracking-wide text-gray-600">Altersklassen</p>
                     {Object.entries(stat.altersklassen).map(([ak, akStats]) => (
                       <div key={ak} className="ml-1">
                         <p className="font-medium text-green-700">

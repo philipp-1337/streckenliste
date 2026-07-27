@@ -394,17 +394,17 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                       <div className="flex items-center gap-2">
                         {new Date(eintrag.datum).toLocaleDateString('de-DE')}
                         {isPending && (
-                          <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-300 whitespace-nowrap">
+                          <span className="inline-block rounded border border-amber-300 bg-amber-100 px-1.5 py-0.5 text-xs font-semibold text-amber-700 whitespace-nowrap">
                             Ausstehend
                           </span>
                         )}
                         {isRejected && (
-                          <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 border border-rose-300 whitespace-nowrap">
+                          <span className="inline-block rounded border border-rose-300 bg-rose-100 px-1.5 py-0.5 text-xs font-semibold text-rose-700 whitespace-nowrap">
                             Abgelehnt
                           </span>
                         )}
                         {isRejected && eintrag.ablehnungsGrund && (
-                          <p className="text-[10px] text-rose-600 mt-0.5 max-w-[160px] truncate" title={eintrag.ablehnungsGrund}>
+                          <p className="mt-0.5 max-w-[160px] truncate text-xs text-rose-700" title={eintrag.ablehnungsGrund}>
                             {eintrag.ablehnungsGrund}
                           </p>
                         )}
@@ -446,7 +446,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                           {onEdit && (
                             <button
                               onClick={() => handleEdit(eintrag)}
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-md text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-800 cursor-pointer"
+                              className="inline-flex size-11 cursor-pointer items-center justify-center rounded-xl text-blue-700 transition-colors hover:bg-blue-50 hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2"
                               title="Bearbeiten"
                               aria-label="Bearbeiten"
                               disabled={loadingId === eintrag.id}
@@ -456,7 +456,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                           )}
                           <button
                             onClick={(event) => handleToggleActionMenu(eintrag.id, event.currentTarget)}
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 cursor-pointer"
+                            className="inline-flex size-11 cursor-pointer items-center justify-center rounded-xl text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
                             title="Weitere Aktionen"
                             aria-haspopup="menu"
                             aria-expanded={openActionMenuId === eintrag.id}
@@ -498,7 +498,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                   {onEdit && (
                     <button
                       onClick={() => { setSwipedOpenId(null); handleEdit(eintrag); }}
-                      className="flex items-center justify-center w-10 h-10 rounded-xl bg-green-100 text-green-700 active:bg-green-200 cursor-pointer"
+                      className="flex size-11 cursor-pointer items-center justify-center rounded-xl bg-green-100 text-green-700 active:bg-green-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700"
                       aria-label="Bearbeiten"
                     >
                       {loadingId === eintrag.id ? <Spinner size={16} /> : <Edit size={18} />}
@@ -506,7 +506,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                   )}
                   <button
                     onClick={() => { setSwipedOpenId(null); handleDelete(eintrag.id); }}
-                    className="flex items-center justify-center w-10 h-10 rounded-xl bg-red-100 text-red-600 active:bg-red-200 cursor-pointer"
+                    className="flex size-11 cursor-pointer items-center justify-center rounded-xl bg-red-100 text-red-700 active:bg-red-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700"
                     aria-label="Löschen"
                     disabled={loadingId === eintrag.id}
                   >
@@ -530,12 +530,12 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                       {new Date(eintrag.datum).toLocaleDateString('de-DE')}
                     </span>
                     {isPending && (
-                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-300">
+                      <span className="inline-block rounded border border-amber-300 bg-amber-100 px-1.5 py-0.5 text-xs font-semibold text-amber-700">
                         Ausstehend
                       </span>
                     )}
                     {isRejected && (
-                      <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-700 border border-rose-300">
+                      <span className="inline-block rounded border border-rose-300 bg-rose-100 px-1.5 py-0.5 text-xs font-semibold text-rose-700">
                         Abgelehnt
                       </span>
                     )}

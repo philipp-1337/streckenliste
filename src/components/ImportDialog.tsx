@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
-import { Upload, X, CheckCircle, AlertCircle, FileText } from 'lucide-react';
+import { Upload, CheckCircle, AlertCircle, FileText } from 'lucide-react';
 import { importCSV } from '@utils/csvImport';
 import type { Eintrag } from '@types';
+import { DialogShell } from '@components/DialogShell';
 
 interface ImportDialogProps {
   isOpen: boolean;
@@ -53,9 +54,6 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({ isOpen, onClose, onI
     try {
       await onImport(preview);
       setSuccess(true);
-      setTimeout(() => {
-        handleClose();
-      }, 2000);
     } catch (err) {
       setError(`Fehler beim Importieren: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`);
     } finally {
@@ -72,22 +70,26 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({ isOpen, onClose, onI
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900">CSV Import</h2>
-          <button
-            onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-            aria-label="Schließen"
-          >
-            <X className="w-6 h-6" />
+    <DialogShell
+      title="CSV-Import"
+      description="Prüfe die Vorschau, bevor die Einträge in den Jagdbezirk übernommen werden."
+      onClose={handleClose}
+      closeDisabled={importing}
+      size="lg"
+      footer={
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <button onClick={handleClose} className="min-h-11 cursor-pointer rounded-xl bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2" disabled={importing}>
+            {success ? 'Schließen' : 'Abbrechen'}
           </button>
+          {!success && (
+            <button onClick={() => void handleImport()} disabled={preview.length === 0 || importing} className="flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl bg-green-700 px-4 py-2 text-white transition-colors hover:bg-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300">
+              {importing ? <><div className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent motion-reduce:animate-none" />Importiere…</> : <><Upload className="size-4" />{preview.length} Einträge importieren</>}
+            </button>
+          )}
         </div>
-
-        {/* Content */}
-        <div className="px-6 py-4 overflow-y-auto flex-1">
+      }
+    >
+        <div>
           {/* File Upload */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -177,36 +179,7 @@ export const ImportDialog: React.FC<ImportDialogProps> = ({ isOpen, onClose, onI
             </div>
           )}
         </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-          <button
-            onClick={handleClose}
-            className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer"
-            disabled={importing}
-          >
-            Abbrechen
-          </button>
-          <button
-            onClick={handleImport}
-            disabled={preview.length === 0 || importing || success}
-            className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
-          >
-            {importing ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Importiere...
-              </>
-            ) : (
-              <>
-                <Upload className="w-4 h-4" />
-                {preview.length} Einträge importieren
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-    </div>
+    </DialogShell>
   );
 };
 

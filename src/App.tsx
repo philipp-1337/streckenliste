@@ -25,6 +25,7 @@ import { deactivatePushForThisDevice } from '@/lib/pushClient';
 import { SkeletonTable, SkeletonStatistik } from '@components/SkeletonLoaders';
 import Spinner from '@components/Spinner';
 import PdfDownloadDialog from '@components/PdfDownloadDialog';
+import { ConfirmDialog } from '@components/ConfirmDialog';
 import useAuth from '@hooks/useAuth';
 import Login from '@auth/Login';
 import ActionHandler from '@auth/ActionHandler';
@@ -79,6 +80,12 @@ const App = () => {
   const [showLegende, setShowLegende] = useState(false);
   const [rejectingEntryId, setRejectingEntryId] = useState<string | null>(null);
   const [historyEntry, setHistoryEntry] = useState<Eintrag | null>(null);
+  const [appConfirmation, setAppConfirmation] = useState<{
+    title: string
+    description: string
+    confirmLabel: string
+    onConfirm: () => Promise<void>
+  } | null>(null);
   // Profile sind an ihren Bezirk gebunden: Passt der gespeicherte Bezirk nicht
   // mehr zum Nutzer (Logout, Bezirkswechsel), gilt die Liste als leer, ohne
   // dass ein Effect den State zurücksetzen muss.
@@ -89,7 +96,7 @@ const App = () => {
   // Login-Flow Flag
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [mobileViewMode, setMobileViewMode] = useState<'cards' | 'table'>(() => {
-    try { return (localStorage.getItem('eintragTableMobileView') as 'cards' | 'table') || 'table'; } catch { return 'table'; }
+    try { return (localStorage.getItem('eintragTableMobileView') as 'cards' | 'table') || 'cards'; } catch { return 'cards'; }
   });
   const toggleMobileView = (view: 'cards' | 'table') => {
     setMobileViewMode(view);
@@ -255,31 +262,15 @@ const App = () => {
   }, []);
 
   const handleLogout = useCallback(() => {
-    toast.custom(
-      (t: string | number) => (
-        <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-lg p-4">
-          <div className="text-sm font-medium text-gray-900">Wirklich abmelden?</div>
-          <div className="mt-3 flex justify-end gap-2">
-            <button
-              onClick={() => toast.dismiss(t)}
-              className="rounded-xl px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 transition cursor-pointer"
-            >
-              Abbrechen
-            </button>
-            <button
-              onClick={async () => {
-                toast.dismiss(t);
-                await performLogout();
-              }}
-              className="rounded-xl px-3 py-1.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition cursor-pointer"
-            >
-              Abmelden
-            </button>
-          </div>
-        </div>
-      ),
-      { duration: 10000 }
-    );
+    setAppConfirmation({
+      title: 'Wirklich abmelden?',
+      description: 'Du wirst auf diesem Gerät abgemeldet. Nicht gespeicherte Eingaben gehen verloren.',
+      confirmLabel: 'Abmelden',
+      onConfirm: async () => {
+        setAppConfirmation(null)
+        await performLogout()
+      },
+    })
   }, [performLogout]);
 
   const handleSubmit = useCallback(async (data: Omit<Eintrag, "id">) => {
@@ -303,50 +294,26 @@ const App = () => {
   }, []);
 
   const handleDelete = useCallback(async (id: string) => {
-    toast.custom(
-      (t: string | number) => (
-        <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-lg p-4">
-            <div className="text-sm font-medium text-gray-900">
-              {(() => {
-                const eintrag = currentData.eintraege.find(e => e.id === id);
-                let dateStr = "?";
-                if (eintrag?.datum) {
-                  const d = new Date(eintrag.datum);
-                  if (!isNaN(d.getTime())) {
-                    dateStr = d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
-                  } else {
-                    dateStr = eintrag.datum;
-                  }
-                }
-                return `Soll der Eintrag vom ${dateStr} wirklich gelöscht werden?`;
-              })()}
-            </div>
-          <div className="mt-3 flex justify-end gap-2">
-            <button
-              onClick={() => toast.dismiss(t)}
-              className="rounded-xl px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 transition cursor-pointer"
-            >
-              Abbrechen
-            </button>
-            <button
-              onClick={async () => {
-                try {
-                  await currentData.deleteEintrag(id);
-                  toast.dismiss(t);
-                } catch (error) {
-                  console.error("Fehler beim Löschen:", error);
-                  toast.error("Fehler beim Löschen");
-                }
-              }}
-              className="rounded-xl px-3 py-1.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition cursor-pointer"
-            >
-              Löschen
-            </button>
-          </div>
-        </div>
-      ),
-      { duration: 10000 }
-    );
+    const eintrag = currentData.eintraege.find(entry => entry.id === id)
+    const parsedDate = eintrag?.datum ? new Date(eintrag.datum) : null
+    const date = parsedDate && !Number.isNaN(parsedDate.getTime())
+      ? parsedDate.toLocaleDateString('de-DE')
+      : eintrag?.datum || 'unbekanntem Datum'
+    setAppConfirmation({
+      title: 'Eintrag löschen?',
+      description: `Der Eintrag vom ${date} wird dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.`,
+      confirmLabel: 'Löschen',
+      onConfirm: async () => {
+        try {
+          await currentData.deleteEintrag(id)
+          setAppConfirmation(null)
+        } catch (error) {
+          console.error('Fehler beim Löschen:', error)
+          toast.error('Der Eintrag konnte nicht gelöscht werden. Bitte versuche es erneut.')
+          throw error
+        }
+      },
+    })
   }, [currentData]);
 
   const handleFormClose = useCallback(() => {
@@ -493,16 +460,18 @@ const App = () => {
                           {/* Mobile view toggle */}
                           <div className="sm:hidden flex items-center gap-0.5 bg-green-800/5 rounded-lg p-0.5">
                             <button
+                              type="button"
                               onClick={() => toggleMobileView('cards')}
-                              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${mobileViewMode === 'cards' ? 'bg-white shadow-sm text-green-800' : 'text-green-900/80'}`}
+                              className={`flex min-h-11 cursor-pointer items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 ${mobileViewMode === 'cards' ? 'bg-white shadow-sm text-green-800' : 'text-green-900/80'}`}
                               aria-label="Kartenansicht"
                             >
                               <LayoutList size={12} />
                               Karten
                             </button>
                             <button
+                              type="button"
                               onClick={() => toggleMobileView('table')}
-                              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${mobileViewMode === 'table' ? 'bg-white shadow-sm text-green-800' : 'text-green-900/80'}`}
+                              className={`flex min-h-11 cursor-pointer items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 ${mobileViewMode === 'table' ? 'bg-white shadow-sm text-green-800' : 'text-green-900/80'}`}
                               aria-label="Tabellenansicht"
                             >
                               <Table size={12} />
@@ -513,7 +482,25 @@ const App = () => {
                             {filteredEintraege.length} von {currentData.eintraege.length} Einträge
                           </span>
                         </div>
-                        <EintragTable
+                        {filteredEintraege.length === 0 ? (
+                          <div className="rounded-xl bg-white px-5 py-10 text-center shadow">
+                            <h3 className="font-semibold text-green-900">
+                              {currentData.eintraege.length === 0 ? 'Noch keine Einträge' : 'Keine passenden Einträge'}
+                            </h3>
+                            <p className="mx-auto mt-2 max-w-lg text-sm text-gray-600">
+                              {currentData.eintraege.length === 0
+                                ? 'Erfasse den ersten Eintrag für diesen Jagdbezirk.'
+                                : 'Die aktuellen Filter liefern keine Treffer. Setze sie zurück oder passe die Auswahl an.'}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={currentData.eintraege.length === 0 ? () => setShowNewEntryForm(true) : handleResetFilters}
+                              className="mt-4 min-h-11 cursor-pointer rounded-xl bg-green-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+                            >
+                              {currentData.eintraege.length === 0 ? 'Ersten Eintrag erfassen' : 'Filter zurücksetzen'}
+                            </button>
+                          </div>
+                        ) : <EintragTable
                           eintraege={filteredEintraege}
                           jaegerProfiles={jaegerProfiles}
                           onEdit={handleEdit}
@@ -525,7 +512,7 @@ const App = () => {
                           currentUser={currentUser}
                           mobileViewMode={mobileViewMode}
                           highlightId={highlightId}
-                        />
+                        />}
                       </>
                     )}
                   </>
@@ -604,6 +591,14 @@ const App = () => {
               onImport={handleImport}
             />
           </Suspense>
+          <ConfirmDialog
+            open={appConfirmation !== null}
+            title={appConfirmation?.title || ''}
+            description={appConfirmation?.description || ''}
+            confirmLabel={appConfirmation?.confirmLabel || ''}
+            onCancel={() => setAppConfirmation(null)}
+            onConfirm={appConfirmation?.onConfirm || (async () => {})}
+          />
           <Suspense fallback={null}>
             <KategorienFixDialog
               isOpen={showFixDialog}

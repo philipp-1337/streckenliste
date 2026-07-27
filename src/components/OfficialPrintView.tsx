@@ -95,7 +95,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
           <button
             onClick={() => navigate(-1)}
             disabled={isPrinting}
-            className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl shadow-lg border border-gray-200 font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2 cursor-pointer"
+            className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-gray-200 bg-white px-6 py-3 font-medium text-gray-700 shadow-lg transition-[transform,box-shadow] hover:scale-105 hover:bg-gray-50 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none"
           >
             <X size={20} />
             Schließen
@@ -113,7 +113,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
               }, 300);
             }}
             disabled={isPrinting}
-            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl shadow-lg font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait cursor-pointer"
+            className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-green-600 px-6 py-3 font-medium text-white shadow-lg transition-[transform,box-shadow] hover:scale-105 hover:bg-green-700 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none disabled:cursor-wait disabled:opacity-50"
           >
             {isPrinting ? (
               <>
@@ -130,7 +130,7 @@ const OfficialPrintView: React.FC<OfficialPrintViewProps> = ({ eintraege, jagdja
           <button
             onClick={() => exportPdf(eintraege, jagdjahr || '', jagdbezirk)}
             disabled={isPrinting}
-            className="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-xl shadow-lg font-medium transition-all hover:shadow-xl hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-green-700 px-6 py-3 font-medium text-white shadow-lg transition-[transform,box-shadow] hover:scale-105 hover:bg-green-800 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             <FileDown size={20} />
             PDF Export

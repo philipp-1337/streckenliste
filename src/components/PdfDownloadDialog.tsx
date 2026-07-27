@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { FileDown, Printer, X } from 'lucide-react';
+import { FileDown, Printer } from 'lucide-react';
 import Spinner from '@components/Spinner';
+import { DialogShell } from '@components/DialogShell';
 
 interface PdfDownloadDialogProps {
   blob: Blob;
@@ -44,19 +45,21 @@ const PdfDownloadDialog: React.FC<PdfDownloadDialogProps> = ({ blob, filename, o
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl p-8 shadow-2xl max-w-sm w-full text-center">
+    <DialogShell
+      title="PDF ist fertig"
+      description={isIos
+        ? 'Speichere oder teile das Dokument über das Systemmenü.'
+        : 'Lade das Dokument herunter oder öffne den Druckdialog.'}
+      onClose={onClose}
+      closeDisabled={loading}
+      size="sm"
+    >
+      <div className="text-center">
         <div className="flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mx-auto mb-4">
           <FileDown size={32} className="text-green-700" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">PDF ist fertig</h3>
-        <p className="text-sm text-gray-500 mb-6">
-          {isIos
-            ? 'Tippe auf den Button um das PDF zu speichern oder zu teilen.'
-            : 'Lade das PDF herunter oder öffne den Druckdialog.'}
-        </p>
         {error && (
-          <p className="text-sm text-red-600 mb-4">{error}</p>
+          <p role="alert" className="mb-4 rounded-xl bg-red-50 p-3 text-left text-sm text-red-700">{error}</p>
         )}
         <div className="space-y-2.5">
           {isIos ? (
@@ -86,16 +89,9 @@ const PdfDownloadDialog: React.FC<PdfDownloadDialogProps> = ({ blob, filename, o
               Drucken
             </button>
           )}
-          <button
-            onClick={onClose}
-            className="flex items-center justify-center gap-1.5 w-full text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer py-1.5"
-          >
-            <X size={14} />
-            Schließen
-          </button>
         </div>
       </div>
-    </div>
+    </DialogShell>
   );
 };
 

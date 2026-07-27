@@ -37,6 +37,12 @@ typography:
     fontWeight: 500
     lineHeight: 1.4
     letterSpacing: "normal"
+  print-compact:
+    fontFamily: "ui-sans-serif, system-ui, sans-serif"
+    fontSize: "0.6rem"
+    fontWeight: 400
+    lineHeight: 1.2
+    letterSpacing: "normal"
 rounded:
   field: "8px"
   control: "12px"
@@ -135,6 +141,8 @@ The palette combines deep forest greens with paper-white work surfaces and neutr
 - **Label** (500, 0.875rem, 1.4): Field labels, buttons, table headings, and compact controls.
 
 **The Operational Readability Rule.** Interactive fields remain at least 16px on mobile; genuinely secondary metadata may use 12–14px.
+
+The official print table uses a dedicated 0.6rem compact step to fit its fixed paper format. This is a print-only exception and must not be used in interactive UI.
 
 ## Layout
 

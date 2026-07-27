@@ -102,7 +102,7 @@ const ActionHandler: React.FC = () => {
         {!verifying && invalidCode && (
           <div className="text-center space-y-4">
             <p className="text-red-600 font-medium">Dieser Link ist ungültig oder abgelaufen.</p>
-            <p className="text-sm text-gray-500">Bitte fordere auf der Login-Seite einen neuen Passwort-Reset-Link an.</p>
+            <p className="text-sm text-gray-500">Bitte fordere auf der Anmeldeseite einen neuen Link zum Zurücksetzen an.</p>
             <button
               onClick={() => navigate('/')}
               className="mt-4 w-full bg-green-700 hover:bg-green-800 text-white font-bold py-2.5 px-4 rounded-xl transition-colors cursor-pointer"

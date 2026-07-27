@@ -277,15 +277,17 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           Es sind keine aktiven Jägerprofile verfügbar. Bitte aktiviere oder erstelle zuerst ein Jägerprofil in der Benutzerverwaltung.
         </div>
       )}
-      <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-5">
         <input type="hidden" {...register('jaegerId')} />
+        <section aria-labelledby="pflichtangaben-title" className="space-y-4">
+        <h4 id="pflichtangaben-title" className="text-sm font-semibold text-green-900">Pflichtangaben</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Datum *</label>
             <input
               type="date"
               {...register('datum')}
-              className={`w-full min-w-0 max-w-full border rounded-lg px-3 py-2 h-[42px] text-base [appearance:textfield] [-webkit-appearance:none] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+              className={`min-h-11 w-full min-w-0 max-w-full rounded-lg border px-3 py-2 text-base [appearance:textfield] [-webkit-appearance:none] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
                 errors.datum ? 'border-red-500' : 'border-gray-300'
               }`}
               style={{ boxSizing: 'border-box' }}
@@ -299,7 +301,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             <select
               {...register('wildart')}
               onChange={(e) => handleWildartChange(e.target.value)}
-              className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+              className={`min-h-11 w-full rounded-lg border px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
                 errors.wildart ? 'border-red-500' : 'border-gray-300'
               }`}
             >
@@ -320,7 +322,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               {...register('kategorie')}
               onChange={(e) => handleKategorieChange(e.target.value)}
               disabled={!watchedWildart}
-              className={`w-full border rounded-lg px-3 py-2 disabled:bg-gray-100 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+              className={`min-h-11 w-full rounded-lg border px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 disabled:bg-gray-100 ${
                 errors.kategorie ? 'border-red-500' : 'border-gray-300'
               }`}
             >
@@ -359,6 +361,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             )}
           </div>
         </div>
+        </section>
 
         {/* Automatisch ausgefüllte Felder */}
         {watchedKategorie && watchedWildart !== 'Sonstige' && (
@@ -379,6 +382,8 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           </div>
         )}
 
+        <section aria-labelledby="zuordnung-title" className="space-y-3">
+        <h4 id="zuordnung-title" className="text-sm font-semibold text-green-900">Zuordnung und Messwerte</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-1">Gewicht (kg)</label>
@@ -386,7 +391,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
               type="number"
               step="0.1"
               {...register('gewicht')}
-              className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+              className={`min-h-11 w-full rounded-lg border px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30 ${
                 errors.gewicht ? 'border-red-500' : 'border-gray-300'
               }`}
             />
@@ -401,7 +406,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
                 type="number"
                 step="0.01"
                 {...register('einnahmen')}
-                className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+                className={`min-h-11 w-full rounded-lg border px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30 ${
                   errors.einnahmen ? 'border-red-500' : 'border-gray-300'
                 }`}
               />
@@ -421,7 +426,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
                     trigger(['jaegerId', 'jaeger'])
                   }}
                   disabled={loadingJaegerProfiles || !adminHasSelectableProfile}
-                  className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+                  className={`min-h-11 w-full rounded-lg border px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30 ${
                     errors.jaeger ? 'border-red-500' : 'border-gray-300'
                   }`}
                 >
@@ -442,7 +447,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
                   type="text"
                   {...register('jaeger')}
                   readOnly
-                  className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+                  className={`min-h-11 w-full rounded-lg border bg-gray-50 px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30 ${
                     errors.jaeger ? 'border-red-500' : 'border-gray-300'
                   }`}
                 />
@@ -457,7 +462,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             <input
               type="text"
               {...register('ort')}
-              className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+              className={`min-h-11 w-full rounded-lg border px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30 ${
                 errors.ort ? 'border-red-500' : 'border-gray-300'
               }`}
             />
@@ -466,7 +471,15 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             )}
           </div>
         </div>
+        </section>
 
+        <details className="group rounded-xl border border-green-200 bg-green-50/40" open={Boolean(editingEntry)}>
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3 font-semibold text-green-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2">
+            Weitere Angaben
+            <span aria-hidden="true" className="text-sm transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none">⌄</span>
+          </summary>
+          <div className="space-y-4 border-t border-green-100 px-4 py-4">
+          <h4 className="text-sm font-semibold text-green-900">Besondere Umstände</h4>
         {watchedWildart && watchedWildart !== 'Sonstige' && (
           <div className="flex items-center gap-2">
             <input
@@ -491,25 +504,26 @@ export const EintragForm: React.FC<EintragFormProps> = ({
                 onClick={() => handleSonstigeAnzahlChange(sonstigeAnzahl - 1)}
                 disabled={sonstigeAnzahl <= 1}
                 aria-label="Anzahl verringern"
-                className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-lg font-medium hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="flex size-11 cursor-pointer items-center justify-center rounded-lg border border-gray-300 text-lg font-medium hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
               >−</button>
               <span className="w-8 text-center font-semibold" aria-live="polite" aria-atomic="true">{sonstigeAnzahl}</span>
               <button
                 type="button"
                 onClick={() => handleSonstigeAnzahlChange(sonstigeAnzahl + 1)}
                 aria-label="Anzahl erhöhen"
-                className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-lg font-medium hover:bg-gray-100 cursor-pointer"
+                className="flex size-11 cursor-pointer items-center justify-center rounded-lg border border-gray-300 text-lg font-medium hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
               >+</button>
             </div>
           </div>
         )}
 
         <div>
+          <h4 className="mb-3 text-sm font-semibold text-green-900">Dokumentation</h4>
           <label className="block text-sm font-medium mb-1">Bemerkung</label>
           <input
             type="text"
             {...register('bemerkung')}
-            className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+            className={`min-h-11 w-full rounded-lg border px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30 ${
               errors.bemerkung ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="z.B. Erleger, Unfallwild, Drückjagd, etc."
@@ -524,7 +538,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           <input
             type="text"
             {...register('wildursprungsschein')}
-            className={`w-full border rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 ${
+            className={`min-h-11 w-full rounded-lg border px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30 ${
               errors.wildursprungsschein ? 'border-red-500' : 'border-gray-300'
             }`}
             placeholder="z.B. 124368"
@@ -547,12 +561,14 @@ export const EintragForm: React.FC<EintragFormProps> = ({
             <p className="text-red-500 text-sm mt-1">{errors.notizen.message}</p>
           )}
         </div>
+          </div>
+        </details>
 
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
           <button
             type="submit"
             disabled={!isValid || loading || isUserWithoutAssignment || loadingJaegerProfiles || adminNeedsJaegerSelection || (isAdmin && !adminHasSelectableProfile)}
-            className="w-full sm:w-auto bg-green-700 hover:bg-green-800 text-white px-6 py-2 rounded-xl transition-colors flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300 cursor-pointer"
+            className="flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-green-700 px-6 py-2 text-white transition-colors hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:hover:bg-gray-300 sm:w-auto"
           >
             {loading ? <Spinner size={20} /> : null}
             {loading ? (editingEntry ? 'Aktualisiere...' : 'Speichere...') : (editingEntry ? 'Aktualisieren' : 'Speichern')}
@@ -560,7 +576,7 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           <button
             type="button"
             onClick={onCancel}
-            className="w-full sm:w-auto border border-gray-300 hover:border-gray-400 text-gray-600 hover:text-gray-800 hover:bg-gray-50 px-6 py-2 rounded-xl transition-colors cursor-pointer"
+            className="min-h-11 w-full cursor-pointer rounded-xl border border-gray-300 px-6 py-2 text-gray-600 transition-colors hover:border-gray-400 hover:bg-gray-50 hover:text-gray-800 sm:w-auto"
             disabled={loading}
           >
             Abbrechen

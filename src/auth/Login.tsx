@@ -30,7 +30,7 @@ const Login: React.FC<LoginProps> = ({ isLoggingIn, setIsLoggingIn }) => {
     } catch (err: unknown) {
       const error = err as FirebaseError;
       if (error.code === 'auth/invalid-credential') {
-        toast.error('Ungültige Zugangsdaten. Bitte überprüfe Email und Passwort.');
+        toast.error('Ungültige Zugangsdaten. Bitte überprüfe E-Mail-Adresse und Passwort.');
       } else if (error.code === 'auth/user-disabled') {
         toast.error('Dieser Account wurde deaktiviert. Bitte wende dich an deinen Administrator.');
       } else {
@@ -47,13 +47,15 @@ const Login: React.FC<LoginProps> = ({ isLoggingIn, setIsLoggingIn }) => {
     setResetLoading(true);
     try {
       await sendPasswordResetEmail(auth, resetEmail.trim());
-      toast.success(`Passwort-Reset-Link wurde an ${resetEmail.trim()} gesendet.`);
+      toast.success('Falls ein Konto zu dieser E-Mail-Adresse existiert, wurde ein Link zum Zurücksetzen gesendet.');
       setShowReset(false);
       setResetEmail('');
     } catch (err: unknown) {
       const error = err as FirebaseError;
       if (error.code === 'auth/user-not-found') {
-        toast.error('Keine Account mit dieser E-Mail-Adresse gefunden.');
+        toast.success('Falls ein Konto zu dieser E-Mail-Adresse existiert, wurde ein Link zum Zurücksetzen gesendet.');
+        setShowReset(false);
+        setResetEmail('');
       } else {
         toast.error('Fehler beim Senden. Bitte versuche es später erneut.');
       }
@@ -99,23 +101,16 @@ const Login: React.FC<LoginProps> = ({ isLoggingIn, setIsLoggingIn }) => {
         </div>
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-green-900 mb-1">Email</label>
+            <label htmlFor="email" className="block text-sm font-medium text-green-900 mb-1">E-Mail-Adresse</label>
             <input
               type="email"
               id="email"
-              placeholder="Email"
+              placeholder="name@beispiel.de"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-4 py-2 text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
               required
               disabled={loading}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  // Trigger form submit manually
-                  (e.target as HTMLInputElement).form?.requestSubmit();
-                }
-              }}
             />
           </div>
           <div>
@@ -137,7 +132,7 @@ const Login: React.FC<LoginProps> = ({ isLoggingIn, setIsLoggingIn }) => {
             disabled={loading}
           >
             {loading ? <Spinner size={24} /> : null}
-            {loading ? 'Wird geprüft...' : 'Login'}
+            {loading ? 'Wird geprüft...' : 'Anmelden'}
           </button>
           <div className="text-center pt-1">
             <button

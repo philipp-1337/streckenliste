@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { X, Clock, CheckCircle2, XCircle, RotateCcw, PlusCircle, Edit2, Trash2 } from 'lucide-react';
+import { CheckCircle2, XCircle, RotateCcw, PlusCircle, Edit2, Trash2 } from 'lucide-react';
 import type { EintragHistory } from '@types';
+import { DialogShell } from '@components/DialogShell';
 
 interface HistoryModalProps {
   eintragId: string;
@@ -22,12 +23,15 @@ const ACTION_CONFIG: Record<EintragHistory['action'], { label: string; color: st
 export const HistoryModal: React.FC<HistoryModalProps> = ({ eintragId, wildart, datum, onClose, getHistory }) => {
   const [entries, setEntries] = useState<EintragHistory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    getHistory(eintragId).then(h => {
-      setEntries(h);
-      setLoading(false);
-    });
+    let active = true;
+    getHistory(eintragId)
+      .then(h => { if (active) setEntries(h) })
+      .catch(() => { if (active) setError(true) })
+      .finally(() => { if (active) setLoading(false) });
+    return () => { active = false };
   }, [eintragId, getHistory]);
 
   const formatDate = (ts: EintragHistory['timestamp']) => {
@@ -37,26 +41,19 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ eintragId, wildart, 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div
-        className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[80vh] flex flex-col"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <Clock size={18} className="text-gray-500" />
-            <h3 className="text-base font-semibold text-gray-900">
-              Verlauf – {wildart} ({new Date(datum).toLocaleDateString('de-DE')})
-            </h3>
-          </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer" aria-label="Schließen">
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="overflow-y-auto px-6 py-4 flex-1">
+    <DialogShell
+      title={`Verlauf – ${wildart}`}
+      description={new Date(datum).toLocaleDateString('de-DE')}
+      onClose={onClose}
+    >
+        <div>
           {loading && (
-            <p className="text-sm text-gray-500 text-center py-8">Wird geladen…</p>
+            <p role="status" className="py-8 text-center text-sm text-gray-500">Verlauf wird geladen…</p>
+          )}
+          {error && (
+            <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+              Der Verlauf konnte nicht geladen werden. Schließe den Dialog und versuche es erneut.
+            </div>
           )}
           {!loading && entries.length === 0 && (
             <p className="text-sm text-gray-500 text-center py-8">Kein Verlauf vorhanden.</p>
@@ -100,7 +97,6 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({ eintragId, wildart, 
             </ol>
           )}
         </div>
-      </div>
-    </div>
+    </DialogShell>
   );
 };

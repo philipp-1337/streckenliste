@@ -31,13 +31,14 @@ export const JagdjahrSelect: React.FC<JagdjahrSelectProps> = ({
           onClick={toggle}
           className="
             relative
-            w-10 h-10 rounded-xl
+            size-11 rounded-xl
             flex items-center justify-center
             bg-white/80 border-2 border-green-600
-            transition-all duration-200
+            transition-[transform,color,border-color] duration-200
             hover:bg-white hover:border-green-700
             active:scale-95
-            focus:outline-none focus:ring-2 focus:ring-green-500/20
+            motion-reduce:transform-none motion-reduce:transition-none
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2
             text-green-700
            cursor-pointer"
           title="Jagdjahr auswählen"
@@ -56,7 +57,7 @@ export const JagdjahrSelect: React.FC<JagdjahrSelectProps> = ({
           <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg border border-green-600 shadow-lg overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
             <button
               onClick={() => handleSelect('')}
-              className={`w-full px-4 py-2.5 text-left text-sm transition-colors ${
+              className={`min-h-11 w-full cursor-pointer px-4 py-2.5 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-green-700 ${
                 !jagdjahr 
                   ? 'bg-green-50 text-green-900 font-semibold' 
                   : 'text-green-800 hover:bg-green-50'
@@ -68,7 +69,7 @@ export const JagdjahrSelect: React.FC<JagdjahrSelectProps> = ({
               <button
                 key={jahr}
                 onClick={() => handleSelect(jahr)}
-                className={`w-full px-4 py-2.5 text-left text-sm transition-colors ${
+                className={`min-h-11 w-full cursor-pointer px-4 py-2.5 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-green-700 ${
                   jagdjahr === jahr 
                     ? 'bg-green-50 text-green-900 font-semibold' 
                     : 'text-green-800 hover:bg-green-50'
@@ -91,7 +92,7 @@ export const JagdjahrSelect: React.FC<JagdjahrSelectProps> = ({
       </label>
       <button
         onClick={toggle}
-        className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border-2 border-green-600 shadow-sm hover:border-green-700 hover:shadow-md transition-all active:scale-[0.98] min-w-[140px] cursor-pointer"
+        className="flex min-h-11 min-w-[140px] cursor-pointer items-center gap-2 rounded-lg border-2 border-green-600 bg-white px-3 py-2 shadow-sm transition-[transform,border-color] hover:border-green-700 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
         aria-label="Jagdjahr auswählen"
       >
         <span className="flex-1 text-left text-green-900 font-medium text-sm">
@@ -104,7 +105,7 @@ export const JagdjahrSelect: React.FC<JagdjahrSelectProps> = ({
         <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg border border-green-600 shadow-lg overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           <button
             onClick={() => handleSelect('')}
-            className={`w-full px-3 py-2.5 text-left text-sm transition-colors ${
+            className={`min-h-11 w-full cursor-pointer px-3 py-2.5 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-green-700 ${
               !jagdjahr 
                 ? 'bg-green-50 text-green-900 font-semibold' 
                 : 'text-green-800 hover:bg-green-50'
@@ -116,7 +117,7 @@ export const JagdjahrSelect: React.FC<JagdjahrSelectProps> = ({
             <button
               key={jahr}
               onClick={() => handleSelect(jahr)}
-              className={`w-full px-3 py-2.5 text-left text-sm transition-colors ${
+              className={`min-h-11 w-full cursor-pointer px-3 py-2.5 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-green-700 ${
                 jagdjahr === jahr 
                   ? 'bg-green-50 text-green-900 font-semibold' 
                   : 'text-green-800 hover:bg-green-50'

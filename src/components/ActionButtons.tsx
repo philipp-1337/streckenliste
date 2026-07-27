@@ -100,6 +100,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
   const renderButton = (button: typeof toggleButtons[0] | typeof exportButtons[0]) => {
     const Icon = button.icon;
     const isFilterButton = button.id === 'filter';
+    const isPrimaryButton = button.id === 'new-entry';
 
     return (
       <button
@@ -108,15 +109,17 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
         disabled={button.disabled}
         className={`
           group relative
-          size-11 sm:size-12 rounded-xl sm:rounded-2xl
+          h-11 rounded-xl sm:h-12 sm:rounded-2xl
           flex items-center justify-center
-          glass-bg backdrop-blur-xl backdrop-saturate-[180%]
+          ${isPrimaryButton ? 'gap-2 bg-green-700 px-3 text-white shadow-sm hover:bg-green-800 sm:px-4' : 'size-11 glass-bg backdrop-blur-xl backdrop-saturate-[180%] sm:size-12'}
           transition-[transform,color,box-shadow] duration-200 ease-out
           hover:scale-105 active:scale-95
           motion-reduce:transform-none motion-reduce:transition-none
           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2
           disabled:opacity-50 disabled:cursor-not-allowed
-          ${button.isActive
+          ${isPrimaryButton
+            ? ''
+            : button.isActive
             ? `glass-shadow-active ${button.activeColors}`
             : 'text-green-900/70 hover:text-green-900/90 glass-shadow'
           }
@@ -124,12 +127,12 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
         title={button.title}
         aria-label={button.title}
       >
-        <div className={`
+        {!isPrimaryButton && <div className={`
           absolute inset-0 rounded-xl sm:rounded-2xl
           bg-gradient-active opacity-0
           transition-opacity duration-300
           ${button.isActive ? 'opacity-100' : 'group-hover:opacity-50'}
-        `} />
+        `} />}
 
         <Icon
           size={18}
@@ -141,9 +144,14 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
             ${button.iconClass}
           `}
         />
+        {isPrimaryButton && (
+          <span className="relative z-10 whitespace-nowrap text-sm font-semibold">
+            {showNewEntryForm ? 'Formular schließen' : 'Eintrag erfassen'}
+          </span>
+        )}
 
         {isFilterButton && activeFilterCount > 0 && (
-          <span className="absolute -top-1 -right-1 z-20 min-w-[18px] h-[18px] px-1 rounded-full bg-green-700 text-white text-[10px] leading-[18px] font-semibold">
+          <span className="absolute -right-1 -top-1 z-20 min-w-[20px] rounded-full bg-green-700 px-1 text-center text-xs font-semibold leading-5 text-white">
             {activeFilterCount}
           </span>
         )}

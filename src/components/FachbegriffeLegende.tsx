@@ -1,8 +1,8 @@
 import { wildarten } from '@data/wildarten';
 
 const GeschlechtIcon: React.FC<{ geschlecht: string }> = ({ geschlecht }) => {
-  if (geschlecht === 'm') return <span className="text-blue-500/70 text-[10px] leading-none align-middle" title="männlich">{'♂\uFE0E'}</span>;
-  if (geschlecht === 'w') return <span className="text-pink-500/70 text-[10px] leading-none align-middle" title="weiblich">{'♀\uFE0E'}</span>;
+  if (geschlecht === 'm') return <span className="align-middle text-xs leading-none text-blue-700/80" title="männlich">{'♂\uFE0E'}</span>;
+  if (geschlecht === 'w') return <span className="align-middle text-xs leading-none text-pink-700/80" title="weiblich">{'♀\uFE0E'}</span>;
   return null;
 };
 
@@ -22,7 +22,7 @@ export const FachbegriffeLegende: React.FC = () => {
 
           return (
             <div key={wildart} className="px-3 py-2.5">
-              <p className="text-[10px] font-bold text-green-800 uppercase tracking-wider mb-2">
+              <p className="mb-2 text-xs font-bold uppercase tracking-wide text-green-800">
                 {wildart}
               </p>
               <div className="space-y-0.5">
@@ -35,7 +35,7 @@ export const FachbegriffeLegende: React.FC = () => {
                         {isAmbiguous && <GeschlechtIcon geschlecht={kat.geschlecht} />}
                       </span>
                       {kat.altersklasse && (
-                        <span className="text-green-900/35 shrink-0 tabular-nums text-[10px]">{kat.altersklasse}</span>
+                        <span className="shrink-0 text-xs tabular-nums text-green-900/60">{kat.altersklasse}</span>
                       )}
                     </div>
                   );

@@ -4,7 +4,7 @@
  */
 
 export const SkeletonTable = () => (
-  <div className="bg-white rounded-lg shadow overflow-hidden animate-pulse">
+  <div className="animate-pulse overflow-hidden rounded-lg bg-white shadow motion-reduce:animate-none">
     {/* Header */}
     <div className="h-12 bg-gray-300" />
     
@@ -28,7 +28,7 @@ export const SkeletonTable = () => (
 );
 
 export const SkeletonStatistik = () => (
-  <div className="bg-white rounded-lg shadow p-6 animate-pulse">
+  <div className="animate-pulse rounded-lg bg-white p-6 shadow motion-reduce:animate-none">
     <div className="h-6 w-32 bg-gray-300 rounded mb-4" />
     
     <div className="space-y-4">
@@ -47,7 +47,7 @@ export const SkeletonStatistik = () => (
 );
 
 export const SkeletonForm = () => (
-  <div className="bg-white rounded-lg shadow p-6 animate-pulse">
+  <div className="animate-pulse rounded-lg bg-white p-6 shadow motion-reduce:animate-none">
     <div className="h-6 w-48 bg-gray-300 rounded mb-6" />
     
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -67,7 +67,7 @@ export const SkeletonForm = () => (
 );
 
 export const SkeletonCard = () => (
-  <div className="bg-white rounded-lg shadow p-4 animate-pulse">
+  <div className="animate-pulse rounded-lg bg-white p-4 shadow motion-reduce:animate-none">
     <div className="h-5 w-32 bg-gray-300 rounded mb-3" />
     <div className="space-y-2">
       <div className="h-4 w-full bg-gray-200 rounded" />

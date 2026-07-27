@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { AlertCircle, CheckCircle2, Play, Eye, X } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Play, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { fixKategorienFuerJagdbezirk, previewKategorienKorrektur } from '@utils/fixKategorien';
 import useAuth from '@hooks/useAuth';
+import { DialogShell } from '@components/DialogShell';
+import { ConfirmDialog } from '@components/ConfirmDialog';
 
 interface KategorienFixDialogProps {
   isOpen: boolean;
@@ -14,6 +16,7 @@ export const KategorienFixDialog: React.FC<KategorienFixDialogProps> = ({ isOpen
   const [loading, setLoading] = useState(false);
   const [vorschau, setVorschau] = useState<Awaited<ReturnType<typeof previewKategorienKorrektur>> | null>(null);
   const [ergebnis, setErgebnis] = useState<Awaited<ReturnType<typeof fixKategorienFuerJagdbezirk>> | null>(null);
+  const [confirmFix, setConfirmFix] = useState(false);
 
   const handleVorschau = async () => {
     if (!currentUser?.jagdbezirkId) {
@@ -40,10 +43,6 @@ export const KategorienFixDialog: React.FC<KategorienFixDialogProps> = ({ isOpen
       return;
     }
 
-    if (!window.confirm('Möchten Sie wirklich alle fehlerhaften Kategorien korrigieren?')) {
-      return;
-    }
-
     setLoading(true);
     try {
       const result = await fixKategorienFuerJagdbezirk(currentUser.jagdbezirkId);
@@ -67,24 +66,15 @@ export const KategorienFixDialog: React.FC<KategorienFixDialogProps> = ({ isOpen
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <AlertCircle className="w-6 h-6 text-yellow-500" />
-            <h2 className="text-xl font-semibold">Kategorien-Korrektur</h2>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
-            title="Schließen"
-            aria-label="Schließen"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="p-6">
+    <>
+    <DialogShell
+      title="Kategorien-Korrektur"
+      description="Prüft ältere CSV-Einträge und korrigiert bekannte Kategorien automatisch."
+      onClose={onClose}
+      closeDisabled={loading}
+      size="lg"
+    >
+        <div>
           <div className="space-y-4 mb-6">
             <p className="text-gray-700">
               Dieses Tool korrigiert fehlerhafte Kategorien aus dem CSV-Import. 
@@ -103,9 +93,9 @@ export const KategorienFixDialog: React.FC<KategorienFixDialogProps> = ({ isOpen
               </button>
 
               <button
-                onClick={handleFix}
+                onClick={() => setConfirmFix(true)}
                 disabled={loading || !vorschau}
-                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50 cursor-pointer"
+                className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-green-700 px-4 py-2 text-white hover:bg-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2 disabled:opacity-50"
               >
                 <Play className="w-4 h-4" />
                 Kategorien korrigieren
@@ -200,10 +190,21 @@ export const KategorienFixDialog: React.FC<KategorienFixDialogProps> = ({ isOpen
             </div>
           )}
         </div>
-      </div>
-    </div>
+    </DialogShell>
+    <ConfirmDialog
+      open={confirmFix}
+      title="Kategorien korrigieren?"
+      description="Die in der Vorschau aufgeführten Einträge werden dauerhaft angepasst."
+      confirmLabel="Korrigieren"
+      tone="primary"
+      onCancel={() => setConfirmFix(false)}
+      onConfirm={async () => {
+        await handleFix()
+        setConfirmFix(false)
+      }}
+    />
+    </>
   );
 };
 
 export default KategorienFixDialog;
-

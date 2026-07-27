@@ -45,7 +45,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
         <button
           type="button"
           onClick={onResetFilters}
-          className="text-sm font-medium text-green-800 hover:text-green-900 underline underline-offset-2 cursor-pointer"
+          className="min-h-11 cursor-pointer rounded-lg px-2 text-sm font-medium text-green-800 underline underline-offset-2 hover:text-green-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700"
         >
           Filter zurücksetzen
         </button>
@@ -55,7 +55,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
           value={filter.wildart}
           onChange={(e) => onFilterChange({...filter, wildart: e.target.value})}
           aria-label="Wildart filtern"
-          className="border border-gray-300 rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+          className="min-h-11 rounded-lg border border-gray-300 px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30"
         >
           <option value="">Alle Wildarten</option>
           {Object.keys(wildarten).map(wildart => (
@@ -68,13 +68,13 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
           aria-label="Nach Fachbegriff filtern"
           value={kategorieInput}
           onChange={(e) => setKategorieInput(e.target.value)}
-          className="border border-gray-300 rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+          className="min-h-11 rounded-lg border border-gray-300 px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30"
         />
         <select
           value={filter.jaegerId}
           onChange={(e) => onFilterChange({ ...filter, jaegerId: e.target.value })}
           aria-label="Nach Jäger filtern"
-          className="border border-gray-300 rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+          className="min-h-11 rounded-lg border border-gray-300 px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30"
         >
           <option value="">Alle Jäger</option>
           {jaegerOptions.map(option => (
@@ -85,7 +85,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
           value={filter.jahr}
           onChange={(e) => onFilterChange({...filter, jahr: e.target.value})}
           aria-label="Jahr filtern"
-          className="border border-gray-300 rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+          className="min-h-11 rounded-lg border border-gray-300 px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30"
         >
           <option value="">Alle Jahre</option>
           <option value="2024">2024</option>
@@ -95,7 +95,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = memo(({ filter, onFilterC
           value={filter.status}
           onChange={(e) => onFilterChange({...filter, status: e.target.value})}
           aria-label="Status filtern"
-          className="border border-gray-300 rounded-lg px-3 py-2 h-[42px] text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+          className="min-h-11 rounded-lg border border-gray-300 px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30"
         >
           <option value="">Alle Status</option>
           <option value="approved">Freigegeben</option>
