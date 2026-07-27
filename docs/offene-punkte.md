@@ -53,6 +53,9 @@ Multi-Tenant-Betrieb noch fehlt.
   Cloud Function `deactivateBezirkUser` (Muster wie `createBezirkUser`),
   die zusätzlich den Auth-Account sperrt. Die Firestore-Rule für
   `delete` auf `/users/{userId}` ist entsprechend auf `false` gesetzt.
+
+**Als Nächstes dran, in dieser Reihenfolge:**
+
 - [ ] **Debug-Logs im Produktions-Bundle:** `src/hooks/useFirestore.ts`
   loggt jede Snapshot-Aktualisierung in die Konsole
   (`📡 onSnapshot update …`, `🔄 Manual fetch …`). Entfernen oder hinter
@@ -60,15 +63,18 @@ Multi-Tenant-Betrieb noch fehlt.
 - [ ] **`enableIndexedDbPersistence` ist deprecated** (Firebase v12):
   In `src/firebase.ts` auf `initializeFirestore` mit
   `persistentLocalCache` umstellen, bevor die API entfernt wird.
-- [ ] **Jägerprofile im Eintragsformular können veralten:** `App.tsx`
-  lädt die Profile einmalig pro Bezirk (kein Listener). Neu angelegte
-  Profile erscheinen im Formular erst nach Reload. Bestandsverhalten,
-  niedrige Priorität.
 - [ ] **Deaktivierte Auth-Accounts endgültig löschen**, sobald sicher ist,
   dass nichts fehlt (deaktiviert am 2026-07-27):
   - `aFR1ouZB1QRIeiKeUnKHjaYfKu93` (philippkanter@gmail.com, Ex-Dummy-Admin)
   - `qHqCpDoRW3bjZpWxECzrjrKBMUY2` (swuerlich@gmail.com, Ex-Dummy-Sandra)
   - `tGPUQDVHu2Xq8wq8pdVKg8k3LSU2` (philippkanter+jagd@gmail.com, „Philipp Test")
+
+Danach, ohne festen Termin:
+
+- [ ] **Jägerprofile im Eintragsformular können veralten:** `App.tsx`
+  lädt die Profile einmalig pro Bezirk (kein Listener). Neu angelegte
+  Profile erscheinen im Formular erst nach Reload. Bestandsverhalten,
+  niedrige Priorität.
 - [ ] **firebase-functions-Versionswarnung der CLI:** 7.3.0 ist aktuell
   genug, die CLI meckert trotzdem. Upgrade bei Gelegenheit.
 
