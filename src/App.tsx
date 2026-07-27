@@ -1,6 +1,6 @@
 import { useState, useCallback, lazy, Suspense, useMemo, useEffect } from 'react';
 import { Toaster, toast } from 'sonner';
-import { Bell, HomeIcon, Landmark, LayoutList, Settings, Table } from 'lucide-react';
+import { Bell, HomeIcon, Landmark, LayoutList, LogOut, Settings, Table } from 'lucide-react';
 import usePdfExport from '@hooks/usePdfExport';
 import type { Eintrag, JaegerProfile } from '@types';
 import { useFirestore } from '@hooks/useFirestore';
@@ -567,6 +567,20 @@ const App = () => {
                         </Link>
                       </div>
                     )}
+                    <div className="mt-6 border-t border-green-200 pt-6">
+                      <h3 className="mb-1 text-base font-semibold text-green-800">Konto</h3>
+                      <p className="mb-3 text-sm text-green-900/70">
+                        Beendet die Sitzung auf diesem Gerät.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2"
+                      >
+                        <LogOut size={17} />
+                        Abmelden
+                      </button>
+                    </div>
                   </>
                 } />
                 <Route path="/einstellungen/jagdbezirke/neu" element={
@@ -583,7 +597,7 @@ const App = () => {
               </Routes>
             </div>
           </div>
-          <Nav onLogout={handleLogout} currentUser={currentUser} pendingCount={pendingCount} />
+          <Nav currentUser={currentUser} pendingCount={pendingCount} />
           <Suspense fallback={null}>
             <ImportDialog
               isOpen={showImportDialog}

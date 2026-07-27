@@ -383,38 +383,8 @@ export const EintragForm: React.FC<EintragFormProps> = ({
         )}
 
         <section aria-labelledby="zuordnung-title" className="space-y-3">
-        <h4 id="zuordnung-title" className="text-sm font-semibold text-green-900">Zuordnung und Messwerte</h4>
+        <h4 id="zuordnung-title" className="text-sm font-semibold text-green-900">Zuordnung</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Gewicht (kg)</label>
-            <input
-              type="number"
-              step="0.1"
-              {...register('gewicht')}
-              className={`min-h-11 w-full rounded-lg border px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30 ${
-                errors.gewicht ? 'border-red-500' : 'border-gray-300'
-              }`}
-            />
-            {errors.gewicht && (
-              <p className="text-red-500 text-sm mt-1">{errors.gewicht.message}</p>
-            )}
-          </div>
-          {currentUser?.role === 'admin' && (
-            <div>
-              <label className="block text-sm font-medium mb-1">Einnahmen (€)</label>
-              <input
-                type="number"
-                step="0.01"
-                {...register('einnahmen')}
-                className={`min-h-11 w-full rounded-lg border px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30 ${
-                  errors.einnahmen ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {errors.einnahmen && (
-                <p className="text-red-500 text-sm mt-1">{errors.einnahmen.message}</p>
-              )}
-            </div>
-          )}
           <div>
             <label className="block text-sm font-medium mb-1">Jäger</label>
             {isAdmin ? (
@@ -473,12 +443,46 @@ export const EintragForm: React.FC<EintragFormProps> = ({
         </div>
         </section>
 
+        {watchedWildart === 'Schwarzwild' && (
+          <div>
+            <label className="block text-sm font-medium mb-1">Wildursprungsschein</label>
+            <input
+              type="text"
+              {...register('wildursprungsschein')}
+              className={`min-h-11 w-full rounded-lg border px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30 ${
+                errors.wildursprungsschein ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="z. B. 124368"
+            />
+            {errors.wildursprungsschein && (
+              <p className="text-red-500 text-sm mt-1">{errors.wildursprungsschein.message}</p>
+            )}
+          </div>
+        )}
+
         <details className="group rounded-xl border border-green-200 bg-green-50/40" open={Boolean(editingEntry)}>
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3 font-semibold text-green-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2">
             Weitere Angaben
             <span aria-hidden="true" className="text-sm transition-transform duration-200 group-open:rotate-180 motion-reduce:transition-none">⌄</span>
           </summary>
           <div className="space-y-4 border-t border-green-100 px-4 py-4">
+          {isAdmin && (
+            <section aria-labelledby="admin-angaben-title" className="space-y-3">
+              <h4 id="admin-angaben-title" className="text-sm font-semibold text-green-900">Abrechnung</h4>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Gewicht (kg)</label>
+                  <input type="number" step="0.1" {...register('gewicht')} className={`min-h-11 w-full rounded-lg border px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30 ${errors.gewicht ? 'border-red-500' : 'border-gray-300'}`} />
+                  {errors.gewicht && <p className="mt-1 text-sm text-red-500">{errors.gewicht.message}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Einnahmen (€)</label>
+                  <input type="number" step="0.01" {...register('einnahmen')} className={`min-h-11 w-full rounded-lg border px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30 ${errors.einnahmen ? 'border-red-500' : 'border-gray-300'}`} />
+                  {errors.einnahmen && <p className="mt-1 text-sm text-red-500">{errors.einnahmen.message}</p>}
+                </div>
+              </div>
+            </section>
+          )}
           <h4 className="text-sm font-semibold text-green-900">Besondere Umstände</h4>
         {watchedWildart && watchedWildart !== 'Sonstige' && (
           <div className="flex items-center gap-2">
@@ -530,21 +534,6 @@ export const EintragForm: React.FC<EintragFormProps> = ({
           />
           {errors.bemerkung && (
             <p className="text-red-500 text-sm mt-1">{errors.bemerkung.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Wildursprungsschein (Schwarzwild)</label>
-          <input
-            type="text"
-            {...register('wildursprungsschein')}
-            className={`min-h-11 w-full rounded-lg border px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30 ${
-              errors.wildursprungsschein ? 'border-red-500' : 'border-gray-300'
-            }`}
-            placeholder="z.B. 124368"
-          />
-          {errors.wildursprungsschein && (
-            <p className="text-red-500 text-sm mt-1">{errors.wildursprungsschein.message}</p>
           )}
         </div>
 

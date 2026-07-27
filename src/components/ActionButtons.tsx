@@ -167,7 +167,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
   };
 
   return (
-    <div className="flex items-center gap-2 sm:gap-3">
+    <div className="flex w-full items-center gap-2 overflow-x-auto pb-1 sm:w-auto sm:gap-3 sm:overflow-visible sm:pb-0">
       {toggleButtons.filter(b => b.show).map(renderButton)}
 
       <div className="w-px h-6 sm:h-7 bg-green-900/10 mx-0.5" />

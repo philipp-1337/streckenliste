@@ -1,14 +1,13 @@
-import { BarChart3, HomeIcon, LogOutIcon, SettingsIcon, Users } from 'lucide-react';
+import { BarChart3, HomeIcon, SettingsIcon, Users } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { UserData } from '@types';
 
 interface NavProps {
-  onLogout: () => void;
   currentUser: UserData | null;
   pendingCount: number;
 }
 
-export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount }) => {
+export const Nav: React.FC<NavProps> = ({ currentUser, pendingCount }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isAdmin = currentUser?.role === 'admin';
@@ -40,13 +39,6 @@ export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount })
       label: 'Einstellungen',
       icon: SettingsIcon,
       onClick: () => navigate('/einstellungen'),
-    },
-    {
-      path: '/logout',
-      label: 'Abmelden',
-      icon: LogOutIcon,
-      onClick: onLogout,
-      isLogout: true,
     },
   ];
 
@@ -84,10 +76,7 @@ export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount })
                 transition-colors duration-200 motion-reduce:transition-none
                 relative rounded-3xl
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2
-                ${tab.isLogout ? 'ml-1 border-l border-green-900/10' : ''}
-                ${tab.isLogout
-                  ? 'text-green-900/35 hover:text-red-500'
-                  : isActive
+                ${isActive
                     ? 'text-green-800'
                     : 'text-green-900/60 hover:text-green-900/90 hover:bg-white/10'
                 }
@@ -96,14 +85,13 @@ export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount })
                   : 'before:absolute before:inset-0 before:rounded-3xl before:bg-gradient-active before:opacity-0 hover:before:opacity-50 before:transition-opacity before:duration-300'
                 }
               `}
-              title={tab.isLogout ? 'Abmelden' : undefined}
-              aria-current={isActive && !tab.isLogout ? 'page' : undefined}
+              aria-current={isActive ? 'page' : undefined}
             >
               <span className="relative z-10 flex flex-col items-center gap-1">
                 <span className="relative">
                   <Icon
                     size={20}
-                    strokeWidth={isActive && !tab.isLogout ? 2.5 : 2}
+                    strokeWidth={isActive ? 2.5 : 2}
                     className="transition-transform duration-200 group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
                   />
                   {'badge' in tab && (tab.badge ?? 0) > 0 && (
