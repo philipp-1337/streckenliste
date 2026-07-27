@@ -8,6 +8,8 @@ import { useStatistiken } from '@hooks/useStatistiken';
 import { useFilter } from '@hooks/useFilter';
 import { usePwaPrompt } from '@hooks/usePwaPrompt';
 import { usePwaUpdate } from '@hooks/usePwaUpdate';
+import { usePushNotifications } from '@hooks/usePushNotifications';
+import { usePushHint } from '@hooks/usePushHint';
 import { Header } from '@components/Header';
 import { ActionButtons } from '@components/ActionButtons';
 import { FilterPanel } from '@components/FilterPanel';
@@ -56,6 +58,10 @@ const App = () => {
   const [searchParams] = useSearchParams();
   // Ziel eines angetippten Push: die Übersicht hebt diesen Eintrag hervor.
   const highlightId = searchParams.get('eintrag') ?? undefined;
+  // Hier statt in PushSettings, damit der Zustand einmal ermittelt wird und der
+  // Hinweis-Toast ihn auch außerhalb der Einstellungsseite kennt.
+  const push = usePushNotifications();
+  usePushHint(push.status);
 
   const [editingEntry, setEditingEntry] = useState<Eintrag | null>(null);
   const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -514,7 +520,13 @@ const App = () => {
                     <h2 className="text-xl font-bold text-green-800 flex items-center gap-2.5 mb-4">
                       Einstellungen
                     </h2>
-                    <PushSettings />
+                    <PushSettings
+                      status={push.status}
+                      level={push.level}
+                      isBusy={push.isBusy}
+                      onToggle={() => void push.toggle()}
+                      onChangeLevel={(level) => void push.changeLevel(level)}
+                    />
                   </>
                 } />
 

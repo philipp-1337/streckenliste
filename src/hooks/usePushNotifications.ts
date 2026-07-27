@@ -32,12 +32,24 @@ const DEFAULT_LEVEL: PushLevel = 'status';
 
 export const usePushNotifications = () => {
   const { currentUser } = useAuth();
-  const [status, setStatus] = useState<PushStatus>('loading');
+  const [determinedStatus, setStatus] = useState<PushStatus>('loading');
   const [isBusy, setIsBusy] = useState(false);
 
   const level = currentUser?.pushLevel ?? DEFAULT_LEVEL;
+  const uid = currentUser?.uid;
+
+  // Abgeleitet statt im Effect gesetzt: ohne Anmeldung gilt der zuletzt
+  // ermittelte Wert nicht mehr, und ein setState im Effect-Körper löst
+  // Kaskaden-Renders aus.
+  const status: PushStatus = uid ? determinedStatus : 'loading';
 
   useEffect(() => {
+    // Ohne Anmeldung nicht ermitteln: getPushDeviceStatus ist ein Callable und
+    // würde ohne Konto zwangsläufig scheitern. Abhängigkeit ist die uid, nicht
+    // das Nutzerobjekt – das wird bei jedem Firestore-Snapshot neu erzeugt und
+    // würde die Ermittlung sonst wiederholt anstoßen.
+    if (!uid) return;
+
     let cancelled = false;
 
     const determineStatus = async () => {
@@ -94,7 +106,7 @@ export const usePushNotifications = () => {
 
     void determineStatus();
     return () => { cancelled = true; };
-  }, []);
+  }, [uid]);
 
   const toggle = useCallback(async () => {
     setIsBusy(true);

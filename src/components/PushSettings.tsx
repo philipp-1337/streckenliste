@@ -1,6 +1,16 @@
 import { BellIcon } from 'lucide-react';
-import { usePushNotifications } from '@hooks/usePushNotifications';
+import type { PushStatus } from '@hooks/usePushNotifications';
 import type { PushLevel } from '@types';
+
+// Reine Darstellung. Den Zustand hält App.tsx, damit er einmal ermittelt wird
+// und auch der Hinweis-Toast außerhalb dieser Seite darauf zugreifen kann.
+interface PushSettingsProps {
+  status: PushStatus;
+  level: PushLevel;
+  isBusy: boolean;
+  onToggle: () => void;
+  onChangeLevel: (level: PushLevel) => void;
+}
 
 const LEVEL_OPTIONS: Array<{ value: PushLevel; label: string; hint: string }> = [
   { value: 'wichtig', label: 'Nur Wichtiges', hint: 'Nur wenn etwas zu tun ist' },
@@ -8,9 +18,13 @@ const LEVEL_OPTIONS: Array<{ value: PushLevel; label: string; hint: string }> = 
   { value: 'alle', label: 'Alle Änderungen', hint: 'Zusätzlich Bearbeitungen und Löschungen' },
 ];
 
-export const PushSettings = () => {
-  const { status, level, isBusy, toggle, changeLevel } = usePushNotifications();
-
+export const PushSettings: React.FC<PushSettingsProps> = ({
+  status,
+  level,
+  isBusy,
+  onToggle,
+  onChangeLevel,
+}) => {
   if (status === 'loading') {
     return <p className="text-sm text-green-900/60">Benachrichtigungen werden geprüft …</p>;
   }
@@ -56,7 +70,7 @@ export const PushSettings = () => {
     <div className="flex flex-col gap-4">
       <button
         type="button"
-        onClick={() => void toggle()}
+        onClick={onToggle}
         disabled={isBusy}
         className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-green-900/10 cursor-pointer disabled:opacity-50 text-left"
       >
@@ -95,7 +109,7 @@ export const PushSettings = () => {
                 name="pushLevel"
                 value={option.value}
                 checked={level === option.value}
-                onChange={() => void changeLevel(option.value)}
+                onChange={() => onChangeLevel(option.value)}
                 className="mt-1 accent-green-700"
               />
               <span className="flex flex-col">
