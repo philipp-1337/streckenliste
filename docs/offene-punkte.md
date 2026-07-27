@@ -86,11 +86,12 @@ Reihenfolge nach Wichtigkeit:
   Jagdstrecken). Benötigt: Datenschutzerklärung, Impressum, vermutlich
   AV-Verträge mit den Pächtern. Kein Code-Thema, aber vor dem ersten
   fremden Bezirk zu klären.
-- [ ] **Error-Monitoring aktivieren:** Die technische Sentry-Integration
-  ist seit 2026-07-27 fertig. Offen sind nur noch Sentry-Projekt und
-  `VITE_SENTRY_DSN` vor dem Deploy. Danach werden Produktionsfehler und
-  React-Crashes erfasst; Performance-Tracing, Session Replay und
-  Standard-PII bleiben deaktiviert.
+- [ ] **Error-Monitoring später entscheiden:** Firebase Crashlytics
+  unterstützt keine Web-Apps. Vor dem Start mit fremden Nutzern zwischen
+  einem spezialisierten Anbieter wie Sentry und einer eigenen,
+  datensparsamen Weiterleitung über eine Firebase Function abwägen.
+  Bis dahin bleiben der lokale React Error Boundary sowie die
+  serverseitigen Firebase-/Cloud-Function-Logs bestehen.
 - [ ] **App Check:** Functions prüfen Auth, aber nicht die App-Herkunft.
   Optional; bei iOS-PWAs mit Zusatzaufwand verbunden. Erst sinnvoll,
   wenn es echte fremde Nutzer gibt.
