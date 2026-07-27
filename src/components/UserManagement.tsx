@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { UserPlus, Trash2, Users, X, Pencil, GitMerge, RotateCcw } from 'lucide-react';
+import { UserPlus, Trash2, Users, X, Pencil, GitMerge, RotateCcw, MapPin } from 'lucide-react';
 import { useUserManagement } from '@hooks/useUserManagement';
 import { JagdbezirkOnboarding } from '@components/JagdbezirkOnboarding';
 import useAuth from '@hooks/useAuth';
@@ -57,6 +57,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
   const [mergePreview, setMergePreview] = useState<{ assignmentCount: number, entryCount: number } | null>(null);
   const [isPreviewingMerge, setIsPreviewingMerge] = useState(false);
   const [isMergingJaegerProfiles, setIsMergingJaegerProfiles] = useState(false);
+  const [activeSection, setActiveSection] = useState<'users' | 'profiles' | 'districts'>('users');
 
   useEffect(() => {
     loadUsers();
@@ -292,6 +293,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
           <Users size={20} strokeWidth={2} />
           Benutzer
         </h2>
+        {activeSection === 'users' && (
         <div className="flex items-center gap-2">
           <button
             onClick={() => {
@@ -336,14 +338,44 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
             <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-white/20 opacity-0 scale-0 group-active:opacity-100 group-active:scale-100 transition-all duration-150" />
           </button>
         </div>
+        )}
       </div>
 
-      {activeJaegerProfiles.length === 0 && (
+      <div
+        className="mb-6 flex w-full items-center gap-0.5 overflow-x-auto rounded-lg bg-green-800/5 p-0.5 sm:w-fit"
+        role="tablist"
+        aria-label="Bereiche der Benutzerverwaltung"
+      >
+        {[
+          { id: 'users' as const, label: 'Benutzer', icon: Users },
+          { id: 'profiles' as const, label: 'Jägerprofile', icon: GitMerge },
+          { id: 'districts' as const, label: 'Jagdbezirke', icon: MapPin },
+        ].map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={activeSection === id}
+            aria-controls={`${id}-panel`}
+            onClick={() => setActiveSection(id)}
+            className={`flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-all sm:flex-none ${
+              activeSection === id
+                ? 'bg-white text-green-800 shadow-sm'
+                : 'text-green-900/80 hover:text-green-900'
+            }`}
+          >
+            <Icon size={14} />
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {activeSection === 'users' && activeJaegerProfiles.length === 0 && (
         <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           Es sind noch keine aktiven Jägerprofile vorhanden. Lege zuerst ein Jägerprofil an, damit Benutzer zugeordnet werden können.
         </div>
       )}
-      {mergeSourceJaegerId && (
+      {activeSection === 'profiles' && mergeSourceJaegerId && (
         <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-4 text-sm text-green-900">
           <div className="font-medium mb-3">
             Jägerprofile zusammenführen
@@ -423,7 +455,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
         </div>
       )}
 
-      {showForm && !editingUser && (
+      {activeSection === 'users' && showForm && !editingUser && (
         <form onSubmit={handleCreateSubmit} className="bg-white rounded-xl shadow p-5 space-y-4 mb-6">
           <h3 className="text-base font-semibold text-green-800">Neuen Benutzer anlegen</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -477,7 +509,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
         </form>
       )}
 
-      {editingUser && (
+      {activeSection === 'users' && editingUser && (
         <form onSubmit={handleUpdateSubmit} className="bg-white rounded-xl shadow p-5 space-y-4 mb-6">
           <h3 className="text-base font-semibold text-green-800">Benutzer "{editingUser.displayName}" bearbeiten</h3>
           <div>
@@ -513,6 +545,8 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
         </form>
       )}
 
+      {activeSection === 'users' && (
+      <div id="users-panel" role="tabpanel">
       <div className="flex justify-end mb-2">
         <span className="text-xs text-green-900/80 tabular-nums">
           {users.length} Benutzer
@@ -617,8 +651,11 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
           </div>
         )}
       </div>
+      </div>
+      )}
 
-      <div className="mt-6">
+      {activeSection === 'profiles' && (
+      <div id="profiles-panel" role="tabpanel">
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-base font-semibold text-green-800">Jägerprofile</h3>
           <span className="text-xs text-green-900/80 tabular-nums">
@@ -789,8 +826,13 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
           </div>
         )}
       </div>
+      )}
 
-      <JagdbezirkOnboarding />
+      {activeSection === 'districts' && (
+        <div id="districts-panel" role="tabpanel">
+          <JagdbezirkOnboarding />
+        </div>
+      )}
     </div>
   );
 };
