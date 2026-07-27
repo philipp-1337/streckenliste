@@ -10,7 +10,7 @@ service cloud.firestore {
     }
 
     // Verarbeitungsnachweise der Push-Events gegen Doppelzustellung. Rein
-    // serverseitig; braucht eine Firestore-TTL-Policy auf processedAt, sonst
+    // serverseitig; braucht eine Firestore-TTL-Policy auf expiresAt, sonst
     // wächst die Collection unbegrenzt.
     match /push_events/{eventId} {
       allow read, write: if false;

@@ -34,10 +34,20 @@ test("erste Zustellung gewinnt den Anspruch", async () => {
   assert.equal(db.created[0].id, "event-1");
 });
 
-test("Marker traegt einen Zeitstempel fuer die TTL-Policy", async () => {
+// Firestore-TTL loescht, sobald der Wert im TTL-Feld in der Vergangenheit
+// liegt. Ein Verarbeitungszeitpunkt waere sofort abgelaufen und der Marker
+// damit wertlos — es muss ein Ablaufzeitpunkt in der Zukunft sein.
+test("Marker traegt einen Ablaufzeitpunkt in der Zukunft", async () => {
   const db = makeDb();
+  const before = Date.now();
   await claimEvent(db, "event-1");
-  assert.ok("processedAt" in db.created[0].data);
+
+  const {expiresAt} = db.created[0].data;
+  assert.ok(expiresAt, "expiresAt fehlt");
+  assert.ok(expiresAt.toMillis() > before, "Ablaufzeitpunkt liegt nicht in der Zukunft");
+  // Sieben Tage, mit Toleranz fuer die Laufzeit des Tests.
+  const sevenDays = 7 * 24 * 60 * 60 * 1000;
+  assert.ok(Math.abs(expiresAt.toMillis() - (before + sevenDays)) < 5000);
 });
 
 // Der Marker wird per create() geschrieben: existiert er schon, schlaegt das
