@@ -33,6 +33,28 @@ service cloud.firestore {
       return request.resource.data.get('jagdbezirkId', resource.data.get('jagdbezirkId', ''));
     }
 
+    // Spiegelt die Eigentümer-Prüfung der update/delete-Regeln für Einträge.
+    // Bewusst ohne userId-Vergleich als alleinigen Treffer: userId benennt in
+    // den Altdaten den Eintragenden, nicht den Eigentümer.
+    function ownsEntryData(data, jagdbezirkId) {
+      return data.get('userId', '') == request.auth.uid ||
+        (
+          data.get('jaegerId', '') != '' &&
+          data.get('jaegerId', '') == getAssignedJaegerId(jagdbezirkId)
+        );
+    }
+
+    // Darf dieser Nutzer für diesen Eintrag überhaupt etwas protokollieren?
+    // Beim Anlegen wird das History-Dokument im selben Batch wie der Eintrag
+    // geschrieben – der Eintrag existiert im committeten Stand also noch nicht
+    // und die Prüfung muss das zulassen, sonst bricht jedes Neuanlegen. Ein
+    // erfundenes History-Dokument unter einer Fantasie-ID läuft im Trigger ins
+    // Leere, weil der Eintrag dort nicht gelesen werden kann.
+    function canLogHistoryForEntry(jagdbezirkId, eintragId) {
+      let entryPath = /databases/$(database)/documents/jagdbezirke/$(jagdbezirkId)/eintraege/$(eintragId);
+      return !exists(entryPath) || ownsEntryData(get(entryPath).data, jagdbezirkId);
+    }
+
     function getAssignedJaegerId(jagdbezirkId) {
       let assignmentPath = /databases/$(database)/documents/jagdbezirke/$(jagdbezirkId)/userAssignments/$(request.auth.uid);
       return exists(assignmentPath)
@@ -167,13 +189,30 @@ service cloud.firestore {
         allow read: if request.auth != null &&
                  getUserData().jagdbezirkId == jagdbezirkId &&
                  isAdmin();
+        // Der Änderungsverlauf ist die Quelle für Push-Benachrichtigungen. Ein
+        // frei beschreibbarer Verlauf hieße deshalb: jeder im Bezirk kann
+        // beliebige Benachrichtigungen an Admins und fremde Jäger auslösen und
+        // dabei Vorgänge behaupten, die nie passiert sind.
+        //
+        // Firestore-Rules können nicht prüfen, ob im selben Batch auch der
+        // Eltern-Eintrag geschrieben wurde – jeder Write eines Batches wird
+        // einzeln bewertet. Prüfbar ist aber, ob der Nutzer den Eintrag
+        // überhaupt ändern dürfte, und das ist die eigentlich relevante Frage.
         allow create: if request.auth != null &&
                  getUserData().jagdbezirkId == jagdbezirkId &&
                  request.resource.data.keys().hasAll(['timestamp', 'changedByUid', 'changedByName', 'action']) &&
                  request.resource.data.action in ['created', 'updated', 'approved', 'rejected', 'reset_to_pending', 'deleted'] &&
-                 // Verhindert, dass ein Nutzer History-Einträge im Namen anderer
-                 // anlegt – seit Push daran hängt, wäre das ein Spam-Vektor.
-                 request.resource.data.changedByUid == request.auth.uid;
+                 // Kein Protokollieren im Namen anderer.
+                 request.resource.data.changedByUid == request.auth.uid &&
+                 (
+                   isAdmin() ||
+                   (
+                     // Statuswechsel sind Admin-Vorgänge. Ohne diese Grenze
+                     // könnte ein Member eine Ablehnung oder Freigabe erfinden.
+                     request.resource.data.action in ['created', 'updated', 'deleted'] &&
+                     canLogHistoryForEntry(jagdbezirkId, eintragId)
+                   )
+                 );
         allow update: if false;
         allow delete: if false;
       }

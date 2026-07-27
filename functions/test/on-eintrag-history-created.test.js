@@ -23,6 +23,12 @@ const makeDb = ({entry, users, assignments, devices = [], claimedEvents = new Se
                 .map((u) => ({id: u.uid, data: () => u})),
             }),
           }),
+          doc: (uid) => ({
+            get: async () => {
+              const found = users.find((u) => u.uid === uid);
+              return {exists: found !== undefined, data: () => found};
+            },
+          }),
         };
       }
       if (name.endsWith("/userAssignments")) {
@@ -231,6 +237,66 @@ test("fehlender Eintrag bei anderer action als deleted sendet nichts", async () 
   });
 
   assert.equal(sent.length, 0);
+});
+
+// Zweite Verteidigungslinie zur Rules-Haertung: der Trigger glaubt dem
+// History-Dokument nicht, dass ein Statuswechsel stattgefunden hat, sondern
+// prueft die Rolle des Akteurs selbst.
+test("als Nicht-Admin behaupteter Statuswechsel wird ignoriert", async () => {
+  const {db, messaging, sent} = makeDb({
+    entry: {wildart: "Rehwild", datum: "2026-05-08", jaegerId: "toni-bitter", status: "rejected"},
+    users: [
+      {uid: "admin-1", jagdbezirkId: BEZIRK, role: "admin"},
+      {uid: "member-1", jagdbezirkId: BEZIRK, role: "user"},
+    ],
+    assignments: [{uid: "member-1", jaegerId: "toni-bitter"}],
+    devices: [{id: "d", userId: "admin-1", token: "t-000000000000000000000000000000"}],
+  });
+
+  await handleHistoryCreated(db, messaging, PARAMS, {
+    action: "rejected",
+    changedByUid: "member-1",
+    changedByName: "Toni Bitter",
+  });
+
+  assert.equal(sent.length, 0);
+});
+
+test("Statuswechsel eines unbekannten Akteurs wird ignoriert", async () => {
+  const {db, messaging, sent} = makeDb({
+    entry: {wildart: "Rehwild", datum: "2026-05-08", jaegerId: "toni-bitter", status: "approved"},
+    users: [{uid: "admin-1", jagdbezirkId: BEZIRK, role: "admin"}],
+    assignments: [],
+    devices: [{id: "d", userId: "admin-1", token: "t-000000000000000000000000000000"}],
+  });
+
+  await handleHistoryCreated(db, messaging, PARAMS, {
+    action: "approved",
+    changedByUid: "geloeschter-nutzer",
+    changedByName: "Weg",
+  });
+
+  assert.equal(sent.length, 0);
+});
+
+// Inhaltliche Aktionen darf ein Member legitim ausloesen — die Pruefung darf
+// den Normalfall nicht mit erwischen.
+test("inhaltliche Aenderung eines Members bleibt erlaubt", async () => {
+  const {db, messaging, sent} = makeDb({
+    entry: {wildart: "Rehwild", datum: "2026-05-08", jaegerId: "toni-bitter", status: "pending"},
+    users: [{uid: "admin-1", jagdbezirkId: BEZIRK, role: "admin", pushLevel: "alle"}],
+    assignments: [],
+    devices: [{id: "d", userId: "admin-1", token: "t-000000000000000000000000000000"}],
+  });
+
+  await handleHistoryCreated(db, messaging, PARAMS, {
+    action: "updated",
+    changedByUid: "member-1",
+    changedByName: "Toni Bitter",
+    changedFields: [{field: "gewicht", label: "Gewicht", before: "20", after: "22"}],
+  });
+
+  assert.equal(sent.length, 1);
 });
 
 // Firestore-Events werden mindestens einmal zugestellt und koennen sich

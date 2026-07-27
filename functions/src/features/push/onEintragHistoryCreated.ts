@@ -12,6 +12,18 @@ const KNOWN_ACTIONS: readonly HistoryAction[] = [
   "created", "updated", "approved", "rejected", "reset_to_pending", "deleted",
 ];
 
+// Statuswechsel kann nur ein Admin ausgelöst haben. Die Rules verhindern das
+// Fälschen bereits, aber der Trigger verlässt sich nicht darauf: er ist die
+// Instanz, die Benachrichtigungen verschickt, und prüft die Behauptung des
+// History-Dokuments deshalb selbst gegen die Rolle des Akteurs.
+const ADMIN_ONLY_ACTIONS: readonly HistoryAction[] = ["approved", "rejected", "reset_to_pending"];
+
+const isActorAdmin = async (db: Firestore, actorUid: string): Promise<boolean> => {
+  if (!actorUid) return false;
+  const snap = await db.collection("users").doc(actorUid).get();
+  return snap.exists && snap.data()?.role === "admin";
+};
+
 type HistoryData = {
   action?: unknown;
   changedByUid?: unknown;
@@ -56,6 +68,13 @@ export const handleHistoryCreated = async (
   const actorUid = asString(history.changedByUid) ?? "";
   const actorName = asString(history.changedByName) ?? "Unbekannt";
   const previousData = history.previousData ?? {};
+
+  if (ADMIN_ONLY_ACTIONS.includes(historyAction) && !(await isActorAdmin(db, actorUid))) {
+    logger.warn(
+      `onEintragHistoryCreated: ignoring ${historyAction} claimed by non-admin ${actorUid}`,
+    );
+    return;
+  }
 
   const entrySnap = await db
     .doc(`jagdbezirke/${params.jagdbezirkId}/eintraege/${params.eintragId}`)
