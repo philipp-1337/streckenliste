@@ -1,7 +1,13 @@
-import {FieldValue, type Firestore} from "firebase-admin/firestore";
+import {Timestamp, type Firestore} from "firebase-admin/firestore";
 import * as logger from "firebase-functions/logger";
 
 export const PUSH_EVENTS_COLLECTION = "push_events";
+
+// Firestore-TTL löscht ein Dokument, sobald der Wert im TTL-Feld in der
+// Vergangenheit liegt — das Feld ist also der Ablaufzeitpunkt, nicht der
+// Verarbeitungszeitpunkt. Sieben Tage sind reichlich: Doppelzustellungen
+// treffen innerhalb von Sekunden bis Minuten ein.
+const RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
 
 // Firestore/Eventarc guarantees at-least-once delivery: the same event can be
 // handed to the function more than once, independently of whether retries are
@@ -20,9 +26,9 @@ export const claimEvent = async (db: Firestore, eventId: string | undefined): Pr
 
   try {
     await db.collection(PUSH_EVENTS_COLLECTION).doc(eventId).create({
-      // Timestamp field so a Firestore TTL policy can expire these markers;
-      // without it the collection grows without bound.
-      processedAt: FieldValue.serverTimestamp(),
+      // Zielfeld der TTL-Policy. Ohne Policy wächst die Collection unbegrenzt,
+      // ohne Zukunftswert würde sie sofort wieder geleert.
+      expiresAt: Timestamp.fromMillis(Date.now() + RETENTION_MS),
     });
     return true;
   } catch (error) {
