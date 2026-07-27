@@ -107,7 +107,7 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
         key={button.id}
         onClick={button.onClick}
         disabled={button.disabled}
-        className={`
+        className={`cursor-pointer 
           group relative
           h-11 rounded-xl sm:h-12 sm:rounded-2xl
           flex items-center justify-center

@@ -340,7 +340,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
             tabIndex={activeSection === id ? 0 : -1}
             onClick={() => changeSection(id)}
             onKeyDown={event => handleTabKeyDown(event, id)}
-            className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2 sm:flex-none ${
+            className={`cursor-pointer flex min-h-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2 sm:flex-none ${
               activeSection === id
                 ? 'bg-white text-green-800 shadow-sm'
                 : 'text-green-900/80 hover:text-green-900'
