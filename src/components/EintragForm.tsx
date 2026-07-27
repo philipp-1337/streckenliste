@@ -491,18 +491,20 @@ export const EintragForm: React.FC<EintragFormProps> = ({
 
         {watchedWildart === 'Sonstige' && watchedFachbegriff && (
           <div className="flex items-center gap-3">
-            <label className="text-sm font-medium">Anzahl</label>
-            <div className="flex items-center gap-1">
+            <label id="sonstige-anzahl-label" className="text-sm font-medium">Anzahl</label>
+            <div className="flex items-center gap-1" role="group" aria-labelledby="sonstige-anzahl-label">
               <button
                 type="button"
                 onClick={() => handleSonstigeAnzahlChange(sonstigeAnzahl - 1)}
                 disabled={sonstigeAnzahl <= 1}
+                aria-label="Anzahl verringern"
                 className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-lg font-medium hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >−</button>
-              <span className="w-8 text-center font-semibold">{sonstigeAnzahl}</span>
+              <span className="w-8 text-center font-semibold" aria-live="polite" aria-atomic="true">{sonstigeAnzahl}</span>
               <button
                 type="button"
                 onClick={() => handleSonstigeAnzahlChange(sonstigeAnzahl + 1)}
+                aria-label="Anzahl erhöhen"
                 className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center text-lg font-medium hover:bg-gray-100 cursor-pointer"
               >+</button>
             </div>

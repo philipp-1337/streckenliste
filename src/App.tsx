@@ -234,7 +234,7 @@ const App = () => {
   const handleToggleImportDialog = useCallback(() => setShowImportDialog((v) => !v), []);
   const handleToggleLegende = useCallback(() => setShowLegende((v) => !v), []);
 
-  const handleLogout = useCallback(async () => {
+  const performLogout = useCallback(async () => {
     // Vor signOut(): der Callable braucht ein angemeldetes Konto. Ohne diesen
     // Schritt bliebe die Zuordnung Token → Konto bestehen und ein geteiltes
     // Gerät würde weiter die Benachrichtigungen des abgemeldeten Kontos
@@ -253,6 +253,34 @@ const App = () => {
       toast.error("Fehler beim Abmelden");
     }
   }, []);
+
+  const handleLogout = useCallback(() => {
+    toast.custom(
+      (t: string | number) => (
+        <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-lg p-4">
+          <div className="text-sm font-medium text-gray-900">Wirklich abmelden?</div>
+          <div className="mt-3 flex justify-end gap-2">
+            <button
+              onClick={() => toast.dismiss(t)}
+              className="rounded-xl px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 transition cursor-pointer"
+            >
+              Abbrechen
+            </button>
+            <button
+              onClick={async () => {
+                toast.dismiss(t);
+                await performLogout();
+              }}
+              className="rounded-xl px-3 py-1.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition cursor-pointer"
+            >
+              Abmelden
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: 10000 }
+    );
+  }, [performLogout]);
 
   const handleSubmit = useCallback(async (data: Omit<Eintrag, "id">) => {
     try {
@@ -468,7 +496,7 @@ const App = () => {
                           <div className="sm:hidden flex items-center gap-0.5 bg-green-800/5 rounded-lg p-0.5">
                             <button
                               onClick={() => toggleMobileView('cards')}
-                              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${mobileViewMode === 'cards' ? 'bg-white shadow-sm text-green-800' : 'text-green-900/40'}`}
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${mobileViewMode === 'cards' ? 'bg-white shadow-sm text-green-800' : 'text-green-900/80'}`}
                               aria-label="Kartenansicht"
                             >
                               <LayoutList size={12} />
@@ -476,14 +504,14 @@ const App = () => {
                             </button>
                             <button
                               onClick={() => toggleMobileView('table')}
-                              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${mobileViewMode === 'table' ? 'bg-white shadow-sm text-green-800' : 'text-green-900/40'}`}
+                              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${mobileViewMode === 'table' ? 'bg-white shadow-sm text-green-800' : 'text-green-900/80'}`}
                               aria-label="Tabellenansicht"
                             >
                               <Table size={12} />
                               Tabelle
                             </button>
                           </div>
-                          <span className="text-xs text-green-900/40 tabular-nums ml-auto">
+                          <span className="text-xs text-green-900/80 tabular-nums ml-auto">
                             {filteredEintraege.length} von {currentData.eintraege.length} Einträge
                           </span>
                         </div>

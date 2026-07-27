@@ -504,7 +504,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
       )}
 
       <div className="flex justify-end mb-2">
-        <span className="text-xs text-green-900/40 tabular-nums">
+        <span className="text-xs text-green-900/80 tabular-nums">
           {users.length} Benutzer
         </span>
       </div>
@@ -609,7 +609,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
       <div className="mt-6">
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-base font-semibold text-green-800">Jägerprofile</h3>
-          <span className="text-xs text-green-900/40 tabular-nums">
+          <span className="text-xs text-green-900/80 tabular-nums">
             {activeJaegerProfiles.length} aktiv
           </span>
         </div>

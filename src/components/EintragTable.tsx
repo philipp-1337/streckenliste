@@ -331,7 +331,8 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
               )}
               {isVisible('geschlecht') && (
                 <th className="px-4 py-3 text-center text-sm font-medium">
-                  <div className="flex items-center justify-center gap-0.5">
+                  <span className="sr-only">Geschlecht</span>
+                  <div className="flex items-center justify-center gap-0.5" aria-hidden="true">
                     <Mars size={14} /><span>/</span><Venus size={14} />
                   </div>
                 </th>
@@ -416,7 +417,17 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                     <td className="px-4 py-3 text-center text-sm">
                       <div className="flex items-center justify-center">
                         {!['Raubwild', 'Invasive Arten'].includes(eintrag.kategorie) && (
-                          eintrag.geschlecht === 'm' ? <Mars size={16} /> : eintrag.geschlecht === 'w' ? <Venus size={16} /> : null
+                          eintrag.geschlecht === 'm' ? (
+                            <span className="inline-flex items-center">
+                              <Mars size={16} aria-hidden="true" />
+                              <span className="sr-only">männlich</span>
+                            </span>
+                          ) : eintrag.geschlecht === 'w' ? (
+                            <span className="inline-flex items-center">
+                              <Venus size={16} aria-hidden="true" />
+                              <span className="sr-only">weiblich</span>
+                            </span>
+                          ) : null
                         )}
                       </div>
                     </td>
@@ -512,7 +523,7 @@ export const EintragTable: React.FC<EintragTableProps> = memo(({
                 {/* Row 1: Nr + Date + status badges */}
                 <div className="flex items-center justify-between gap-2 mb-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs text-green-900/40 tabular-nums">#{index + 1}</span>
+                    <span className="text-xs text-green-900/80 tabular-nums">#{index + 1}</span>
                     <span className="text-sm font-medium text-gray-900">
                       {new Date(eintrag.datum).toLocaleDateString('de-DE')}
                     </span>
