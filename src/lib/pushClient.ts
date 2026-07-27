@@ -1,6 +1,6 @@
 import { httpsCallable } from 'firebase/functions';
 import { functions } from '../firebase';
-import type { PushPlatform } from './messaging';
+import { getCurrentPushToken, unregisterPushToken, type PushPlatform } from './messaging';
 
 const callRegister = httpsCallable<{ token: string; platform: PushPlatform }, { success: boolean }>(
   functions,
@@ -31,4 +31,18 @@ export async function unregisterPushDevice(token?: string): Promise<void> {
 export async function getPushDeviceStatus(token: string): Promise<boolean> {
   const result = await callStatus({ token });
   return result.data.registered === true;
+}
+
+// Löst die Zuordnung dieses Geräts zum aktuell angemeldeten Konto vollständig:
+// serverseitiger Eintrag weg, FCM-Token verworfen. Wird vom Einstellungs-Toggle
+// und vom Logout genutzt.
+//
+// Muss beim Logout vor signOut() laufen, weil der Callable ein angemeldetes
+// Konto braucht. Ohne diesen Schritt bliebe die Zuordnung Token → Konto
+// bestehen und ein geteiltes Gerät bekäme weiter die Benachrichtigungen des
+// abgemeldeten Kontos auf den Lockscreen.
+export async function deactivatePushForThisDevice(): Promise<void> {
+  const token = await getCurrentPushToken();
+  await unregisterPushDevice(token ?? undefined);
+  await unregisterPushToken();
 }
