@@ -79,6 +79,20 @@ export const plugins = [
           `,
       },
 
+      // Compact glass shadow für kleine Icon-Buttons (z.B. ActionButtons) -
+      // die große Blur-Radius-Variante oben ist für die große Nav-Pille gedacht
+      // und wirkt auf 44px-Buttons als grauer Schatten-Fleck
+      '.glass-shadow-sm': {
+        'box-shadow': '0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04)',
+      },
+      '.glass-shadow-sm-active': {
+        'box-shadow': `
+            0 2px 8px rgba(0, 0, 0, 0.1),
+            0 1px 2px rgba(0, 0, 0, 0.06),
+            0 0 0 1px rgba(22, 101, 52, 0.18)
+          `,
+      },
+
       // Bottom positioning mit safe area (floating version)
       '.bottom-safe-floating': {
         bottom: 'calc(28px + env(safe-area-inset-bottom, 28px))',

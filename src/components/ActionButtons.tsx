@@ -120,8 +120,8 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
           ${isPrimaryButton
             ? ''
             : button.isActive
-            ? `glass-shadow-active ${button.activeColors}`
-            : 'text-green-900/70 hover:text-green-900/90 glass-shadow'
+            ? `glass-shadow-sm-active ${button.activeColors}`
+            : 'text-green-900/70 hover:text-green-900/90 glass-shadow-sm'
           }
         `}
         title={button.title}
