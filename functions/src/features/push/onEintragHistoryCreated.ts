@@ -6,6 +6,7 @@ import {classifyEvent, shouldNotify, type HistoryAction} from "../../internal/no
 import {resolveRecipients} from "../../internal/recipients";
 import {buildNotification, type ChangedField} from "../../internal/notificationContent";
 import {sendPushToUser} from "../../internal/push";
+import {claimEvent} from "../../internal/eventDedupe";
 
 const KNOWN_ACTIONS: readonly HistoryAction[] = [
   "created", "updated", "approved", "rejected", "reset_to_pending", "deleted",
@@ -38,6 +39,7 @@ export const handleHistoryCreated = async (
   messaging: Messaging,
   params: TriggerParams,
   history: HistoryData,
+  eventId?: string,
 ): Promise<void> => {
   const action = history.action;
   if (typeof action !== "string" || !(KNOWN_ACTIONS as readonly string[]).includes(action)) {
@@ -45,6 +47,11 @@ export const handleHistoryCreated = async (
     return;
   }
   const historyAction = action as HistoryAction;
+
+  // Claimed up front rather than right before sending: a redelivery then exits
+  // without repeating the Firestore reads. Placed after the action check so
+  // malformed events do not leave markers behind.
+  if (!(await claimEvent(db, eventId))) return;
 
   const actorUid = asString(history.changedByUid) ?? "";
   const actorName = asString(history.changedByName) ?? "Unbekannt";
@@ -110,6 +117,7 @@ export const onEintragHistoryCreated = onDocumentCreated(
         eintragId: event.params.eintragId,
       },
       history,
+      event.id,
     );
   },
 );
