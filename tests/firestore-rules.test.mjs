@@ -13,12 +13,15 @@ import {
   assertSucceeds,
   initializeTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { doc, setDoc, writeBatch, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, writeBatch, deleteDoc, serverTimestamp } from "firebase/firestore";
 
 const BEZIRK = "gjb-test";
 const ADMIN = "admin-uid";
 const MEMBER = "member-uid";
 const OTHER_MEMBER = "other-member-uid";
+// Admin eines fremden Bezirks – für die Mandanten-Grenzen.
+const FOREIGN_BEZIRK = "gjb-fremd";
+const FOREIGN_ADMIN = "foreign-admin-uid";
 
 const entryPath = (id) => `jagdbezirke/${BEZIRK}/eintraege/${id}`;
 const historyPath = (entryId, historyId) =>
@@ -69,6 +72,11 @@ test.before(async () => {
       role: "user",
       jagdbezirkId: BEZIRK,
       displayName: "Other",
+    });
+    await setDoc(doc(db, "users", FOREIGN_ADMIN), {
+      role: "admin",
+      jagdbezirkId: FOREIGN_BEZIRK,
+      displayName: "Foreign Admin",
     });
     await setDoc(doc(db, `jagdbezirke/${BEZIRK}/userAssignments`, MEMBER), {
       userId: MEMBER,
@@ -218,6 +226,65 @@ test("Nutzer eines anderen Bezirks darf nichts protokollieren", async () => {
   const db = testEnv.authenticatedContext("outsider-uid").firestore();
   await assertFails(
     setDoc(doc(db, historyPath("own-entry", "outsider")), historyDoc("updated", "outsider-uid"))
+  );
+});
+
+// Mandanten-Grenzen: Ein Admin sieht und verwaltet ausschließlich den eigenen
+// Bezirk. Vor dieser Verschärfung konnte jeder Admin alle Nutzer aller Bezirke
+// lesen, Nutzer über die jagdbezirkId in den eigenen Bezirk ziehen und fremde
+// Bezirks-Dokumente beschreiben.
+test("Admin liest Nutzer des eigenen Bezirks, aber keine fremden", async () => {
+  const ownDb = testEnv.authenticatedContext(ADMIN).firestore();
+  await assertSucceeds(getDoc(doc(ownDb, "users", MEMBER)));
+
+  const foreignDb = testEnv.authenticatedContext(FOREIGN_ADMIN).firestore();
+  await assertFails(getDoc(doc(foreignDb, "users", MEMBER)));
+});
+
+test("niemand darf die jagdbezirkId eines Nutzers ändern", async () => {
+  // Fremder Admin zieht einen Nutzer in den eigenen Bezirk: verboten.
+  const foreignDb = testEnv.authenticatedContext(FOREIGN_ADMIN).firestore();
+  await assertFails(
+    updateDoc(doc(foreignDb, "users", MEMBER), { jagdbezirkId: FOREIGN_BEZIRK })
+  );
+
+  // Auch der eigene Admin darf den Bezirk nicht umschreiben …
+  const ownDb = testEnv.authenticatedContext(ADMIN).firestore();
+  await assertFails(
+    updateDoc(doc(ownDb, "users", MEMBER), { jagdbezirkId: FOREIGN_BEZIRK })
+  );
+
+  // … normale Verwaltung im eigenen Bezirk bleibt möglich.
+  await assertSucceeds(
+    updateDoc(doc(ownDb, "users", MEMBER), { displayName: "Member umbenannt" })
+  );
+});
+
+test("Admin schreibt nur das eigene Bezirks-Dokument", async () => {
+  const ownDb = testEnv.authenticatedContext(ADMIN).firestore();
+  await assertSucceeds(
+    setDoc(doc(ownDb, "jagdbezirke", BEZIRK), { name: "GJB Test" }, { merge: true })
+  );
+
+  const foreignDb = testEnv.authenticatedContext(FOREIGN_ADMIN).firestore();
+  await assertFails(
+    setDoc(doc(foreignDb, "jagdbezirke", BEZIRK), { name: "Übernommen" }, { merge: true })
+  );
+});
+
+test("Eintrag muss den Bezirk des Pfads im jagdbezirkId-Feld tragen", async () => {
+  const db = testEnv.authenticatedContext(ADMIN).firestore();
+  await assertFails(
+    setDoc(
+      doc(db, entryPath("wrong-bezirk-field")),
+      validEntry({ userId: ADMIN, jagdbezirkId: FOREIGN_BEZIRK, status: "approved" })
+    )
+  );
+  await assertSucceeds(
+    setDoc(
+      doc(db, entryPath("right-bezirk-field")),
+      validEntry({ userId: ADMIN, status: "approved" })
+    )
   );
 });
 
