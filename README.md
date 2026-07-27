@@ -102,7 +102,30 @@ bun run preview
 
 # Linting
 bun run lint
+
+# Unit-Tests und Firestore-Rules-Tests
+bun test src
+bun run test:rules
 ```
+
+### Lokal testen mit der Emulator-Suite
+
+Testdaten leben ausschließlich lokal – es gibt keinen Testbezirk in
+Produktion. Drei Terminals bzw. Schritte:
+
+```bash
+# 1. Emulatoren starten (Auth, Firestore, Functions)
+bun run emulators
+
+# 2. Synthetischen Testbezirk anlegen (einmalig pro Emulator-Start)
+bun run seed:emulator
+
+# 3. App gegen die Emulatoren starten
+bun run dev:emulator
+```
+
+Logins danach: `admin@test.local` / `test1234` (Admin) und
+`jaeger@test.local` / `test1234` (Jäger mit zugeordnetem Profil).
 
 ## 🎯 Features im Detail
 

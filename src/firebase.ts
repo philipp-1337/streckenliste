@@ -1,10 +1,10 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getFirestore, enableIndexedDbPersistence, connectFirestoreEmulator } from "firebase/firestore";
 import { getPerformance } from "firebase/performance";
 import { getAnalytics, isSupported, type Analytics } from "firebase/analytics";
-import { getFunctions } from "firebase/functions";
+import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -31,6 +31,15 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 const functions = getFunctions(app, "europe-west3");
+
+// Testbetrieb gegen die lokale Emulator-Suite statt gegen Produktion:
+// `bun run dev:emulator` setzt das Flag; Ports wie in firebase.json.
+if (import.meta.env.DEV && import.meta.env.VITE_USE_EMULATOR === "true") {
+  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+  console.info("🧪 Firebase-Emulatoren verbunden (Auth 9099, Firestore 8080, Functions 5001)");
+}
 
 // Initialize Performance Monitoring
 const perf = getPerformance(app);

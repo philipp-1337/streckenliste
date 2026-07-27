@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "bunx --bun vite",
+    "dev:emulator": "VITE_USE_EMULATOR=true bunx --bun vite",
+    "emulators": "firebase emulators:start --only auth,firestore,functions",
+    "seed:emulator": "node scripts/seed-emulator.mjs",
     "build": "bun run tsc -b && bunx --bun vite build",
     "lint": "bunx eslint .",
     "test": "bun test src",
