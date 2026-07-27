@@ -56,15 +56,15 @@ Multi-Tenant-Betrieb noch fehlt.
 
 **Als Nächstes dran, in dieser Reihenfolge:**
 
-- [ ] **Debug-Logs im Produktions-Bundle:** `src/hooks/useFirestore.ts`
-  loggt jede Snapshot-Aktualisierung in die Konsole
-  (`📡 onSnapshot update …`, `🔄 Manual fetch …`). Entfernen oder hinter
-  `import.meta.env.DEV` legen.
-- [ ] **`enableIndexedDbPersistence` ist deprecated** (Firebase v12):
-  In `src/firebase.ts` auf `initializeFirestore` mit
-  `persistentLocalCache` umstellen, bevor die API entfernt wird.
-- [ ] **Deaktivierte Auth-Accounts endgültig löschen**, sobald sicher ist,
-  dass nichts fehlt (deaktiviert am 2026-07-27):
+- [x] **Debug-Logs im Produktions-Bundle:** _(erledigt 2026-07-27)_
+  Diagnostische Snapshot-, Manual-Fetch- und PWA-Sichtbarkeits-Logs aus
+  `src/hooks/useFirestore.ts` entfernt; Fehler werden weiterhin geloggt.
+- [x] **`enableIndexedDbPersistence` ist deprecated** (Firebase v12):
+  _(erledigt 2026-07-27)_ Firestore wird jetzt über
+  `initializeFirestore` mit `persistentLocalCache` und
+  Multi-Tab-Unterstützung initialisiert.
+- [x] **Deaktivierte Auth-Accounts endgültig löschen:** _(erledigt
+  2026-07-27; zuvor am selben Tag deaktiviert)_
   - `aFR1ouZB1QRIeiKeUnKHjaYfKu93` (philippkanter@gmail.com, Ex-Dummy-Admin)
   - `qHqCpDoRW3bjZpWxECzrjrKBMUY2` (swuerlich@gmail.com, Ex-Dummy-Sandra)
   - `tGPUQDVHu2Xq8wq8pdVKg8k3LSU2` (philippkanter+jagd@gmail.com, „Philipp Test")

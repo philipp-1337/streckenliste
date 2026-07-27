@@ -1,7 +1,12 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
-import { getFirestore, enableIndexedDbPersistence, connectFirestoreEmulator } from "firebase/firestore";
+import {
+  connectFirestoreEmulator,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+} from "firebase/firestore";
 import { getPerformance } from "firebase/performance";
 import { getAnalytics, isSupported, type Analytics } from "firebase/analytics";
 import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
@@ -28,7 +33,11 @@ export const VAPID_PUBLIC_KEY = "BNqatKh2d5H_Wa6z2M1p9IyPvb4_-liTgvdG052_yWu695c
 const app = initializeApp(firebaseConfig);
 
 // Initialize Cloud Firestore and get a reference to the service
-const db = getFirestore(app);
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager(),
+  }),
+});
 const auth = getAuth(app);
 const functions = getFunctions(app, "europe-west3");
 
@@ -53,17 +62,5 @@ isSupported().then((supported) => {
 }).catch(() => {
   console.warn('Firebase Analytics wird in dieser Umgebung nicht unterstützt.');
 });
-
-// Enable offline persistence
-enableIndexedDbPersistence(db)
-  .catch((err) => {
-    if (err.code === 'failed-precondition') {
-      // Multiple tabs open, persistence can only be enabled in one tab at a time
-      console.warn('Offline-Persistenz kann nur in einem Tab aktiviert werden.');
-    } else if (err.code === 'unimplemented') {
-      // The current browser doesn't support persistence
-      console.warn('Dieser Browser unterstützt keine Offline-Persistenz.');
-    }
-  });
 
 export { app, db, auth, functions, perf, analytics };

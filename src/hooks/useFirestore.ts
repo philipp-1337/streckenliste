@@ -138,13 +138,11 @@ export const useFirestore = () => {
         
         const geladeneEintraege = Array.from(map.values());
         setLoadedEintraege({ key: streckenCollectionRef.path, list: geladeneEintraege });
-        console.log('🔄 Manual fetch completed:', geladeneEintraege.length, 'entries');
       } else {
         const q = query(streckenCollectionRef, orderBy("datum", "asc"));
         const data = await getDocs(q);
         const geladeneEintraege = data.docs.map(doc => ({ ...doc.data(), id: doc.id } as Eintrag));
         setLoadedEintraege({ key: streckenCollectionRef.path, list: geladeneEintraege });
-        console.log('🔄 Manual fetch completed:', geladeneEintraege.length, 'entries');
       }
     } catch (err) {
       console.error("Error in manual fetch:", err);
@@ -183,7 +181,6 @@ export const useFirestore = () => {
         map1.clear();
         snapshot.docs.forEach(doc => map1.set(doc.id, { ...doc.data(), id: doc.id } as Eintrag));
         updateEintraege();
-        console.log('📡 onSnapshot 1 update:', map1.size, 'entries');
       }, (err) => {
         console.error("Query 1 (userId) failed:", err);
         handleSnapshotError(err);
@@ -196,7 +193,6 @@ export const useFirestore = () => {
           map2.clear();
           snapshot.docs.forEach(doc => map2.set(doc.id, { ...doc.data(), id: doc.id } as Eintrag));
           updateEintraege();
-          console.log('📡 onSnapshot 2 update:', map2.size, 'entries');
         }, (err) => {
           console.error("Query 2 (jaegerId) failed:", err);
           handleSnapshotError(err);
@@ -212,7 +208,6 @@ export const useFirestore = () => {
           id: doc.id 
         } as Eintrag));
         setLoadedEintraege({ key: streckenCollectionRef.path, list: geladeneEintraege });
-        console.log('📡 onSnapshot admin update:', geladeneEintraege.length, 'entries');
       }, handleSnapshotError);
       unsubscribes.push(unsub);
     }
@@ -224,13 +219,10 @@ export const useFirestore = () => {
         const now = Date.now();
         const timeSinceLastChange = now - lastVisibilityChange.current;
         lastVisibilityChange.current = now;
-        
-        console.log('👁️ Page visible - time hidden:', timeSinceLastChange, 'ms');
-        
+
         // If app was hidden for more than 5 seconds, do a manual fetch
         // This ensures iOS PWAs get updates even if listener was paused
         if (timeSinceLastChange > 5000) {
-          console.log('⚠️ App was hidden >5s, performing manual fetch for iOS');
           manualFetch();
         }
       }
