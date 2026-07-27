@@ -21,7 +21,7 @@ const makeDb = ({entry, users, assignments, devices = [], claimedEvents = new Se
         get: async () => ({
           exists: entry !== null,
           data: () => entry ?? undefined,
-          updateTime: COMMIT,
+          updateTime: entry?.updateTime ?? COMMIT,
         }),
       };
     },
@@ -251,48 +251,38 @@ test("fehlender Eintrag bei anderer action als deleted sendet nichts", async () 
   assert.equal(sent.length, 0);
 });
 
-// Herkunftscheck: nur was gemeinsam mit dem Eintrag committet wurde, loest eine
-// Benachrichtigung aus. Faengt die Luecke ab, bei der ein Member unter seinem
-// eigenen pending-Eintrag beliebig oft eine Anlage behauptet.
-test("eigenstaendig geschriebenes History-Dokument wird ignoriert", async () => {
+// Haelt die Regression fest, die ein Zeitfenster-Vergleich zwischen
+// entrySnap.updateTime und dem History-Zeitstempel verursacht hat: updateTime
+// gehoert zum aktuellen Eintrag, nicht zum ausloesenden Write. Wird der Eintrag
+// zwischen Ausloesung und Trigger-Lauf erneut geaendert – Admin gibt kurz nach
+// dem Anlegen frei –, darf die Benachrichtigung trotzdem rausgehen.
+test("spaeter geaenderter Eintrag verwirft die Benachrichtigung nicht", async () => {
   const {db, messaging, sent} = makeDb({
-    entry: {wildart: "Schwarzwild", datum: "2026-07-18", jaegerId: "toni-bitter", status: "pending"},
+    entry: {
+      wildart: "Schwarzwild",
+      datum: "2026-07-18",
+      jaegerId: "toni-bitter",
+      status: "pending",
+      // Der Eintrag wurde nach dem ausloesenden Write nochmals angefasst.
+      updateTime: commitTime(COMMIT.toMillis() + 120_000),
+    },
     users: [{uid: "admin-1", jagdbezirkId: BEZIRK, role: "admin", pushLevel: "wichtig"}],
     assignments: [],
     devices: [{id: "d", userId: "admin-1", token: "t-000000000000000000000000000000"}],
   });
 
-  // Eine Minute nach dem Eintrag geschrieben – also nicht aus demselben Commit.
-  await handleHistoryCreated(
-    db, messaging, PARAMS,
-    {action: "created", changedByUid: "member-1", changedByName: "Toni Bitter"},
-    "event-forged",
-    commitTime(COMMIT.toMillis() + 60_000),
-  );
-
-  assert.equal(sent.length, 0);
-});
-
-test("History aus demselben Commit wird verschickt", async () => {
-  const {db, messaging, sent} = makeDb({
-    entry: {wildart: "Schwarzwild", datum: "2026-07-18", jaegerId: "toni-bitter", status: "pending"},
-    users: [{uid: "admin-1", jagdbezirkId: BEZIRK, role: "admin", pushLevel: "wichtig"}],
-    assignments: [],
-    devices: [{id: "d", userId: "admin-1", token: "t-000000000000000000000000000000"}],
+  await handleHistoryCreated(db, messaging, PARAMS, {
+    action: "created",
+    changedByUid: "member-1",
+    changedByName: "Toni Bitter",
   });
-
-  await handleHistoryCreated(
-    db, messaging, PARAMS,
-    {action: "created", changedByUid: "member-1", changedByName: "Toni Bitter"},
-    "event-real",
-    COMMIT,
-  );
 
   assert.equal(sent.length, 1);
 });
 
 // Bei einer echten Loeschung ist der Eintrag weg. Ist er noch da, wurde die
-// Loeschung nur behauptet.
+// Loeschung nur behauptet. Diese Pruefung kommt ohne Zeitstempel aus und bleibt
+// deshalb bestehen.
 test("behauptete Loeschung bei noch existierendem Eintrag wird ignoriert", async () => {
   const {db, messaging, sent} = makeDb({
     entry: {wildart: "Rehwild", datum: "2026-05-08", jaegerId: "toni-bitter", status: "approved"},
@@ -305,7 +295,6 @@ test("behauptete Loeschung bei noch existierendem Eintrag wird ignoriert", async
     db, messaging, PARAMS,
     {action: "deleted", changedByUid: "member-1", changedByName: "Toni Bitter"},
     "event-fake-delete",
-    COMMIT,
   );
 
   assert.equal(sent.length, 0);
