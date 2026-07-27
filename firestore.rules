@@ -9,6 +9,13 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Verarbeitungsnachweise der Push-Events gegen Doppelzustellung. Rein
+    // serverseitig; braucht eine Firestore-TTL-Policy auf processedAt, sonst
+    // wächst die Collection unbegrenzt.
+    match /push_events/{eventId} {
+      allow read, write: if false;
+    }
+
     // Helper function to get the current user's data from the /users collection
     function getUserData() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
