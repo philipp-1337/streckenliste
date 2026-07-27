@@ -68,7 +68,9 @@ export const Nav: React.FC<NavProps> = ({ onLogout, currentUser, pendingCount })
       >
         {tabs.map((tab) => {
           const Icon = tab.icon;
-          const isActive = location.pathname === tab.path;
+          const isActive = tab.path === '/einstellungen'
+            ? location.pathname.startsWith('/einstellungen')
+            : location.pathname === tab.path;
 
           return (
             <button

@@ -108,12 +108,13 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
         disabled={button.disabled}
         className={`
           group relative
-          w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl
+          size-11 sm:size-12 rounded-xl sm:rounded-2xl
           flex items-center justify-center
           glass-bg backdrop-blur-xl backdrop-saturate-[180%]
-          transition-all duration-300 ease-bounce
+          transition-[transform,color,box-shadow] duration-200 ease-out
           hover:scale-105 active:scale-95
-          focus:outline-none focus:ring-2 focus:ring-green-500/30
+          motion-reduce:transform-none motion-reduce:transition-none
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2
           disabled:opacity-50 disabled:cursor-not-allowed
           ${button.isActive
             ? `glass-shadow-active ${button.activeColors}`
@@ -134,8 +135,9 @@ export const ActionButtons: React.FC<ActionButtonsProps> = memo(({
           size={18}
           className={`
             relative z-10
-            transition-all duration-300 ease-bounce
+            transition-transform duration-200 ease-out
             group-hover:scale-110
+            motion-reduce:transform-none motion-reduce:transition-none
             ${button.iconClass}
           `}
         />

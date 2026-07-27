@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { Landmark } from 'lucide-react';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { httpsCallable } from 'firebase/functions';
 import { auth, functions } from '../firebase';
 import useAuth from '@hooks/useAuth';
+import { isSuperadminUid } from '@constants/superadmin';
+import { PageHeader } from '@components/PageHeader';
 
 const toBezirkId = (name: string) =>
   name
@@ -15,31 +17,10 @@ const toBezirkId = (name: string) =>
     .replace(/^-+|-+$/g, '')
     .slice(0, 63);
 
-// Onboarding neuer Jagdbezirke. Sichtbar nur für Konten mit dem Custom
-// Claim `superadmin` — die eigentliche Berechtigung prüft die Cloud
-// Function serverseitig, die Sichtbarkeit hier ist reine UI-Höflichkeit.
+// Die eigentliche Berechtigung prüft die Cloud Function serverseitig.
+// Diese Prüfung liefert zusätzlich eine klare UI statt einer leeren Seite.
 export const JagdbezirkOnboarding: React.FC = () => {
   const { firebaseUser } = useAuth();
-  // Claim an die UID gebunden, damit nach einem Nutzerwechsel kein
-  // veralteter Claim-Stand weiterwirkt.
-  const [claimState, setClaimState] = useState<{ uid: string; superadmin: boolean }>({ uid: '', superadmin: false });
-
-  useEffect(() => {
-    if (!firebaseUser) return;
-    let cancelled = false;
-    firebaseUser.getIdTokenResult()
-      .then(result => {
-        if (!cancelled) {
-          setClaimState({ uid: firebaseUser.uid, superadmin: result.claims.superadmin === true });
-        }
-      })
-      .catch(() => { /* ohne Claim bleibt die Sektion unsichtbar */ });
-    return () => { cancelled = true; };
-  }, [firebaseUser]);
-
-  const isSuperadmin = firebaseUser !== null
-    && claimState.uid === firebaseUser.uid
-    && claimState.superadmin;
 
   const [name, setName] = useState('');
   const [bezirkId, setBezirkId] = useState('');
@@ -48,7 +29,13 @@ export const JagdbezirkOnboarding: React.FC = () => {
   const [adminEmail, setAdminEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  if (!isSuperadmin) return null;
+  if (!isSuperadminUid(firebaseUser?.uid)) {
+    return (
+      <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        Die Anlage neuer Jagdbezirke ist nur für Superadministratoren verfügbar.
+      </div>
+    );
+  }
 
   const handleNameChange = (value: string) => {
     setName(value);
@@ -89,17 +76,14 @@ export const JagdbezirkOnboarding: React.FC = () => {
   };
 
   return (
-    <div className="mt-10">
-      <h2 className="text-xl font-bold text-green-800 flex items-center gap-2.5 mb-1">
-        <Landmark size={20} strokeWidth={2} />
-        Neuen Jagdbezirk anlegen
-      </h2>
-      <p className="text-sm text-gray-500 mb-4">
-        Legt den Bezirk und dessen ersten Administrator in einem Schritt an.
-        Der Admin erhält eine Einladungs-E-Mail zum Setzen seines Passworts.
-      </p>
+    <div>
+      <PageHeader
+        title="Neuen Jagdbezirk anlegen"
+        icon={Landmark}
+        description="Legt den Bezirk und dessen ersten Administrator an. Der Admin erhält eine Einladung zum Setzen seines Passworts."
+      />
 
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow p-4 grid gap-3 sm:grid-cols-2">
+      <form onSubmit={handleSubmit} className="grid gap-4 rounded-xl bg-white p-5 shadow sm:grid-cols-2">
         <label className="block">
           <span className="text-sm font-medium text-gray-700">Bezirksname</span>
           <input
@@ -146,11 +130,11 @@ export const JagdbezirkOnboarding: React.FC = () => {
             className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-base focus:border-green-600 focus:ring-green-600"
           />
         </label>
-        <div className="sm:col-span-2 flex justify-end">
+        <div className="flex justify-end sm:col-span-2">
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex items-center gap-2 rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-800 disabled:opacity-50 cursor-pointer"
+            className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-green-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? 'Wird angelegt …' : 'Jagdbezirk anlegen'}
           </button>

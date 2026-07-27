@@ -59,7 +59,7 @@ export const Header: React.FC<HeaderProps> = ({ jagdjahr, availableJagdjahre, on
             {/* Collapse toggle — mobile only */}
             <button
               onClick={toggleCollapsed}
-              className="sm:hidden ml-2 flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full text-green-800/40 hover:text-green-800/70 hover:bg-green-100 transition-colors cursor-pointer"
+              className="ml-1 inline-flex size-11 flex-shrink-0 cursor-pointer items-center justify-center rounded-xl text-green-800/60 transition-colors hover:bg-green-100 hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2 sm:hidden"
               aria-label={isCollapsed ? 'Details einblenden' : 'Details ausblenden'}
             >
               {isCollapsed ? <ChevronDown size={15} /> : <ChevronUp size={15} />}

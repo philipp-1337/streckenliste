@@ -1,6 +1,6 @@
 import { useState, useCallback, lazy, Suspense, useMemo, useEffect } from 'react';
 import { Toaster, toast } from 'sonner';
-import { HomeIcon, LayoutList, Table } from 'lucide-react';
+import { Bell, HomeIcon, Landmark, LayoutList, Settings, Table } from 'lucide-react';
 import usePdfExport from '@hooks/usePdfExport';
 import type { Eintrag, JaegerProfile } from '@types';
 import { useFirestore } from '@hooks/useFirestore';
@@ -18,6 +18,8 @@ import { EintragForm } from '@components/EintragForm';
 import { EintragTable } from '@components/EintragTable';
 import { FachbegriffeLegende } from '@components/FachbegriffeLegende';
 import { PushSettings } from '@components/PushSettings';
+import { PageHeader } from '@components/PageHeader';
+import { isSuperadminUid } from '@constants/superadmin';
 import { takePendingDeepLink } from '@/lib/pendingDeepLink';
 import { deactivatePushForThisDevice } from '@/lib/pushClient';
 import { SkeletonTable, SkeletonStatistik } from '@components/SkeletonLoaders';
@@ -30,7 +32,7 @@ import { auth } from './firebase';
 import { db } from './firebase';
 import { signOut } from 'firebase/auth';
 import { collection, onSnapshot } from 'firebase/firestore';
-import { Routes, Route, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, Routes, Route, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { getAvailableJagdjahre, getCurrentJagdjahr } from '@utils/jagdjahrUtils';
 
 // Stabile Leerliste, damit abgeleitete Memos bei "keine Profile" nicht bei
@@ -52,6 +54,7 @@ const OfficialPrintView = lazy(() => import('@components/OfficialPrintView'));
 const ImportDialog = lazy(() => import('@components/ImportDialog'));
 const KategorienFixDialog = lazy(() => import('@components/KategorienFixDialog'));
 const UserManagement = lazy(() => import('@components/UserManagement').then(m => ({ default: m.UserManagement })));
+const JagdbezirkOnboarding = lazy(() => import('@components/JagdbezirkOnboarding').then(m => ({ default: m.JagdbezirkOnboarding })));
 const AblehnungsModal = lazy(() => import('@components/AblehnungsModal').then(m => ({ default: m.AblehnungsModal })));
 const HistoryModal = lazy(() => import('@components/HistoryModal').then(m => ({ default: m.HistoryModal })));
 
@@ -60,6 +63,7 @@ const App = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const showJagdjahrContext = location.pathname === '/' || location.pathname === '/stats';
   // Ziel eines angetippten Push: die Übersicht hebt diesen Eintrag hervor.
   const highlightId = searchParams.get('eintrag') ?? undefined;
   // Hier statt in PushSettings, damit der Zustand einmal ermittelt wird und der
@@ -433,19 +437,17 @@ const App = () => {
           <div className="min-h-screen bg-green-50 p-4">
             <div className="max-w-7xl mx-auto pb-16">
               <Header
-                jagdjahr={location.pathname === '/users' ? undefined : filter.jagdjahr}
-                availableJagdjahre={location.pathname === '/users' ? undefined : availableJagdjahre}
-                onJagdjahrChange={location.pathname === '/users' ? undefined : handleJagdjahrChange}
+                jagdjahr={showJagdjahrContext ? filter.jagdjahr : undefined}
+                availableJagdjahre={showJagdjahrContext ? availableJagdjahre : undefined}
+                onJagdjahrChange={showJagdjahrContext ? handleJagdjahrChange : undefined}
               />
               <Routes>
                 <Route path="/" element={
                   <>
-                    <div className="flex items-center justify-between gap-4 mb-4">
-                      <h2 className="text-xl font-bold text-green-800 flex items-center gap-2.5 shrink-0">
-                        <HomeIcon size={20} strokeWidth={2} />
-                        Übersicht
-                      </h2>
-                      <ActionButtons
+                    <PageHeader
+                      title="Übersicht"
+                      icon={HomeIcon}
+                      actions={<ActionButtons
                         showFilter={showFilterPanel}
                         showNewEntryForm={showNewEntryForm}
                         onToggleFilterPanel={handleToggleFilterPanel}
@@ -461,8 +463,8 @@ const App = () => {
                         showLegende={showLegende}
                         currentUser={currentUser}
                         activeFilterCount={activeFilterCount}
-                      />
-                    </div>
+                      />}
+                    />
                     {/* Inline Formular über der Tabelle */}
                     {(showNewEntryForm || editingEntry) && (
                       <div className="mx-auto mb-6">
@@ -549,9 +551,11 @@ const App = () => {
 
                 <Route path="/einstellungen" element={
                   <>
-                    <h2 className="text-xl font-bold text-green-800 flex items-center gap-2.5 mb-4">
-                      Einstellungen
-                    </h2>
+                    <PageHeader title="Einstellungen" icon={Settings} />
+                    <h3 className="mb-2 flex items-center gap-2 text-base font-semibold text-green-800">
+                      <Bell size={18} />
+                      Benachrichtigungen
+                    </h3>
                     <PushSettings
                       status={push.status}
                       level={push.level}
@@ -559,7 +563,29 @@ const App = () => {
                       onToggle={() => void push.toggle()}
                       onChangeLevel={(level) => void push.changeLevel(level)}
                     />
+                    {isSuperadminUid(currentUser.uid) && (
+                      <div className="mt-6 border-t border-green-200 pt-6">
+                        <h3 className="mb-1 flex items-center gap-2 text-base font-semibold text-green-800">
+                          <Landmark size={18} />
+                          Systemverwaltung
+                        </h3>
+                        <p className="mb-3 text-sm text-green-900/70">
+                          Seltene, systemweite Aufgaben außerhalb der laufenden Bezirksverwaltung.
+                        </p>
+                        <Link
+                          to="/einstellungen/jagdbezirke/neu"
+                          className="inline-flex min-h-11 items-center rounded-xl border border-green-300 bg-white px-4 py-2 text-sm font-medium text-green-800 transition-colors hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+                        >
+                          Neuen Jagdbezirk anlegen
+                        </Link>
+                      </div>
+                    )}
                   </>
+                } />
+                <Route path="/einstellungen/jagdbezirke/neu" element={
+                  <Suspense fallback={<div className="p-4">Wird geladen...</div>}>
+                    <JagdbezirkOnboarding />
+                  </Suspense>
                 } />
 
                 <Route path="/print" element={

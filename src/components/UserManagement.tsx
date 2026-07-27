@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { UserPlus, Trash2, Users, X, Pencil, GitMerge, RotateCcw, MapPin } from 'lucide-react';
+import { UserPlus, Trash2, Users, Pencil, GitMerge, RotateCcw } from 'lucide-react';
 import { useUserManagement } from '@hooks/useUserManagement';
-import { JagdbezirkOnboarding } from '@components/JagdbezirkOnboarding';
 import useAuth from '@hooks/useAuth';
 import Spinner from '@components/Spinner';
 import { ConfirmDialog } from '@components/ConfirmDialog';
 import { UserManagementUserList } from '@components/UserManagementUserList';
+import { PageHeader } from '@components/PageHeader';
 import type { UserData, Role, JaegerProfile } from '@types';
 
 interface ConfirmationState {
@@ -58,6 +58,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
   const [editedName, setEditedName] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [newJaegerName, setNewJaegerName] = useState('');
+  const [showJaegerForm, setShowJaegerForm] = useState(false);
   const [isCreatingJaeger, setIsCreatingJaeger] = useState(false);
   const [editingJaegerId, setEditingJaegerId] = useState<string | null>(null);
   const [editedJaegerName, setEditedJaegerName] = useState('');
@@ -68,12 +69,11 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
   const [mergePreview, setMergePreview] = useState<{ assignmentCount: number, entryCount: number } | null>(null);
   const [isPreviewingMerge, setIsPreviewingMerge] = useState(false);
   const [isMergingJaegerProfiles, setIsMergingJaegerProfiles] = useState(false);
-  const [activeSection, setActiveSection] = useState<'users' | 'profiles' | 'districts'>('users');
+  const [activeSection, setActiveSection] = useState<'users' | 'profiles'>('users');
   const [confirmation, setConfirmation] = useState<ConfirmationState | null>(null)
-  const tabRefs = useRef<Record<'users' | 'profiles' | 'districts', HTMLButtonElement | null>>({
+  const tabRefs = useRef<Record<'users' | 'profiles', HTMLButtonElement | null>>({
     users: null,
     profiles: null,
-    districts: null,
   })
 
   useEffect(() => {
@@ -135,7 +135,31 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
 
   const handleCancelEdit = () => {
     setEditingUser(null);
+    setEditedName('');
     setShowForm(false);
+  }
+
+  const resetTransientState = () => {
+    setShowForm(false)
+    setFormEmail('')
+    setFormName('')
+    setFormRole('user')
+    setEditingUser(null)
+    setEditedName('')
+    setShowJaegerForm(false)
+    setNewJaegerName('')
+    setEditingJaegerId(null)
+    setEditedJaegerName('')
+    setMergeSourceJaegerId(null)
+    setMergeTargetJaegerId('')
+    setMergePreview(null)
+    setConfirmation(null)
+  }
+
+  const changeSection = (section: 'users' | 'profiles') => {
+    if (section === activeSection) return
+    resetTransientState()
+    setActiveSection(section)
   }
 
   const handleEditUser = useCallback((user: UserData) => {
@@ -161,6 +185,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
       const createdProfileId = await createJaegerProfile(newJaegerName)
       if (createdProfileId) {
         setNewJaegerName('')
+        setShowJaegerForm(false)
       }
     } finally {
       setIsCreatingJaeger(false)
@@ -264,7 +289,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
     })
   }
 
-  const sectionIds = ['users', 'profiles', 'districts'] as const
+  const sectionIds = ['users', 'profiles'] as const
 
   const handleTabKeyDown = (
     event: React.KeyboardEvent<HTMLButtonElement>,
@@ -281,75 +306,26 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
 
     event.preventDefault()
     const nextSection = sectionIds[nextIndex]
-    setActiveSection(nextSection)
+    changeSection(nextSection)
     tabRefs.current[nextSection]?.focus()
   }
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-green-800 flex items-center gap-2.5">
-          <Users size={20} strokeWidth={2} />
-          Benutzer
-        </h2>
-        {activeSection === 'users' && (
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => {
-              // Bei offenem Formular ODER laufender Bearbeitung schließt der
-              // Klick beides; sonst öffnet er das Neuanlage-Formular. Ein
-              // blindes setShowForm(v => !v) würde beim Abbrechen einer
-              // Bearbeitung (showForm ist dabei false) stattdessen das
-              // Neuanlage-Formular öffnen.
-              if (showForm || editingUser) {
-                handleCancelEdit();
-              } else {
-                setShowForm(true);
-                setEditingUser(null);
-              }
-            }}
-            title={showForm || editingUser ? 'Abbrechen' : 'Neuer Benutzer'}
-            aria-label={showForm || editingUser ? 'Abbrechen' : 'Neuer Benutzer'}
-            className={`
-              group relative
-              w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl
-              flex items-center justify-center
-              glass-bg backdrop-blur-xl backdrop-saturate-[180%]
-              transition-[transform,color,box-shadow] duration-200 ease-out
-              hover:scale-105 active:scale-95
-              motion-reduce:transform-none motion-reduce:transition-none
-              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2
-              cursor-pointer
-              ${showForm
-                ? 'glass-shadow-active text-green-700'
-                : 'text-green-900/70 hover:text-green-900/90 glass-shadow'
-              }
-            `}
-          >
-            <div className={`
-              absolute inset-0 rounded-xl sm:rounded-2xl bg-gradient-active opacity-0
-              transition-opacity duration-300
-              ${showForm ? 'opacity-100' : 'group-hover:opacity-50'}
-            `} />
-            {showForm || editingUser
-              ? <X size={20} className="relative z-10 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transform-none motion-reduce:transition-none" />
-              : <UserPlus size={20} className="relative z-10 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transform-none motion-reduce:transition-none" />
-            }
-            <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-white/20 opacity-0 scale-0 group-active:opacity-100 group-active:scale-100 transition-all duration-150" />
-          </button>
-        </div>
-        )}
-      </div>
+      <PageHeader
+        title="Verwaltung"
+        icon={Users}
+        description="Benutzerkonten und Jägerprofile für diesen Jagdbezirk"
+      />
 
       <div
-        className="mb-6 flex w-full items-center gap-0.5 overflow-x-auto rounded-lg bg-green-800/5 p-0.5 sm:w-fit"
+        className="mb-4 flex w-full items-center gap-0.5 overflow-x-auto rounded-lg bg-green-800/5 p-0.5 sm:w-fit"
         role="tablist"
         aria-label="Bereiche der Benutzerverwaltung"
       >
         {[
           { id: 'users' as const, label: 'Benutzer', icon: Users },
           { id: 'profiles' as const, label: 'Jägerprofile', icon: GitMerge },
-          { id: 'districts' as const, label: 'Jagdbezirke', icon: MapPin },
         ].map(({ id, label, icon: Icon }) => (
           <button
             key={id}
@@ -362,7 +338,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
             aria-selected={activeSection === id}
             aria-controls={`${id}-panel`}
             tabIndex={activeSection === id ? 0 : -1}
-            onClick={() => setActiveSection(id)}
+            onClick={() => changeSection(id)}
             onKeyDown={event => handleTabKeyDown(event, id)}
             className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2 sm:flex-none ${
               activeSection === id
@@ -374,6 +350,42 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
             {label}
           </button>
         ))}
+      </div>
+
+      <div className="mb-4 flex min-h-11 items-center justify-between gap-3">
+        <div>
+          <h3 className="font-semibold text-green-800">
+            {activeSection === 'users' ? 'Benutzer' : 'Jägerprofile'}
+          </h3>
+          <p className="text-xs tabular-nums text-green-900/70">
+            {activeSection === 'users'
+              ? `${users.length} Benutzer`
+              : `${activeJaegerProfiles.length} aktiv`}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            if (activeSection === 'users') {
+              setEditingUser(null)
+              setEditedName('')
+              setShowForm(true)
+            } else {
+              setEditingJaegerId(null)
+              setEditedJaegerName('')
+              setShowJaegerForm(true)
+            }
+          }}
+          aria-expanded={activeSection === 'users' ? showForm : showJaegerForm}
+          aria-controls={activeSection === 'users' ? 'new-user-form' : 'new-profile-form'}
+          className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-green-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+        >
+          <UserPlus size={17} />
+          <span className="hidden sm:inline">
+            {activeSection === 'users' ? 'Benutzer hinzufügen' : 'Jägerprofil hinzufügen'}
+          </span>
+          <span className="sm:hidden">Hinzufügen</span>
+        </button>
       </div>
 
       {activeSection === 'users' && activeJaegerProfiles.length === 0 && (
@@ -474,7 +486,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
       )}
 
       {activeSection === 'users' && showForm && !editingUser && (
-        <form onSubmit={handleCreateSubmit} className="bg-white rounded-xl shadow p-5 space-y-4 mb-6">
+        <form id="new-user-form" onSubmit={handleCreateSubmit} className="bg-white rounded-xl shadow p-5 space-y-4 mb-6">
           <h3 className="text-base font-semibold text-green-800">Neuen Benutzer anlegen</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -514,7 +526,10 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
               </select>
             </div>
           </div>
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={handleCancelEdit} disabled={submitting} className="min-h-11 cursor-pointer rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+              Abbrechen
+            </button>
             <button
               type="submit"
               disabled={submitting}
@@ -585,13 +600,8 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
 
       {activeSection === 'profiles' && (
       <div id="profiles-panel" role="tabpanel" aria-labelledby="profiles-tab">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-base font-semibold text-green-800">Jägerprofile</h3>
-          <span className="text-xs text-green-900/80 tabular-nums">
-            {activeJaegerProfiles.length} aktiv
-          </span>
-        </div>
-        <form onSubmit={handleCreateJaegerProfile} className="mb-4 rounded-xl bg-white p-4 shadow">
+        {showJaegerForm && (
+        <form id="new-profile-form" onSubmit={handleCreateJaegerProfile} className="mb-4 rounded-xl bg-white p-4 shadow">
           <div className="flex flex-col gap-3 md:flex-row md:items-end">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-1">Neues Jägerprofil</label>
@@ -604,6 +614,9 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
               />
             </div>
+            <button type="button" onClick={() => { setShowJaegerForm(false); setNewJaegerName('') }} disabled={isCreatingJaeger} className="min-h-11 cursor-pointer rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50">
+              Abbrechen
+            </button>
             <button
               type="submit"
               disabled={isCreatingJaeger || !newJaegerName.trim()}
@@ -613,6 +626,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
             </button>
           </div>
         </form>
+        )}
         <div className="bg-white rounded-xl shadow overflow-hidden">
           {activeJaegerProfiles.length === 0 ? (
             <div className="text-center py-10 text-gray-500">Keine aktiven Jägerprofile vorhanden.</div>
@@ -844,11 +858,6 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
       </div>
       )}
 
-      {activeSection === 'districts' && (
-        <div id="districts-panel" role="tabpanel" aria-labelledby="districts-tab">
-          <JagdbezirkOnboarding />
-        </div>
-      )}
       <ConfirmDialog
         open={confirmation !== null}
         title={confirmation?.title || ''}

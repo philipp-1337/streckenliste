@@ -10,15 +10,22 @@ import {
 
 // Onboarding eines neuen Jagdbezirks: Bezirks-Dokument plus erster Admin
 // in einem Zug. Bewusst kein Self-Service — nur Konten mit dem Custom
-// Claim `superadmin` (per Admin SDK gesetzt, nicht über die App erreichbar)
-// dürfen Bezirke anlegen.
+// Claim `superadmin` oder vorübergehend explizit freigeschaltete UIDs dürfen
+// Bezirke anlegen. Die Prüfung bleibt serverseitig die Autorisierungsgrenze.
+const SUPERADMIN_UIDS = new Set([
+  "SbtAXGzX69T5PxTVB2sirVkhjh62",
+]);
+
 export const createJagdbezirk = onCall(
   {region: "europe-west3"},
   async (request) => {
     if (!request.auth) {
       throw new HttpsError("unauthenticated", "Anmeldung erforderlich.");
     }
-    if (request.auth.token?.superadmin !== true) {
+    if (
+      request.auth.token?.superadmin !== true &&
+      !SUPERADMIN_UIDS.has(request.auth.uid)
+    ) {
       throw new HttpsError("permission-denied", "Nur Superadmins dürfen Jagdbezirke anlegen.");
     }
 
