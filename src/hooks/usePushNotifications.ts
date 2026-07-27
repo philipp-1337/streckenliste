@@ -9,10 +9,13 @@ import {
   isPushSupported,
   isStandalonePwa,
   requestPushPermission,
-  unregisterPushToken,
   waitForServiceWorkerReady,
 } from '@/lib/messaging';
-import { getPushDeviceStatus, registerPushDevice, unregisterPushDevice } from '@/lib/pushClient';
+import {
+  deactivatePushForThisDevice,
+  getPushDeviceStatus,
+  registerPushDevice,
+} from '@/lib/pushClient';
 import useAuth from '@hooks/useAuth';
 import type { PushLevel } from '@types';
 
@@ -97,11 +100,7 @@ export const usePushNotifications = () => {
     setIsBusy(true);
     try {
       if (status === 'on') {
-        const token = await getCurrentPushToken();
-        // Passing no token makes the server drop every device of this user —
-        // the only way to clean up when Safari already killed the subscription.
-        await unregisterPushDevice(token ?? undefined);
-        await unregisterPushToken();
+        await deactivatePushForThisDevice();
         setStatus('off');
         toast.success('Benachrichtigungen deaktiviert');
         return;

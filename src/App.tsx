@@ -17,6 +17,7 @@ import { EintragTable } from '@components/EintragTable';
 import { FachbegriffeLegende } from '@components/FachbegriffeLegende';
 import { PushSettings } from '@components/PushSettings';
 import { takePendingDeepLink } from '@/lib/pendingDeepLink';
+import { deactivatePushForThisDevice } from '@/lib/pushClient';
 import { SkeletonTable, SkeletonStatistik } from '@components/SkeletonLoaders';
 import Spinner from '@components/Spinner';
 import PdfDownloadDialog from '@components/PdfDownloadDialog';
@@ -220,6 +221,17 @@ const App = () => {
   const handleToggleLegende = useCallback(() => setShowLegende((v) => !v), []);
 
   const handleLogout = useCallback(async () => {
+    // Vor signOut(): der Callable braucht ein angemeldetes Konto. Ohne diesen
+    // Schritt bliebe die Zuordnung Token → Konto bestehen und ein geteiltes
+    // Gerät würde weiter die Benachrichtigungen des abgemeldeten Kontos
+    // anzeigen. Ein Fehler hier darf das Abmelden nicht verhindern – sonst
+    // hängt jemand ohne Netz in der Sitzung fest.
+    try {
+      await deactivatePushForThisDevice();
+    } catch (error) {
+      console.error("Push-Gerät konnte beim Abmelden nicht entfernt werden:", error);
+    }
+
     try {
       await signOut(auth);
     } catch (error) {
