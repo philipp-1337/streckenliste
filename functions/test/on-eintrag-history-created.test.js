@@ -6,12 +6,24 @@ const {handleHistoryCreated} = require("../lib/features/push/onEintragHistoryCre
 const BEZIRK = "gjb-10-randau";
 const PARAMS = {jagdbezirkId: BEZIRK, eintragId: "entry-1"};
 
+// Eintrag und History aus demselben writeBatch tragen denselben
+// Commit-Zeitstempel. Die Tests bilden das nach, damit der Normalfall den
+// Herkunftscheck des Triggers passiert.
+const commitTime = (millis) => ({toMillis: () => millis});
+const COMMIT = commitTime(1_785_000_000_000);
+
 const makeDb = ({entry, users, assignments, devices = [], claimedEvents = new Set()}) => {
   const sent = [];
   const db = {
     doc: (path) => {
       assert.equal(path, `jagdbezirke/${BEZIRK}/eintraege/entry-1`);
-      return {get: async () => ({exists: entry !== null, data: () => entry ?? undefined})};
+      return {
+        get: async () => ({
+          exists: entry !== null,
+          data: () => entry ?? undefined,
+          updateTime: COMMIT,
+        }),
+      };
     },
     collection: (name) => {
       if (name === "users") {
@@ -235,6 +247,66 @@ test("fehlender Eintrag bei anderer action als deleted sendet nichts", async () 
     changedByUid: "uwe",
     changedByName: "Uwe",
   });
+
+  assert.equal(sent.length, 0);
+});
+
+// Herkunftscheck: nur was gemeinsam mit dem Eintrag committet wurde, loest eine
+// Benachrichtigung aus. Faengt die Luecke ab, bei der ein Member unter seinem
+// eigenen pending-Eintrag beliebig oft eine Anlage behauptet.
+test("eigenstaendig geschriebenes History-Dokument wird ignoriert", async () => {
+  const {db, messaging, sent} = makeDb({
+    entry: {wildart: "Schwarzwild", datum: "2026-07-18", jaegerId: "toni-bitter", status: "pending"},
+    users: [{uid: "admin-1", jagdbezirkId: BEZIRK, role: "admin", pushLevel: "wichtig"}],
+    assignments: [],
+    devices: [{id: "d", userId: "admin-1", token: "t-000000000000000000000000000000"}],
+  });
+
+  // Eine Minute nach dem Eintrag geschrieben – also nicht aus demselben Commit.
+  await handleHistoryCreated(
+    db, messaging, PARAMS,
+    {action: "created", changedByUid: "member-1", changedByName: "Toni Bitter"},
+    "event-forged",
+    commitTime(COMMIT.toMillis() + 60_000),
+  );
+
+  assert.equal(sent.length, 0);
+});
+
+test("History aus demselben Commit wird verschickt", async () => {
+  const {db, messaging, sent} = makeDb({
+    entry: {wildart: "Schwarzwild", datum: "2026-07-18", jaegerId: "toni-bitter", status: "pending"},
+    users: [{uid: "admin-1", jagdbezirkId: BEZIRK, role: "admin", pushLevel: "wichtig"}],
+    assignments: [],
+    devices: [{id: "d", userId: "admin-1", token: "t-000000000000000000000000000000"}],
+  });
+
+  await handleHistoryCreated(
+    db, messaging, PARAMS,
+    {action: "created", changedByUid: "member-1", changedByName: "Toni Bitter"},
+    "event-real",
+    COMMIT,
+  );
+
+  assert.equal(sent.length, 1);
+});
+
+// Bei einer echten Loeschung ist der Eintrag weg. Ist er noch da, wurde die
+// Loeschung nur behauptet.
+test("behauptete Loeschung bei noch existierendem Eintrag wird ignoriert", async () => {
+  const {db, messaging, sent} = makeDb({
+    entry: {wildart: "Rehwild", datum: "2026-05-08", jaegerId: "toni-bitter", status: "approved"},
+    users: [{uid: "admin-1", jagdbezirkId: BEZIRK, role: "admin", pushLevel: "alle"}],
+    assignments: [],
+    devices: [{id: "d", userId: "admin-1", token: "t-000000000000000000000000000000"}],
+  });
+
+  await handleHistoryCreated(
+    db, messaging, PARAMS,
+    {action: "deleted", changedByUid: "member-1", changedByName: "Toni Bitter"},
+    "event-fake-delete",
+    COMMIT,
+  );
 
   assert.equal(sent.length, 0);
 });

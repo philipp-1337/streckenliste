@@ -43,6 +43,18 @@ export async function getPushDeviceStatus(token: string): Promise<boolean> {
 // abgemeldeten Kontos auf den Lockscreen.
 export async function deactivatePushForThisDevice(): Promise<void> {
   const token = await getCurrentPushToken();
-  await unregisterPushDevice(token ?? undefined);
-  await unregisterPushToken();
+  try {
+    await unregisterPushDevice(token ?? undefined);
+  } finally {
+    // Bewusst im finally: Schlägt der Callable fehl – offline, Netzfehler –,
+    // muss die lokale Subscription trotzdem verschwinden. Sonst behielte ein
+    // geteiltes Gerät sowohl die Subscription als auch die serverseitige
+    // Zuordnung, weil handleLogout den Fehler absichtlich verschluckt und
+    // dennoch abmeldet.
+    //
+    // Das räumt auch die Serverseite auf: ohne Subscription meldet FCM den
+    // Token beim nächsten Versand als nicht registriert, und sendPushToUser
+    // löscht den push_devices-Eintrag daraufhin selbst.
+    await unregisterPushToken();
+  }
 }

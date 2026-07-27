@@ -121,6 +121,31 @@ test("Member darf eigenen Eintrag löschen und protokollieren", async () => {
   await assertSucceeds(batch.commit());
 });
 
+// Die Lücke aus dem zweiten Review: ein eigenständiges created-Dokument unter
+// einem bestehenden eigenen Eintrag. Der Trigger hätte das als neuen
+// Freigabevorgang gewertet und Admins auf jeder Stufe benachrichtigt – beliebig
+// oft wiederholbar, ohne den Eintrag anzufassen.
+test("Member darf keine Anlage unter einem bestehenden Eintrag behaupten", async () => {
+  const db = testEnv.authenticatedContext(MEMBER).firestore();
+  await assertFails(
+    setDoc(doc(db, historyPath("own-entry", "forged-created")), historyDoc("created", MEMBER))
+  );
+});
+
+test("Member darf keine Löschung ohne Eintrag behaupten", async () => {
+  const db = testEnv.authenticatedContext(MEMBER).firestore();
+  await assertFails(
+    setDoc(doc(db, historyPath("gibt-es-nicht", "forged-delete")), historyDoc("deleted", MEMBER))
+  );
+});
+
+test("Member darf keine Bearbeitung ohne Eintrag behaupten", async () => {
+  const db = testEnv.authenticatedContext(MEMBER).firestore();
+  await assertFails(
+    setDoc(doc(db, historyPath("gibt-es-nicht", "forged-update")), historyDoc("updated", MEMBER))
+  );
+});
+
 // Ab hier die eigentliche Lücke aus dem Review.
 test("Member darf keine Ablehnung erfinden", async () => {
   const db = testEnv.authenticatedContext(MEMBER).firestore();
