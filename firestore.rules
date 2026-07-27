@@ -44,15 +44,28 @@ service cloud.firestore {
         );
     }
 
-    // Darf dieser Nutzer für diesen Eintrag überhaupt etwas protokollieren?
-    // Beim Anlegen wird das History-Dokument im selben Batch wie der Eintrag
-    // geschrieben – der Eintrag existiert im committeten Stand also noch nicht
-    // und die Prüfung muss das zulassen, sonst bricht jedes Neuanlegen. Ein
-    // erfundenes History-Dokument unter einer Fantasie-ID läuft im Trigger ins
-    // Leere, weil der Eintrag dort nicht gelesen werden kann.
-    function canLogHistoryForEntry(jagdbezirkId, eintragId) {
+    // Regeln werten jeden Write eines Batches gegen den Stand VOR dem Commit
+    // aus. Daraus folgt für Nicht-Admins pro Aktion eine exakte Erwartung:
+    //
+    //   created  – der Eintrag entsteht im selben Batch, existiert also noch
+    //              nicht. Ein vorhandener Eintrag bedeutet: eigenständiges
+    //              History-Dokument ohne echte Anlage.
+    //   updated  – der Eintrag existiert und gehört dem Nutzer.
+    //   deleted  – der Eintrag existiert noch (er wird im selben Batch
+    //              gelöscht) und gehört dem Nutzer.
+    //
+    // Die created-Bedingung ist der Kern: ohne sie kann ein Member unter seinem
+    // eigenen pending-Eintrag beliebig oft eine Anlage behaupten, ohne etwas zu
+    // ändern – und das erreicht Admins auf jeder Benachrichtigungsstufe.
+    function memberMayLogHistory(jagdbezirkId, eintragId, action) {
       let entryPath = /databases/$(database)/documents/jagdbezirke/$(jagdbezirkId)/eintraege/$(eintragId);
-      return !exists(entryPath) || ownsEntryData(get(entryPath).data, jagdbezirkId);
+      return action == 'created'
+        ? !exists(entryPath)
+        : (
+            action in ['updated', 'deleted'] &&
+            exists(entryPath) &&
+            ownsEntryData(get(entryPath).data, jagdbezirkId)
+          );
     }
 
     function getAssignedJaegerId(jagdbezirkId) {
@@ -210,7 +223,7 @@ service cloud.firestore {
                      // Statuswechsel sind Admin-Vorgänge. Ohne diese Grenze
                      // könnte ein Member eine Ablehnung oder Freigabe erfinden.
                      request.resource.data.action in ['created', 'updated', 'deleted'] &&
-                     canLogHistoryForEntry(jagdbezirkId, eintragId)
+                     memberMayLogHistory(jagdbezirkId, eintragId, request.resource.data.action)
                    )
                  );
         allow update: if false;

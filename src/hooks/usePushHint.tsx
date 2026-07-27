@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { BellIcon, XIcon } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PUSH_HINT_DELAY, PUSH_HINT_DISMISSED_KEY } from '@constants';
+import { isStandalonePwa } from '@/lib/messaging';
 import type { PushStatus } from '@hooks/usePushNotifications';
 
 const TOAST_ID = 'push-hint-toast';
@@ -55,10 +56,17 @@ const renderHint = (onOpenSettings: () => void, onDismiss: () => void) => (
   </div>
 );
 
-// Weist darauf hin, dass Push inaktiv ist – aber nur, wenn es sich auch
-// aktivieren lässt. Bei fehlender Browser-Unterstützung, nicht installierter
-// PWA oder in den Browser-Einstellungen blockierten Benachrichtigungen wäre der
-// Hinweis nur Rauschen, weil er zu nichts führt.
+// Weist darauf hin, dass Push inaktiv ist – aber nur in der installierten PWA.
+//
+// Zwei Gründe für diese Grenze: Auf iOS ist Push ausschließlich in der
+// Home-Screen-App verfügbar, ein Hinweis im Safari-Tab würde also in eine
+// Einstellungsseite führen, die nur erklärt, dass es hier nicht geht. Und das
+// Feature ist bewusst auf die installierte App zugeschnitten – wer im Browser-Tab
+// arbeitet, soll nicht dorthin gedrängt werden. Über die Einstellungen bleibt
+// das Aktivieren dort möglich, wo der Browser es hergibt (Desktop, Android).
+//
+// Der Status deckt die übrigen Ausschlussgründe ab: fehlende Unterstützung,
+// kein Service Worker, in den Browser-Einstellungen blockiert.
 export const usePushHint = (status: PushStatus) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -68,6 +76,7 @@ export const usePushHint = (status: PushStatus) => {
   useEffect(() => {
     // Auf der Einstellungsseite steht der echte Toggle direkt daneben.
     if (status !== 'off' || onSettingsPage || shown.current || wasDismissed()) return;
+    if (!isStandalonePwa()) return;
 
     const timeoutId = window.setTimeout(() => {
       shown.current = true;
