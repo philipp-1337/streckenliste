@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { httpsCallable } from 'firebase/functions';
-import { collection, query, where, getDocs, setDoc, updateDoc, deleteDoc, doc, writeBatch } from 'firebase/firestore';
+import { collection, query, where, getDocs, getCountFromServer, setDoc, updateDoc, deleteDoc, doc, writeBatch } from 'firebase/firestore';
 import { auth, db, functions } from '../firebase';
 import useAuth from '@hooks/useAuth';
 import type { UserData, Role, JaegerProfile } from '@types';
@@ -21,6 +21,7 @@ export const useUserManagement = () => {
   const [users, setUsers] = useState<UserData[]>([]);
   const [jaegerProfiles, setJaegerProfiles] = useState<JaegerProfile[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadUsers = useCallback(async () => {
     if (!currentUser?.jagdbezirkId || currentUser.role !== 'admin') {
@@ -29,22 +30,26 @@ export const useUserManagement = () => {
       return;
     }
     setLoading(true);
+    setLoadError(null);
     try {
       const usersQuery = query(
         collection(db, 'users'),
         where('jagdbezirkId', '==', currentUser.jagdbezirkId)
       );
-      const usersSnapshot = await getDocs(usersQuery);
+      const jaegerCollection = collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/jaeger`);
+      const assignmentsCollection = collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/userAssignments`);
+      const entriesCollection = collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/eintraege`);
+      const [usersSnapshot, jaegerSnapshot, assignmentsSnapshot] = await Promise.all([
+        getDocs(usersQuery),
+        getDocs(jaegerCollection),
+        getDocs(assignmentsCollection),
+      ]);
 
-      const jaegerSnapshot = await getDocs(collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/jaeger`));
-      const assignmentsSnapshot = await getDocs(collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/userAssignments`));
-      const eintraegeSnapshot = await getDocs(collection(db, `jagdbezirke/${currentUser.jagdbezirkId}/eintraege`));
-      const entryCountByJaegerId = eintraegeSnapshot.docs.reduce<Record<string, number>>((acc, d) => {
-        const jaegerId = String(d.data().jaegerId || '').trim();
-        if (!jaegerId) return acc;
-        acc[jaegerId] = (acc[jaegerId] || 0) + 1;
-        return acc;
-      }, {});
+      const profileEntryCounts = await Promise.all(jaegerSnapshot.docs.map(async jaegerDoc => {
+        const countSnapshot = await getCountFromServer(query(entriesCollection, where('jaegerId', '==', jaegerDoc.id)));
+        return [jaegerDoc.id, countSnapshot.data().count] as const;
+      }));
+      const entryCountByJaegerId = Object.fromEntries(profileEntryCounts);
       const loadedJaegerProfiles = jaegerSnapshot.docs
         .map(d => ({
           id: d.id,
@@ -80,6 +85,7 @@ export const useUserManagement = () => {
       setUsers(loadedUsers);
     } catch (err) {
       console.error('Error loading users:', err);
+      setLoadError('Benutzer und Jägerprofile konnten nicht geladen werden.');
       toast.error('Fehler beim Laden der Benutzer');
     } finally {
       setLoading(false);
@@ -397,6 +403,7 @@ export const useUserManagement = () => {
     } catch (err) {
       toast.error('Fehler beim Deaktivieren des Benutzers.');
       console.error('Error deactivating user:', err);
+      throw err;
     }
   }, []);
 
@@ -404,6 +411,7 @@ export const useUserManagement = () => {
     users,
     jaegerProfiles,
     loading,
+    loadError,
     loadUsers,
     createUser,
     updateUserRole,

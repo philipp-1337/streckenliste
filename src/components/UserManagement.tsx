@@ -1,11 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { UserPlus, Trash2, Users, X, Pencil, GitMerge, RotateCcw, MapPin } from 'lucide-react';
 import { useUserManagement } from '@hooks/useUserManagement';
 import { JagdbezirkOnboarding } from '@components/JagdbezirkOnboarding';
 import useAuth from '@hooks/useAuth';
 import Spinner from '@components/Spinner';
+import { ConfirmDialog } from '@components/ConfirmDialog';
+import { UserManagementUserList } from '@components/UserManagementUserList';
 import type { UserData, Role, JaegerProfile } from '@types';
+
+interface ConfirmationState {
+  title: string
+  description: React.ReactNode
+  confirmLabel: string
+  tone?: 'danger' | 'primary'
+  onConfirm: () => Promise<void>
+}
 
 export const UserManagement: React.FC = () => {
   const { currentUser } = useAuth();
@@ -26,6 +36,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
     users,
     jaegerProfiles,
     loading,
+    loadError,
     loadUsers,
     createUser,
     updateUserRole,
@@ -58,31 +69,25 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
   const [isPreviewingMerge, setIsPreviewingMerge] = useState(false);
   const [isMergingJaegerProfiles, setIsMergingJaegerProfiles] = useState(false);
   const [activeSection, setActiveSection] = useState<'users' | 'profiles' | 'districts'>('users');
+  const [confirmation, setConfirmation] = useState<ConfirmationState | null>(null)
+  const tabRefs = useRef<Record<'users' | 'profiles' | 'districts', HTMLButtonElement | null>>({
+    users: null,
+    profiles: null,
+    districts: null,
+  })
 
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
 
-  const assignedUserIdsByJaegerId = users.reduce<Record<string, string[]>>((acc, user) => {
-    if (!user.jaegerId) return acc
-    acc[user.jaegerId] = [...(acc[user.jaegerId] || []), user.uid]
-    return acc
-  }, {})
-
-  const activeJaegerProfiles = jaegerProfiles.filter(profile => profile.active !== false)
-  const archivedJaegerProfiles = jaegerProfiles.filter(profile => profile.active === false)
-
-  const getAssignableProfilesForUser = (user: UserData): JaegerProfile[] => {
-    const visibleProfiles = activeJaegerProfiles.slice()
-    if (user.jaegerId) {
-      const assignedProfile = jaegerProfiles.find(profile => profile.id === user.jaegerId)
-      if (assignedProfile && !visibleProfiles.some(profile => profile.id === assignedProfile.id)) {
-        visibleProfiles.push(assignedProfile)
-      }
-    }
-
-    return visibleProfiles.sort((a, b) => a.displayName.localeCompare(b.displayName, 'de'))
-  }
+  const activeJaegerProfiles = useMemo(
+    () => jaegerProfiles.filter(profile => profile.active !== false),
+    [jaegerProfiles]
+  )
+  const archivedJaegerProfiles = useMemo(
+    () => jaegerProfiles.filter(profile => profile.active === false),
+    [jaegerProfiles]
+  )
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,38 +121,38 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
     }
   };
 
-  const handleDeactivate = (uid: string, displayName: string | null) => {
-    toast.custom((t: string | number) => (
-      <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-lg p-4">
-        <div className="text-sm font-medium text-gray-900">
-          Soll „{displayName || 'Benutzer'}" wirklich deaktiviert werden?
-        </div>
-        <p className="text-xs text-gray-500 mt-1">Der Benutzer kann sich danach nicht mehr einloggen. Einträge bleiben erhalten.</p>
-        <div className="mt-3 flex justify-end gap-2">
-          <button
-            onClick={() => toast.dismiss(t)}
-            className="rounded-xl px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 transition cursor-pointer"
-          >
-            Abbrechen
-          </button>
-          <button
-            onClick={async () => {
-              await deactivateUser(uid);
-              toast.dismiss(t);
-            }}
-            className="rounded-xl px-3 py-1.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition cursor-pointer"
-          >
-            Deaktivieren
-          </button>
-        </div>
-      </div>
-    ), { duration: 10000 });
-  };
+  const handleDeactivate = useCallback((uid: string, displayName: string | null) => {
+    setConfirmation({
+      title: `„${displayName || 'Benutzer'}“ deaktivieren?`,
+      description: <p>Der Benutzer kann sich danach nicht mehr einloggen. Einträge bleiben erhalten.</p>,
+      confirmLabel: 'Deaktivieren',
+      onConfirm: async () => {
+        await deactivateUser(uid)
+        setConfirmation(null)
+      },
+    })
+  }, [deactivateUser])
 
   const handleCancelEdit = () => {
     setEditingUser(null);
     setShowForm(false);
   }
+
+  const handleEditUser = useCallback((user: UserData) => {
+    setEditingUser(user)
+    setEditedName(user.displayName || '')
+    setShowForm(false)
+  }, [])
+
+  const handleDeactivateUser = useCallback((user: UserData) => {
+    handleDeactivate(user.uid, user.displayName)
+  }, [handleDeactivate])
+
+  const handleJaegerChange = useCallback((uid: string, jaegerId: string | null) => {
+    void updateUserJaeger(uid, jaegerId)
+  }, [updateUserJaeger])
+
+  const closeConfirmation = useCallback(() => setConfirmation(null), [])
 
   const handleCreateJaegerProfile = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -192,36 +197,22 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
   }
 
   const handleArchiveJaegerProfile = (profile: JaegerProfile) => {
-    toast.custom((t: string | number) => (
-      <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-lg p-4">
-        <div className="text-sm font-medium text-gray-900">
-          Jägerprofil „{profile.displayName}“ archivieren?
-        </div>
-        <p className="text-xs text-gray-500 mt-1">
+    setConfirmation({
+      title: `Jägerprofil „${profile.displayName}“ archivieren?`,
+      description: (
+        <>
+          <p>
           Das Profil verschwindet aus der normalen UI und aus Auswahlfeldern, bleibt aber für bestehende Verknüpfungen erhalten.
-        </p>
-        <p className="mt-2 text-xs text-gray-500">
-          Verknüpfte Einträge: {profile.entryCount || 0}
-        </p>
-        <div className="mt-3 flex justify-end gap-2">
-          <button
-            onClick={() => toast.dismiss(t)}
-            className="rounded-xl px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 transition cursor-pointer"
-          >
-            Abbrechen
-          </button>
-          <button
-            onClick={async () => {
-              await setJaegerProfileActive(profile.id, false)
-              toast.dismiss(t)
-            }}
-            className="rounded-xl px-3 py-1.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition cursor-pointer"
-          >
-            Archivieren
-          </button>
-        </div>
-      </div>
-    ), { duration: 10000 })
+          </p>
+          <p>Verknüpfte Einträge: {profile.entryCount || 0}</p>
+        </>
+      ),
+      confirmLabel: 'Archivieren',
+      onConfirm: async () => {
+        await setJaegerProfileActive(profile.id, false)
+        setConfirmation(null)
+      },
+    })
   }
 
   const handlePreviewJaegerMerge = async () => {
@@ -244,46 +235,54 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
     const targetProfile = jaegerProfiles.find(profile => profile.id === mergeTargetJaegerId)
     if (!sourceProfile || !targetProfile) return
 
-    toast.custom((t: string | number) => (
-      <div className="w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-lg p-4">
-        <div className="text-sm font-medium text-gray-900">
-          Jägerprofil „{sourceProfile.displayName}“ wirklich in „{targetProfile.displayName}“ zusammenführen?
-        </div>
-        <p className="text-xs text-gray-500 mt-1">
-          Das Quellprofil wird deaktiviert. Bestehende `jaegerId`-Zuordnungen werden auf das Zielprofil umgehängt.
-        </p>
-        {mergePreview && (
-          <p className="text-xs text-green-700 mt-2">
-            Vorschau: {mergePreview.entryCount} Einträge und {mergePreview.assignmentCount} User-Zuordnungen betroffen.
-          </p>
-        )}
-        <div className="mt-3 flex justify-end gap-2">
-          <button
-            onClick={() => toast.dismiss(t)}
-            className="rounded-xl px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100 transition cursor-pointer"
-          >
-            Abbrechen
-          </button>
-          <button
-            onClick={async () => {
-              setIsMergingJaegerProfiles(true)
-              try {
-                await mergeJaegerProfiles(mergeSourceJaegerId, mergeTargetJaegerId, mergeSyncEntryNames)
-                setMergeSourceJaegerId(null)
-                setMergeTargetJaegerId('')
-                setMergePreview(null)
-                toast.dismiss(t)
-              } finally {
-                setIsMergingJaegerProfiles(false)
-              }
-            }}
-            className="rounded-xl px-3 py-1.5 text-sm font-medium text-white bg-green-700 hover:bg-green-800 transition cursor-pointer"
-          >
-            Zusammenführen
-          </button>
-        </div>
-      </div>
-    ), { duration: 15000 })
+    setConfirmation({
+      title: `„${sourceProfile.displayName}“ in „${targetProfile.displayName}“ zusammenführen?`,
+      description: (
+        <>
+          <p>Das Quellprofil wird deaktiviert. Bestehende Jäger-Zuordnungen werden auf das Zielprofil umgehängt.</p>
+          {mergePreview && (
+            <p className="font-medium text-green-800">
+              Vorschau: {mergePreview.entryCount} Einträge und {mergePreview.assignmentCount} User-Zuordnungen betroffen.
+            </p>
+          )}
+        </>
+      ),
+      confirmLabel: 'Zusammenführen',
+      tone: 'primary',
+      onConfirm: async () => {
+        setIsMergingJaegerProfiles(true)
+        try {
+          await mergeJaegerProfiles(mergeSourceJaegerId, mergeTargetJaegerId, mergeSyncEntryNames)
+          setMergeSourceJaegerId(null)
+          setMergeTargetJaegerId('')
+          setMergePreview(null)
+          setConfirmation(null)
+        } finally {
+          setIsMergingJaegerProfiles(false)
+        }
+      },
+    })
+  }
+
+  const sectionIds = ['users', 'profiles', 'districts'] as const
+
+  const handleTabKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    currentSection: typeof sectionIds[number]
+  ) => {
+    const currentIndex = sectionIds.indexOf(currentSection)
+    let nextIndex: number
+
+    if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % sectionIds.length
+    else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + sectionIds.length) % sectionIds.length
+    else if (event.key === 'Home') nextIndex = 0
+    else if (event.key === 'End') nextIndex = sectionIds.length - 1
+    else return
+
+    event.preventDefault()
+    const nextSection = sectionIds[nextIndex]
+    setActiveSection(nextSection)
+    tabRefs.current[nextSection]?.focus()
   }
 
   return (
@@ -316,9 +315,10 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
               w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl
               flex items-center justify-center
               glass-bg backdrop-blur-xl backdrop-saturate-[180%]
-              transition-all duration-300 ease-bounce
+              transition-[transform,color,box-shadow] duration-200 ease-out
               hover:scale-105 active:scale-95
-              focus:outline-none focus:ring-2 focus:ring-green-500/30
+              motion-reduce:transform-none motion-reduce:transition-none
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2
               cursor-pointer
               ${showForm
                 ? 'glass-shadow-active text-green-700'
@@ -332,8 +332,8 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
               ${showForm ? 'opacity-100' : 'group-hover:opacity-50'}
             `} />
             {showForm || editingUser
-              ? <X size={20} className="relative z-10 transition-all duration-300 ease-bounce group-hover:scale-110" />
-              : <UserPlus size={20} className="relative z-10 transition-all duration-300 ease-bounce group-hover:scale-110" />
+              ? <X size={20} className="relative z-10 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transform-none motion-reduce:transition-none" />
+              : <UserPlus size={20} className="relative z-10 transition-transform duration-200 ease-out group-hover:scale-110 motion-reduce:transform-none motion-reduce:transition-none" />
             }
             <div className="absolute inset-0 rounded-xl sm:rounded-2xl bg-white/20 opacity-0 scale-0 group-active:opacity-100 group-active:scale-100 transition-all duration-150" />
           </button>
@@ -353,12 +353,18 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
         ].map(({ id, label, icon: Icon }) => (
           <button
             key={id}
+            ref={element => {
+              tabRefs.current[id] = element
+            }}
+            id={`${id}-tab`}
             type="button"
             role="tab"
             aria-selected={activeSection === id}
             aria-controls={`${id}-panel`}
+            tabIndex={activeSection === id ? 0 : -1}
             onClick={() => setActiveSection(id)}
-            className={`flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-all sm:flex-none ${
+            onKeyDown={event => handleTabKeyDown(event, id)}
+            className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2 sm:flex-none ${
               activeSection === id
                 ? 'bg-white text-green-800 shadow-sm'
                 : 'text-green-900/80 hover:text-green-900'
@@ -373,6 +379,18 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
       {activeSection === 'users' && activeJaegerProfiles.length === 0 && (
         <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           Es sind noch keine aktiven Jägerprofile vorhanden. Lege zuerst ein Jägerprofil an, damit Benutzer zugeordnet werden können.
+        </div>
+      )}
+      {loadError && (
+        <div role="alert" className="mb-4 flex flex-col gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900 sm:flex-row sm:items-center sm:justify-between">
+          <span>{loadError}</span>
+          <button
+            type="button"
+            onClick={() => void loadUsers()}
+            className="min-h-11 rounded-xl bg-red-700 px-4 py-2 font-medium text-white transition-colors hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2 cursor-pointer"
+          >
+            Erneut versuchen
+          </button>
         </div>
       )}
       {activeSection === 'profiles' && mergeSourceJaegerId && (
@@ -546,116 +564,27 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
       )}
 
       {activeSection === 'users' && (
-      <div id="users-panel" role="tabpanel">
-      <div className="flex justify-end mb-2">
-        <span className="text-xs text-green-900/80 tabular-nums">
-          {users.length} Benutzer
-        </span>
-      </div>
-      <div className="bg-white rounded-xl shadow overflow-hidden">
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <Spinner size={32} />
+        <div id="users-panel" role="tabpanel" aria-labelledby="users-tab">
+          <div className="mb-2 flex justify-end">
+            <span className="text-xs tabular-nums text-green-900/80">{users.length} Benutzer</span>
           </div>
-        ) : users.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">Keine Benutzer gefunden.</div>
-        ) : (
-          <div className="overflow-x-auto">
-          <table className="min-w-full">
-            <thead className="bg-green-800 text-white">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-medium">Name</th>
-                <th className="px-4 py-3 text-left text-sm font-medium">E-Mail</th>
-                <th className="px-4 py-3 text-left text-sm font-medium">Rolle</th>
-                <th className="px-4 py-3 text-left text-sm font-medium">Jäger-Zuordnung</th>
-                <th className="px-4 py-3 text-center text-sm font-medium">Aktionen</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {users.map(user => (
-                <tr key={user.uid} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm font-medium">
-                    {user.displayName || '—'}
-                    {user.uid === currentUser?.uid && (
-                      <span className="ml-2 text-xs text-green-700 font-normal">(ich)</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{user.email}</td>
-                  <td className="px-4 py-3 text-sm">
-                    <select
-                      value={user.role}
-                      onChange={e => updateUserRole(user.uid, e.target.value as Role)}
-                      disabled={user.uid === currentUser?.uid}
-                      className="border border-gray-300 rounded-lg px-2 py-1 text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <option value="user">Benutzer</option>
-                      <option value="admin">Administrator</option>
-                    </select>
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <select
-                      value={user.jaegerId || ''}
-                      onChange={e => {
-                        void updateUserJaeger(user.uid, e.target.value || null)
-                      }}
-                      className="w-full min-w-[220px] border border-gray-300 rounded-lg px-2 py-1 text-base focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
-                    >
-                      <option value="">Nicht zugeordnet</option>
-                      {getAssignableProfilesForUser(user).map(profile => (
-                        <option key={profile.id} value={profile.id}>
-                          {profile.displayName}{profile.active === false ? ' (archiviert)' : ''}
-                        </option>
-                      ))}
-                    </select>
-                    {user.jaegerId && (assignedUserIdsByJaegerId[user.jaegerId]?.length || 0) > 1 && (
-                      <p className="mt-1 text-xs text-amber-700">
-                        Hinweis: Dieses Jägerprofil ist aktuell {assignedUserIdsByJaegerId[user.jaegerId].length} Benutzern zugeordnet.
-                      </p>
-                    )}
-                    {user.role === 'user' && !user.jaegerId && (
-                      <p className="mt-1 text-xs text-amber-700">
-                        Dieser Benutzer kann erst nach manueller Zuordnung eigene Abschüsse erfassen.
-                      </p>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    {user.uid !== currentUser?.uid && (
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => {
-                            setEditingUser(user)
-                            setEditedName(user.displayName || '')
-                            setShowForm(false)
-                          }}
-                          className="text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
-                          title="Bearbeiten"
-                          aria-label={`${user.displayName || 'Benutzer'} bearbeiten`}
-                        >
-                          <Pencil size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDeactivate(user.uid, user.displayName)}
-                          className="text-red-600 hover:text-red-800 transition-colors cursor-pointer"
-                          title="Deaktivieren"
-                          aria-label={`${user.displayName || 'Benutzer'} deaktivieren`}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className="overflow-hidden rounded-xl bg-white shadow">
+            <UserManagementUserList
+              users={users}
+              jaegerProfiles={jaegerProfiles}
+              loading={loading}
+              currentUserId={currentUser.uid}
+              onEdit={handleEditUser}
+              onDeactivate={handleDeactivateUser}
+              onRoleChange={updateUserRole}
+              onJaegerChange={handleJaegerChange}
+            />
           </div>
-        )}
-      </div>
-      </div>
+        </div>
       )}
 
       {activeSection === 'profiles' && (
-      <div id="profiles-panel" role="tabpanel">
+      <div id="profiles-panel" role="tabpanel" aria-labelledby="profiles-tab">
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-base font-semibold text-green-800">Jägerprofile</h3>
           <span className="text-xs text-green-900/80 tabular-nums">
@@ -688,7 +617,72 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
           {activeJaegerProfiles.length === 0 ? (
             <div className="text-center py-10 text-gray-500">Keine aktiven Jägerprofile vorhanden.</div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+            <div className="divide-y divide-gray-200 md:hidden">
+              {activeJaegerProfiles.map(profile => {
+                const isEditing = editingJaegerId === profile.id
+                return (
+                  <article key={profile.id} className="space-y-3 p-4">
+                    {isEditing ? (
+                      <label className="grid gap-1 text-sm font-medium text-gray-700">
+                        Name
+                        <input
+                          type="text"
+                          value={editedJaegerName}
+                          onChange={event => setEditedJaegerName(event.target.value)}
+                          disabled={isUpdatingJaeger}
+                          className="min-h-11 w-full rounded-lg border border-gray-300 px-3 py-2 text-base focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-500/30"
+                        />
+                      </label>
+                    ) : (
+                      <div>
+                        <h3 className="break-words font-semibold text-gray-900">{profile.displayName}</h3>
+                        <p className="mt-1 break-all text-xs text-gray-500">{profile.id}</p>
+                      </div>
+                    )}
+                    <p className="text-sm text-gray-700">{profile.entryCount || 0} Einträge</p>
+                    <div className="flex flex-wrap justify-end gap-2 border-t border-gray-100 pt-3">
+                      {isEditing ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={handleSaveJaegerEdit}
+                            disabled={isUpdatingJaeger}
+                            className="min-h-11 rounded-xl bg-green-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                          >
+                            {isUpdatingJaeger ? 'Speichere…' : 'Speichern'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingJaegerId(null)
+                              setEditedJaegerName('')
+                            }}
+                            disabled={isUpdatingJaeger}
+                            className="min-h-11 rounded-xl px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+                          >
+                            Abbrechen
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button type="button" onClick={() => handleStartJaegerEdit(profile.id, profile.displayName)} className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-blue-800 hover:bg-blue-50 cursor-pointer">
+                            <Pencil size={16} /> Bearbeiten
+                          </button>
+                          <button type="button" onClick={() => handleStartJaegerMerge(profile.id)} className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-green-800 hover:bg-green-50 cursor-pointer">
+                            <GitMerge size={16} /> Zusammenführen
+                          </button>
+                          <button type="button" onClick={() => handleArchiveJaegerProfile(profile)} className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-red-800 hover:bg-red-50 cursor-pointer">
+                            <Trash2 size={16} /> Archivieren
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+            <div className="hidden overflow-x-auto md:block">
               <table className="min-w-full">
                 <thead className="bg-green-800 text-white">
                   <tr>
@@ -747,7 +741,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
                               <button
                                 type="button"
                                 onClick={() => handleStartJaegerEdit(profile.id, profile.displayName)}
-                                className="text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+                                className="inline-flex size-11 items-center justify-center rounded-xl text-blue-700 transition-colors hover:bg-blue-50 hover:text-blue-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2 cursor-pointer"
                                 title="Name bearbeiten"
                                 aria-label={`Name von ${profile.displayName} bearbeiten`}
                               >
@@ -756,7 +750,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
                               <button
                                 type="button"
                                 onClick={() => handleStartJaegerMerge(profile.id)}
-                                className="text-green-700 hover:text-green-900 transition-colors cursor-pointer"
+                                className="inline-flex size-11 items-center justify-center rounded-xl text-green-700 transition-colors hover:bg-green-50 hover:text-green-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2 cursor-pointer"
                                 title="Mit anderem Profil zusammenführen"
                                 aria-label={`${profile.displayName} mit anderem Profil zusammenführen`}
                               >
@@ -765,7 +759,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
                               <button
                                 type="button"
                                 onClick={() => handleArchiveJaegerProfile(profile)}
-                                className="text-red-600 hover:text-red-800 transition-colors cursor-pointer"
+                                className="inline-flex size-11 items-center justify-center rounded-xl text-red-700 transition-colors hover:bg-red-50 hover:text-red-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-700 focus-visible:ring-offset-2 cursor-pointer"
                                 title="Archivieren"
                                 aria-label={`${profile.displayName} archivieren`}
                               >
@@ -780,6 +774,7 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </div>
         {archivedJaegerProfiles.length > 0 && (
@@ -791,7 +786,28 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
               </span>
             </div>
             <div className="bg-white rounded-xl shadow overflow-hidden">
-              <div className="overflow-x-auto">
+              <div className="divide-y divide-gray-200 md:hidden">
+                {archivedJaegerProfiles.map(profile => (
+                  <article key={profile.id} className="space-y-3 p-4">
+                    <div>
+                      <h3 className="break-words font-semibold text-gray-800">{profile.displayName}</h3>
+                      <p className="mt-1 break-all text-xs text-gray-500">{profile.id}</p>
+                    </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-sm text-gray-700">{profile.entryCount || 0} Einträge</span>
+                      <button
+                        type="button"
+                        onClick={() => void setJaegerProfileActive(profile.id, true)}
+                        className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2 cursor-pointer"
+                      >
+                        <RotateCcw size={14} />
+                        Wiederherstellen
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              <div className="hidden overflow-x-auto md:block">
                 <table className="min-w-full">
                   <thead className="bg-gray-100 text-gray-700">
                     <tr>
@@ -829,10 +845,19 @@ const AdminUserManagement: React.FC<{ currentUser: UserData }> = ({ currentUser 
       )}
 
       {activeSection === 'districts' && (
-        <div id="districts-panel" role="tabpanel">
+        <div id="districts-panel" role="tabpanel" aria-labelledby="districts-tab">
           <JagdbezirkOnboarding />
         </div>
       )}
+      <ConfirmDialog
+        open={confirmation !== null}
+        title={confirmation?.title || ''}
+        description={confirmation?.description}
+        confirmLabel={confirmation?.confirmLabel || ''}
+        tone={confirmation?.tone}
+        onCancel={closeConfirmation}
+        onConfirm={confirmation?.onConfirm || (async () => {})}
+      />
     </div>
   );
 };
