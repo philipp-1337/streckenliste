@@ -35,27 +35,19 @@ type HistoryData = {
 
 type TriggerParams = {jagdbezirkId: string; eintragId: string};
 
-// Nur die Zeitstempel-Methode wird gebraucht; so bleibt die Prüfung ohne
-// Admin-SDK-Typen testbar.
-type CommitTime = {toMillis(): number};
-
-// Gemessen: Eintrag und History aus demselben writeBatch tragen denselben
-// Commit-Zeitstempel (Delta 0 ms), ein nachträglich geschriebenes
-// History-Dokument liegt sichtbar später. Die Toleranz federt interne
-// Zeitunterschiede ab – eine verlorene Benachrichtigung wäre schlimmer als ein
-// Angreifer, der sich innerhalb von fünf Sekunden an eine echte Änderung hängt.
-const COMMIT_TOLERANCE_MS = 5000;
-
-const isSameCommit = (
-  entryUpdatedAt: CommitTime | undefined,
-  historyCreatedAt: CommitTime | undefined,
-): boolean => {
-  // Ohne Zeitstempel nicht entscheidbar. Die Rules sind die primäre
-  // Absicherung; diese Prüfung ist die zweite Schicht und darf im Zweifel nicht
-  // die ganze Benachrichtigung verhindern.
-  if (!entryUpdatedAt || !historyCreatedAt) return true;
-  return Math.abs(entryUpdatedAt.toMillis() - historyCreatedAt.toMillis()) <= COMMIT_TOLERANCE_MS;
-};
+// Hier stand einmal ein Zeitfenster-Vergleich zwischen entrySnap.updateTime und
+// dem Zeitstempel des History-Dokuments, um erfundene Einträge zu erkennen. Er
+// ist bewusst wieder entfernt: updateTime gehört zum AKTUELLEN Eintrag, nicht zu
+// dem Write, der dieses Event ausgelöst hat. Wird der Eintrag zwischen Auslösung
+// und Trigger-Lauf erneut geändert – Admin gibt kurz nach dem Anlegen frei –,
+// liegt updateTime außerhalb jedes Fensters und eine legitime Benachrichtigung
+// geht verloren. Firestore-Trigger haben zudem keine garantierte Reihenfolge.
+//
+// Was stattdessen trägt: die Rules erlauben Nicht-Admins 'created' nur ohne
+// existierenden Eintrag, und die deleted-Prüfung unten kommt ohne Zeitstempel
+// aus. Der verbleibende Fall – erfundene 'updated'-Dokumente am eigenen Eintrag,
+// die Empfänger auf Stufe 'alle' erreichen – lässt sich clientseitig nicht
+// zuverlässig ausschließen und braucht serverseitig erzeugte History.
 
 const asString = (value: unknown): string | undefined =>
   typeof value === "string" && value.length > 0 ? value : undefined;
@@ -74,7 +66,6 @@ export const handleHistoryCreated = async (
   params: TriggerParams,
   history: HistoryData,
   eventId?: string,
-  historyCreatedAt?: CommitTime,
 ): Promise<void> => {
   const action = history.action;
   if (typeof action !== "string" || !(KNOWN_ACTIONS as readonly string[]).includes(action)) {
@@ -115,11 +106,6 @@ export const handleHistoryCreated = async (
     }
   } else if (!entrySnap.exists) {
     logger.warn(`onEintragHistoryCreated: entry ${params.eintragId} missing for ${historyAction}`);
-    return;
-  } else if (!isSameCommit(entrySnap.updateTime, historyCreatedAt)) {
-    logger.warn(
-      `onEintragHistoryCreated: history for ${params.eintragId} not written with the entry`,
-    );
     return;
   }
 
@@ -175,7 +161,6 @@ export const onEintragHistoryCreated = onDocumentCreated(
       },
       history,
       event.id,
-      event.data?.createTime,
     );
   },
 );
