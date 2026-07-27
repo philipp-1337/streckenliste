@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-27T14:29:18Z",
+  "title": "Design System: Streckenliste",
+  "extensions": {
+    "colorMeta": {
+      "forest-primary": {
+        "role": "primary",
+        "displayName": "Ledger Forest",
+        "canonical": "#166534",
+        "tonalRamp": ["#052e16", "#14532d", "#166534", "#15803d", "#16a34a", "#4ade80", "#bbf7d0", "#f0fdf4"]
+      },
+      "forest-action": {
+        "role": "primary",
+        "displayName": "Working Green",
+        "canonical": "#15803d",
+        "tonalRamp": ["#052e16", "#14532d", "#166534", "#15803d", "#16a34a", "#4ade80", "#bbf7d0", "#f0fdf4"]
+      },
+      "field-background": {
+        "role": "neutral",
+        "displayName": "Field Wash",
+        "canonical": "#f0fdf4",
+        "tonalRamp": ["#052e16", "#14532d", "#166534", "#15803d", "#22c55e", "#86efac", "#dcfce7", "#f0fdf4"]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Ledger Paper",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#111827", "#374151", "#4b5563", "#6b7280", "#9ca3af", "#d1d5db", "#f3f4f6", "#ffffff"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Ledger Identity",
+        "purpose": "Application title only."
+      },
+      "body": {
+        "displayName": "Operational Text",
+        "purpose": "Forms, records, and task guidance."
+      }
+    },
+    "shadows": [
+      {
+        "name": "record-surface",
+        "value": "0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        "purpose": "Forms, cards, and tables on the field background."
+      },
+      {
+        "name": "floating-control",
+        "value": "0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
+        "purpose": "Persistent navigation and compact global actions."
+      },
+      {
+        "name": "dialog",
+        "value": "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+        "purpose": "Protected focus and consequential confirmations."
+      }
+    ],
+    "motion": [
+      {
+        "name": "feedback",
+        "value": "200ms cubic-bezier(0, 0, 0.2, 1)",
+        "purpose": "Routine color, focus, and compact transform feedback."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "none",
+        "purpose": "Remove nonessential transforms while retaining immediate state changes."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The default action for creating, saving, or confirming a positive operation.",
+      "html": "<button class=\"ds-btn-primary\">Speichern</button>",
+      "css": ".ds-btn-primary { min-height: 44px; border: 0; border-radius: 12px; background: #15803d; color: #fff; padding: 8px 16px; font: 500 14px/1.4 ui-sans-serif, system-ui, sans-serif; transition: background-color 200ms ease-out; } .ds-btn-primary:hover { background: #166534; } .ds-btn-primary:focus-visible { outline: 2px solid #166534; outline-offset: 2px; }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Consequential access and archival actions inside protected confirmation flows.",
+      "html": "<button class=\"ds-btn-danger\">Deaktivieren</button>",
+      "css": ".ds-btn-danger { min-height: 44px; border: 0; border-radius: 12px; background: #dc2626; color: #fff; padding: 8px 16px; font: 500 14px/1.4 ui-sans-serif, system-ui, sans-serif; transition: background-color 200ms ease-out; } .ds-btn-danger:hover { background: #b91c1c; } .ds-btn-danger:focus-visible { outline: 2px solid #b91c1c; outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "A clear ledger field with a visible forest focus state.",
+      "html": "<label class=\"ds-field-label\">Anzeigename<input class=\"ds-field\" value=\"Max Mustermann\"></label>",
+      "css": ".ds-field-label { display: grid; gap: 4px; color: #374151; font: 500 14px/1.4 ui-sans-serif, system-ui, sans-serif; } .ds-field { min-height: 44px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; color: #111827; padding: 8px 12px; font: 400 16px/1.5 ui-sans-serif, system-ui, sans-serif; } .ds-field:focus { border-color: #22c55e; outline: 2px solid rgba(34, 197, 94, 0.3); outline-offset: 0; }"
+    },
+    {
+      "name": "Record Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "The mobile presentation of a multi-field operational record.",
+      "html": "<article class=\"ds-record\"><strong>Max Mustermann</strong><span>max@beispiel.de</span></article>",
+      "css": ".ds-record { display: grid; gap: 8px; border-radius: 12px; background: #fff; color: #111827; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06); font: 400 16px/1.5 ui-sans-serif, system-ui, sans-serif; } .ds-record strong { color: #111827; font-weight: 600; } .ds-record span { color: #4b5563; font-size: 14px; overflow-wrap: anywhere; }"
+    },
+    {
+      "name": "Section Tabs",
+      "kind": "nav",
+      "refersTo": "section-tabs",
+      "description": "Compact keyboard-operable navigation between related administration areas.",
+      "html": "<div class=\"ds-tabs\"><button class=\"ds-tab ds-tab-active\">Benutzer</button><button class=\"ds-tab\">Jägerprofile</button></div>",
+      "css": ".ds-tabs { display: flex; gap: 2px; border-radius: 8px; background: rgba(22, 101, 52, 0.05); padding: 2px; } .ds-tab { min-height: 44px; border: 0; border-radius: 6px; background: transparent; color: rgba(20, 83, 45, 0.8); padding: 8px 12px; font: 500 14px/1.4 ui-sans-serif, system-ui, sans-serif; } .ds-tab-active { background: #fff; color: #166534; box-shadow: 0 1px 2px rgba(0,0,0,0.08); } .ds-tab:focus-visible { outline: 2px solid #166534; outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Calm Digital Hunting Ledger",
+    "overview": "Streckenliste should feel like a dependable field ledger translated into a clear digital tool: quiet, legible, and trustworthy under repeated operational use. Hunting-green structure establishes place and identity, while paper-white work surfaces keep forms and records easy to scan.",
+    "keyCharacteristics": [
+      "Calm, task-first administrative surfaces",
+      "Hunting-green hierarchy on a pale field background",
+      "Dense records on desktop, touch-friendly cards on mobile",
+      "Rounded but practical controls with explicit interaction states",
+      "Motion used for feedback and continuity, never delay"
+    ],
+    "rules": [
+      {
+        "name": "Meaning Before Decoration",
+        "body": "Amber and red always communicate state or consequence; they are never ornamental accents.",
+        "section": "colors"
+      },
+      {
+        "name": "Operational Readability",
+        "body": "Interactive fields remain at least 16px on mobile; genuinely secondary metadata may use 12–14px.",
+        "section": "typography"
+      },
+      {
+        "name": "Grounded Workspace",
+        "body": "Records stay visually grounded; strong elevation is reserved for floating navigation and protected focus.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do preserve green as the structural product voice across headings, focus, navigation, and primary actions.",
+      "Do provide mobile cards for multi-column operational tables.",
+      "Do keep interactive targets at least 44px and keyboard focus clearly visible.",
+      "Do use explicit loading, empty, error, disabled, and recovery states.",
+      "Do respect reduced-motion preferences while preserving state feedback."
+    ],
+    "donts": [
+      "Don't use destructive confirmations as transient toasts.",
+      "Don't introduce color without operational meaning.",
+      "Don't force mobile users to pan across desktop-shaped tables for core tasks.",
+      "Don't use bounce or scale motion when reduced motion is requested.",
+      "Don't add decorative glass surfaces to ordinary records or nested cards."
+    ]
+  }
+}
