@@ -387,7 +387,11 @@ export const useUserManagement = () => {
 
   const deactivateUser = useCallback(async (uid: string) => {
     try {
-      await deleteDoc(doc(db, 'users', uid));
+      // Läuft über die Cloud Function, damit der Auth-Account mitgesperrt
+      // wird — ein reines Löschen des Dokuments ließ ihn aktiv und
+      // anmeldbar zurück.
+      const deactivateBezirkUser = httpsCallable(functions, 'deactivateBezirkUser');
+      await deactivateBezirkUser({ uid });
       setUsers(prev => prev.filter(u => u.uid !== uid));
       toast.success('Benutzer deaktiviert.');
     } catch (err) {

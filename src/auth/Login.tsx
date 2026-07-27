@@ -31,6 +31,8 @@ const Login: React.FC<LoginProps> = ({ isLoggingIn, setIsLoggingIn }) => {
       const error = err as FirebaseError;
       if (error.code === 'auth/invalid-credential') {
         toast.error('Ungültige Zugangsdaten. Bitte überprüfe Email und Passwort.');
+      } else if (error.code === 'auth/user-disabled') {
+        toast.error('Dieser Account wurde deaktiviert. Bitte wende dich an deinen Administrator.');
       } else {
         toast.error(error.message || 'Fehler beim Login');
       }

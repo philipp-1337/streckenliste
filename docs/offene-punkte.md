@@ -47,11 +47,12 @@ Multi-Tenant-Betrieb noch fehlt.
 
 ## Kleine Baustellen (zusammen ca. ein kurzer Nachmittag)
 
-- [ ] **„Benutzer deaktivieren" deaktiviert nicht wirklich:**
-  `deactivateUser` in `src/hooks/useUserManagement.ts` löscht nur das
-  User-Dokument; der Auth-Account bleibt aktiv und anmeldbar. Sauberer:
-  eine `deactivateBezirkUser`-Cloud-Function nach dem Muster von
-  `createBezirkUser`, die zusätzlich den Auth-Account sperrt.
+- [x] **„Benutzer deaktivieren" deaktiviert nicht wirklich:** _(erledigt
+  2026-07-27)_ `deactivateUser` löschte nur das User-Dokument; der
+  Auth-Account blieb aktiv und anmeldbar. Läuft jetzt über die neue
+  Cloud Function `deactivateBezirkUser` (Muster wie `createBezirkUser`),
+  die zusätzlich den Auth-Account sperrt. Die Firestore-Rule für
+  `delete` auf `/users/{userId}` ist entsprechend auf `false` gesetzt.
 - [ ] **Debug-Logs im Produktions-Bundle:** `src/hooks/useFirestore.ts`
   loggt jede Snapshot-Aktualisierung in die Konsole
   (`📡 onSnapshot update …`, `🔄 Manual fetch …`). Entfernen oder hinter

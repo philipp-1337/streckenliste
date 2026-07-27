@@ -128,9 +128,11 @@ service cloud.firestore {
                         getUserData().jagdbezirkId == resource.data.get('jagdbezirkId', '')
                       )
                     );
-      // Admin: deactivate (delete) users in their own jagdbezirk
-      allow delete: if isAdmin() &&
-                    getUserData().jagdbezirkId == resource.data.jagdbezirkId;
+      // Deaktivierung läuft ausschließlich serverseitig über die Cloud
+      // Function deactivateBezirkUser (Admin SDK umgeht die Rules) — die
+      // sperrt zusätzlich den Auth-Account. Ein reines Client-Delete des
+      // Dokuments ließe den Account aktiv und anmeldbar zurück.
+      allow delete: if false;
     }
 
     // Jagdbezirk document itself (for metadata)
